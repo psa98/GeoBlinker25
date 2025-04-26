@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">GeoBlinker</string>
+    <string name="version">1.0.2.14</string>
+    <string name="log_in_by_number">Войти по номеру</string>
+    <string name="new_user">Новый пользователь</string>
+    <string name="problems_logging">Проблемы со входом в приложение?</string>
+    <string name="enter">Войти</string>
+    <string name="enter_the_number">Введите номер</string>
+    <string name="back">Назад</string>
+    <string name="sent_an_SMS">Отправили СМС с кодом подтверждения на ваш номер</string>
+    <string name="enter_the_code">Введите 4-значный код</string>
+    <string name="confirm">Подтвердить</string>
+    <string name="send_to_another_number">Отправить на другой номер</string>
+    <string name="is_the_code_not_coming">Не приходит код?</string>
+    <string name="invalid_code">Неверный код</string>
+    <string name="resend">Отправить повторно</string>
+    <string name="invalid_number">Номер указан неверно</string>
+    <string name="welcome">Добро пожаловать,</string>
+</resources>
