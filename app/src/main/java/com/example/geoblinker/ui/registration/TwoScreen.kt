@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.authorization
+package com.example.geoblinker.ui.registration
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,8 +36,8 @@ import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import kotlinx.coroutines.delay
 
 @Composable
-fun ThreeScreen(
-    fourScreen: () -> Unit,
+fun TwoScreen(
+    threeScreen: () -> Unit,
     backFun: () -> Unit
 ) {
     var value by remember { mutableStateOf("") }
@@ -56,7 +56,7 @@ fun ThreeScreen(
 
     fun onClick() {
         if (value == "1234")
-            fourScreen()
+            threeScreen()
         else {
             isError = true
             changeMode = true
@@ -165,6 +165,6 @@ fun ThreeScreen(
 @Composable
 fun PreviewThree() {
     GeoBlinkerTheme {
-        ThreeScreen({}, {})
+        TwoScreen({}, {})
     }
 }

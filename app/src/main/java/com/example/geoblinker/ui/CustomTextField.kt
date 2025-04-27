@@ -146,7 +146,7 @@ fun PhoneNumberTextField(
                     )
             },
             prefix = {
-                if (isFocused)
+                if (isFocused || textFieldValueState.text.isNotEmpty())
                     Text(
                         text = "  + 7 ",
                         color = if (isError) red else Color.Unspecified,
@@ -155,6 +155,59 @@ fun PhoneNumberTextField(
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone =  { onDone() }
+            ),
+            singleLine = true,
+            shape = MaterialTheme.shapes.large,
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent, // Убираем линию в фокусе
+                unfocusedIndicatorColor = Color.Transparent // Убираем линию без фокуса
+            )
+        )
+    }
+}
+
+@Composable
+fun NameTextField(
+    onValueChange: (String) -> Unit,
+    onDone: () -> Unit,
+    isError: Boolean = false
+) {
+    var value by remember { mutableStateOf("") }
+
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, if (isError) red else Color(0xFFBEBEBE))
+    ) {
+        TextField(
+            value = value,
+            onValueChange = {
+                value = it
+                onValueChange(value)
+            },
+            modifier = Modifier
+                .height(81.dp)
+                .fillMaxWidth()
+            ,
+            textStyle = MaterialTheme.typography.headlineMedium.copy(
+                color = if (isError) red else Color(0xFF222221)
+            ),
+            placeholder = {
+                Text(
+                    text = stringResource(R.string.your_name),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            },
+            prefix = {
+                Text("  ")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(

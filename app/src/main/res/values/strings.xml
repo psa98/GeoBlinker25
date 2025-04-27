@@ -16,4 +16,7 @@
     <string name="resend">Отправить повторно</string>
     <string name="invalid_number">Номер указан неверно</string>
     <string name="welcome">Добро пожаловать,</string>
+    <string name="your_name">Ваше имя</string>
+    <string name="enter_the_user_name">Введите имя пользователя</string>
+    <string name="registration_completed_successfully">Регистрация успешно пройдена</string>
 </resources>
