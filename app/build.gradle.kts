@@ -58,5 +58,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.libphonenumber)
+    implementation(libs.compose.cloudy)
+    implementation(libs.material3)
 }

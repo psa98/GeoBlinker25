@@ -49,7 +49,7 @@ val gray = Color(0xFF878787)
 @Composable
 fun GreenButton(
     modifier: Modifier = Modifier,
-    @DrawableRes icon: Int,
+    @DrawableRes icon: Int? = null,
     text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
@@ -77,12 +77,14 @@ fun GreenButton(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(icon),
-                    contentDescription = null,
-                    modifier = Modifier.width(23.dp).height(23.dp)
-                )
-                Spacer(Modifier.width(17.dp))
+                icon?.let {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(it),
+                        contentDescription = null,
+                        modifier = Modifier.width(23.dp).height(23.dp)
+                    )
+                    Spacer(Modifier.width(17.dp))
+                }
                 Text(
                     text,
                     style = MaterialTheme.typography.headlineMedium
@@ -145,7 +147,7 @@ fun BlackButton(
 fun WhiteButton(
     modifier: Modifier = Modifier,
     @DrawableRes icon: Int? = null,
-    @StringRes text: Int,
+    text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
     height: Int = 81
@@ -181,7 +183,7 @@ fun WhiteButton(
                     Spacer(Modifier.width(17.dp))
                 }
                 Text(
-                    stringResource(text),
+                    text,
                     style = MaterialTheme.typography.headlineMedium
                 )
             }
@@ -200,7 +202,36 @@ fun BackButton(
     ) {
         IconButton(
             onClick = onClick,
-            modifier = Modifier.size(65.dp, 65.dp).padding(1.dp),
+            modifier = Modifier
+                .size(65.dp, 65.dp)
+                .padding(1.dp)
+            ,
+            colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFFEFEFEF))
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.back),
+                contentDescription = stringResource(R.string.back)
+            )
+        }
+    }
+}
+
+@Composable
+fun BackWhiteButton(
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = MaterialTheme.shapes.small,
+        color = Color.White,
+        border = BorderStroke(1.dp, Color(0xFFE8E8E8))
+    ) {
+        IconButton(
+            onClick = onClick,
+            modifier = Modifier
+                .background(whiteGradient, MaterialTheme.shapes.small)
+                .size(65.dp, 65.dp)
+                .padding(1.dp)
+            ,
             colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFFEFEFEF))
         ) {
             Icon(

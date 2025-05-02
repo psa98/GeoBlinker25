@@ -19,4 +19,14 @@
     <string name="your_name">Ваше имя</string>
     <string name="enter_the_user_name">Введите имя пользователя</string>
     <string name="registration_completed_successfully">Регистрация успешно пройдена</string>
+    <string name="get_the_confirmation_code">Получите код подтверждения удобным способом:</string>
+    <string name="telegram">Telegram</string>
+    <string name="whatsapp">WhatsApp</string>
+    <string name="sms">SMS</string>
+    <string name="email">Email</string>
+    <string name="specify_the_email">Укажите email:</string>
+    <string name="cancellation">Отмена</string>
+    <string name="remember_my_choice">Запомнить мой выбор</string>
+    <string name="send_the_code">Отправить код</string>
+    <string name="your_email">Ваш email</string>
 </resources>

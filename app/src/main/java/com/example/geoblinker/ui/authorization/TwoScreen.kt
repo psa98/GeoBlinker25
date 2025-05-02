@@ -2,6 +2,7 @@ package com.example.geoblinker.ui.authorization
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,8 +21,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,8 +33,10 @@ import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
+import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.skydoves.cloudy.cloudy
 
 @Composable
 fun TwoScreen(
@@ -38,9 +45,12 @@ fun TwoScreen(
 ) {
     var value by remember { mutableStateOf("") }
     var isPhoneNumberIncorrect by remember { mutableStateOf(false) }
+    var visiblePopup by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().cloudy(16, visiblePopup),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -53,7 +63,7 @@ fun TwoScreen(
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleSmall
         )
         Spacer(Modifier.height(134.dp))
         PhoneNumberTextField(
@@ -65,7 +75,7 @@ fun TwoScreen(
                 if (value.length < 12)
                     isPhoneNumberIncorrect = true
                 else
-                    threeScreen(value)
+                    visiblePopup = true
             },
             isError = isPhoneNumberIncorrect
         )
@@ -77,14 +87,14 @@ fun TwoScreen(
                 if (value.length < 12)
                     isPhoneNumberIncorrect = true
                 else
-                    threeScreen(value)
+                    visiblePopup = true
             }
         )
         Spacer(Modifier.height(56.dp))
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().cloudy(16, visiblePopup),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -110,6 +120,22 @@ fun TwoScreen(
             )
             Spacer(Modifier.height(56.dp))
         }
+    }
+
+    if (visiblePopup) {
+        LaunchedEffect(Unit) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+
+        CustomPopup(
+            phone = value,
+            onChangeVisible = { visiblePopup = it },
+            sendCode = {
+                visiblePopup = false
+                threeScreen(value)
+            }
+        )
     }
 }
 

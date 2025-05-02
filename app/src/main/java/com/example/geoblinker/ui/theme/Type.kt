@@ -52,6 +52,13 @@ val Typography = Typography(
     titleMedium = TextStyle(
         color = black,
         fontFamily = Manrope,
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp,
+        textAlign = TextAlign.Center
+    ),
+    titleSmall = TextStyle(
+        color = black,
+        fontFamily = Manrope,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         letterSpacing = 0.04.em
@@ -67,5 +74,17 @@ val Typography = Typography(
         fontFamily = Manrope,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp
+    ),
+    labelMedium = TextStyle(
+        color = black,
+        fontFamily = Manrope,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp
+    ),
+    labelSmall = TextStyle(
+        color = black,
+        fontFamily = Manrope,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp
     )
 )

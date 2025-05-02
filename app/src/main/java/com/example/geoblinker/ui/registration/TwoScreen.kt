@@ -119,7 +119,7 @@ fun TwoScreen(
         )
         Spacer(Modifier.height(20.dp))
         WhiteButton(
-            text = R.string.send_to_another_number,
+            text = stringResource(R.string.send_to_another_number),
             onClick = backFun
         )
         Spacer(Modifier.height(29.dp))

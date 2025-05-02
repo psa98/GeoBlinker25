@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,6 +20,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
+import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.NameTextField
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
@@ -39,6 +43,9 @@ fun OneScreen(
     var name by remember { mutableStateOf("") }
     var isErrorPhone by remember { mutableStateOf(false) }
     var isErrorName by remember { mutableStateOf(false) }
+    var visiblePopup by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     fun onClick() {
         if (phone.length < 12)
@@ -46,7 +53,7 @@ fun OneScreen(
         if (name.isEmpty())
             isErrorName = true
         if (!isErrorPhone && !isErrorName)
-            twoScreen(phone, name)
+            visiblePopup = true
     }
 
     Column(
@@ -62,7 +69,7 @@ fun OneScreen(
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleSmall
         )
         Spacer(Modifier.height(33.dp))
         if (isErrorPhone) {
@@ -92,6 +99,7 @@ fun OneScreen(
         )
         Spacer(Modifier.height(20.dp))
         NameTextField(
+            placeholder = stringResource(R.string.your_name),
             onValueChange = {
                 name = it
                 isErrorPhone = false
@@ -116,6 +124,22 @@ fun OneScreen(
     ) {
         BackButton(backFun)
         Spacer(Modifier.height(40.dp))
+    }
+
+    if (visiblePopup) {
+        LaunchedEffect(Unit) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+
+        CustomPopup(
+            phone = phone,
+            onChangeVisible = { visiblePopup = it },
+            sendCode = {
+                visiblePopup = false
+                twoScreen(phone, name)
+            }
+        )
     }
 }
 

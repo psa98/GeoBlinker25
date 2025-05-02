@@ -123,7 +123,7 @@ fun PhoneNumberTextField(
             onValueChange = { value ->
                 val filtered = value.text.filter { it.isDigit() }.take(10)
                 val format = formatPhoneNumber(filtered)
-                onValueChange("+7${filtered}")
+                onValueChange("+ 7 $format")
                 textFieldValueState = TextFieldValue(
                     text = format,
                     selection = TextRange(format.length)
@@ -174,6 +174,7 @@ fun PhoneNumberTextField(
 
 @Composable
 fun NameTextField(
+    placeholder: String,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
     isError: Boolean = false
@@ -199,7 +200,59 @@ fun NameTextField(
             ),
             placeholder = {
                 Text(
-                    text = stringResource(R.string.your_name),
+                    text = placeholder,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            },
+            prefix = {
+                Text("  ")
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone =  { onDone() }
+            ),
+            singleLine = true,
+            shape = MaterialTheme.shapes.large,
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent, // Убираем линию в фокусе
+                unfocusedIndicatorColor = Color.Transparent // Убираем линию без фокуса
+            )
+        )
+    }
+}
+
+@Composable
+fun EmailTextField(
+    email: String,
+    placeholder: String,
+    onValueChange: (String) -> Unit,
+    onDone: () -> Unit,
+    isError: Boolean = false
+) {
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, if (isError) red else Color(0xFFBEBEBE))
+    ) {
+        TextField(
+            value = email,
+            onValueChange = { newValue ->
+                onValueChange(newValue.filter { it != ' ' })
+            },
+            modifier = Modifier
+                .height(81.dp)
+                .fillMaxWidth()
+            ,
+            textStyle = MaterialTheme.typography.headlineMedium.copy(
+                color = if (isError) red else Color(0xFF222221)
+            ),
+            placeholder = {
+                Text(
+                    text = placeholder,
                     style = MaterialTheme.typography.headlineMedium
                 )
             },

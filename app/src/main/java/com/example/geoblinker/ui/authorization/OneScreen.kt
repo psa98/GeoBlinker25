@@ -43,7 +43,7 @@ fun OneScreen(
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.titleSmall
         )
         Spacer(Modifier.height(134.dp))
         GreenButton(
