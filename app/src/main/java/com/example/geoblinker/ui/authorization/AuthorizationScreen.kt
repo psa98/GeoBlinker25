@@ -1,5 +1,6 @@
 package com.example.geoblinker.ui.authorization
 
+import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,10 +24,11 @@ enum class AuthorizationScreen {
 
 @Composable
 fun AuthorizationScreen(
-    viewModel: AuthorizationViewModel,
+    application: Application,
     navController: NavHostController = rememberNavController(),
     registrationScreen: () -> Unit
 ) {
+    val viewModel = AuthorizationViewModel(application)
     Scaffold { innerPadding ->
         Row(
             modifier = Modifier
@@ -45,13 +47,15 @@ fun AuthorizationScreen(
                 composable(route = AuthorizationScreen.Two.name) {
                     TwoScreen(
                         { navController.navigate(AuthorizationScreen.Three.name) },
-                        { navController.navigate(AuthorizationScreen.One.name) }
+                        { navController.navigate(AuthorizationScreen.One.name) },
+                        viewModel
                     )
                 }
                 composable(route = AuthorizationScreen.Three.name) {
                     ThreeScreen(
                         { navController.navigate(AuthorizationScreen.Four.name) },
-                        { navController.navigate(AuthorizationScreen.Two.name) }
+                        { navController.navigate(AuthorizationScreen.Two.name) },
+                        viewModel
                     )
                 }
                 composable(route = AuthorizationScreen.Four.name) {

@@ -59,8 +59,6 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
-import kotlin.math.max
-import kotlin.math.roundToInt
 
 data class DraggableItem(
     val text: String,
@@ -71,7 +69,8 @@ data class DraggableItem(
 fun CustomPopup(
     phone: String,
     onChangeVisible: (Boolean) -> Unit,
-    sendCode: () -> Unit
+    sendCode: () -> Unit,
+    addWay: (String) -> Unit
 ) {
     val stringTelegram = stringResource(R.string.telegram)
     val stringWhatsApp = stringResource(R.string.whatsapp)
@@ -232,7 +231,7 @@ fun CustomPopup(
                                                         )
 
                                                         val targetIndex =
-                                                            (draggedIndex + Round(draggedOffset.y / 100))
+                                                            (draggedIndex + round(draggedOffset.y / 100))
                                                         Log.d(
                                                             "DragItem",
                                                             "${draggedOffset.y} ${draggedOffset.y / 100} $targetIndex $draggedIndex ${draggableItem.text}"
@@ -311,7 +310,13 @@ fun CustomPopup(
                 Spacer(Modifier.height(25.dp))
                 GreenButton(
                     text = stringResource(R.string.send_the_code),
-                    onClick = sendCode
+                    onClick = {
+                        items.forEach { draggableItem ->
+                            if (switchStates[draggableItem.text]!!)
+                                addWay(draggableItem.text)
+                        }
+                        sendCode()
+                    }
                 )
                 Spacer(Modifier.height(20.dp))
                 Text(
@@ -351,7 +356,7 @@ fun CustomPopup(
     }
 }
 
-fun Round(fl: Float): Int {
+fun round(fl: Float): Int {
     if (fl >= 1)
         return 1
     if (fl <= -1)

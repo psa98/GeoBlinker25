@@ -1,5 +1,6 @@
 package com.example.geoblinker.ui.registration
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -7,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,26 +25,25 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CodeTextField
-import com.example.geoblinker.ui.WhiteButton
-import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import kotlinx.coroutines.delay
 
 @Composable
 fun TwoScreen(
     threeScreen: () -> Unit,
-    backFun: () -> Unit
+    backFun: () -> Unit,
+    viewModel: RegistrationViewModel
 ) {
     var value by remember { mutableStateOf("") }
     var isError by remember { mutableStateOf(false) }
     var changeMode by remember { mutableStateOf(false) }
     var remainingTime by remember { mutableIntStateOf(30) }
     var checkTimer by remember { mutableStateOf(true) }
+    var textTitle by remember { mutableIntStateOf(viewModel.getNowWay()) }
 
     // Запускаем таймер
     LaunchedEffect(checkTimer) {
@@ -55,7 +54,7 @@ fun TwoScreen(
     }
 
     fun onClick() {
-        if (value == "1234")
+        if (viewModel.checkWay(value))
             threeScreen()
         else {
             isError = true
@@ -75,7 +74,7 @@ fun TwoScreen(
             )
             Spacer(Modifier.height(20.dp))
             Text(
-                stringResource(R.string.sent_an_SMS),
+                stringResource(textTitle),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
@@ -117,54 +116,62 @@ fun TwoScreen(
             onClick = { onClick() },
             enabled = !isError && value.length == 4
         )
-        Spacer(Modifier.height(20.dp))
-        WhiteButton(
-            text = stringResource(R.string.send_to_another_number),
-            onClick = backFun
-        )
-        Spacer(Modifier.height(29.dp))
+        Spacer(Modifier.height(45.dp))
         Text(
-            text = stringResource(R.string.is_the_code_not_coming),
+            text = stringResource(R.string.send_to_another_number),
+            modifier = Modifier.clickable { backFun() },
             style = MaterialTheme.typography.bodyLarge
         )
-        if (changeMode) {
-            Spacer(Modifier.height(52.dp))
-            BlackButton(
-                modifier = Modifier.width(266.dp),
+        Spacer(Modifier.height(15.dp))
+        Text(
+            text = stringResource(R.string.get_the_code_in_another_way),
+            modifier = Modifier.clickable {  },
+            style = MaterialTheme.typography.bodyLarge
+        )
+
+        if (!changeMode) {
+            Spacer(Modifier.height(15.dp))
+            Text(
                 text = if (remainingTime > 0)
                     "${stringResource(R.string.resend)} ... $remainingTime c"
                 else
                     stringResource(R.string.resend),
-                onClick = {
-                    isError = false
-                    changeMode = false
+                modifier = Modifier.clickable {
                     checkTimer = !checkTimer
                     remainingTime = 30
+                    textTitle = viewModel.getNextWay()
+                    value = ""
                 },
-                textStyle = MaterialTheme.typography.bodyMedium,
-                enabled = remainingTime == 0,
-                height = 55
+                color = if (remainingTime > 0)
+                    Color(0xFF636363)
+                else
+                    Color.Unspecified,
+                style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(73.dp))
-        }
-        else {
-            Spacer(Modifier.height(85.dp))
+            Spacer(Modifier.height(96.dp))
+        } else {
+            Spacer(Modifier.height(228.dp))
         }
     }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Bottom,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        BackButton(backFun)
+        Text(
+            text = stringResource(R.string.is_the_code_not_coming),
+            color = Color(0xFFC4162D),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(Modifier.height(25.dp))
+        BackButton {
+            if (changeMode) {
+                changeMode = false
+                isError = false
+            } else
+                backFun()
+        }
         Spacer(Modifier.height(36.dp))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewThree() {
-    GeoBlinkerTheme {
-        TwoScreen({}, {})
     }
 }

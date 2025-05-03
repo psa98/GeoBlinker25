@@ -1,7 +1,6 @@
 package com.example.geoblinker.ui
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -203,32 +202,6 @@ fun BackButton(
         IconButton(
             onClick = onClick,
             modifier = Modifier
-                .size(65.dp, 65.dp)
-                .padding(1.dp)
-            ,
-            colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFFEFEFEF))
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.back),
-                contentDescription = stringResource(R.string.back)
-            )
-        }
-    }
-}
-
-@Composable
-fun BackWhiteButton(
-    onClick: () -> Unit
-) {
-    Surface(
-        shape = MaterialTheme.shapes.small,
-        color = Color.White,
-        border = BorderStroke(1.dp, Color(0xFFE8E8E8))
-    ) {
-        IconButton(
-            onClick = onClick,
-            modifier = Modifier
-                .background(whiteGradient, MaterialTheme.shapes.small)
                 .size(65.dp, 65.dp)
                 .padding(1.dp)
             ,

@@ -45,7 +45,7 @@ fun CodeTextField(
 
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, if (isError) red else Color.White)
+        border = BorderStroke(1.dp, if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = textFieldValueState,
@@ -93,6 +93,18 @@ fun CodeTextField(
     }
 }
 
+fun formatPhoneNumber(phoneNumber: String): String {
+    val formatted = StringBuilder()
+
+    phoneNumber.forEachIndexed { index, c ->
+        when (index) {
+            3, 6, 8 -> formatted.append(" $c")
+            else -> formatted.append(c)
+        }
+    }
+    return formatted.toString()
+}
+
 @Composable
 fun PhoneNumberTextField(
     onValueChange: (String) -> Unit,
@@ -101,18 +113,6 @@ fun PhoneNumberTextField(
 ) {
     var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = "")) }
     var isFocused by remember { mutableStateOf(false) }
-
-    fun formatPhoneNumber(phoneNumber: String): String {
-        val formatted = StringBuilder()
-
-        phoneNumber.forEachIndexed { index, c ->
-            when (index) {
-                3, 6, 8 -> formatted.append(" $c")
-                else -> formatted.append(c)
-            }
-        }
-        return formatted.toString()
-    }
 
     Surface(
         shape = MaterialTheme.shapes.large,
@@ -123,7 +123,7 @@ fun PhoneNumberTextField(
             onValueChange = { value ->
                 val filtered = value.text.filter { it.isDigit() }.take(10)
                 val format = formatPhoneNumber(filtered)
-                onValueChange("+ 7 $format")
+                onValueChange(filtered)
                 textFieldValueState = TextFieldValue(
                     text = format,
                     selection = TextRange(format.length)

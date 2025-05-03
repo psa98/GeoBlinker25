@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
@@ -32,12 +31,13 @@ import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.NameTextField
 import com.example.geoblinker.ui.PhoneNumberTextField
-import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.formatPhoneNumber
 
 @Composable
 fun OneScreen(
     twoScreen: (String, String) -> Unit,
-    backFun: () -> Unit
+    backFun: () -> Unit,
+    viewModel: RegistrationViewModel
 ) {
     var phone by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
@@ -48,7 +48,7 @@ fun OneScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     fun onClick() {
-        if (phone.length < 12)
+        if (phone.length < 10)
             isErrorPhone = true
         if (name.isEmpty())
             isErrorName = true
@@ -127,26 +127,20 @@ fun OneScreen(
     }
 
     if (visiblePopup) {
+        viewModel.clearWays()
         LaunchedEffect(Unit) {
             focusManager.clearFocus()
             keyboardController?.hide()
         }
 
         CustomPopup(
-            phone = phone,
+            phone = "+ 7 ${formatPhoneNumber(phone)}",
             onChangeVisible = { visiblePopup = it },
             sendCode = {
                 visiblePopup = false
                 twoScreen(phone, name)
-            }
+            },
+            addWay = { viewModel.addWay(it) }
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewOne() {
-    GeoBlinkerTheme {
-        OneScreen({a, b -> }, {})
     }
 }

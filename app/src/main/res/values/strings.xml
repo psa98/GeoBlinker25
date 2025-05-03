@@ -29,4 +29,9 @@
     <string name="remember_my_choice">Запомнить мой выбор</string>
     <string name="send_the_code">Отправить код</string>
     <string name="your_email">Ваш email</string>
+    <string name="get_the_code_in_another_way">Получить код другим способом</string>
+    <string name="telegram_way_title">Отправили код подтверждения на ваш номер в Telegram</string>
+    <string name="whatsapp_way_title">Отправили код подтверждения на ваш номер в WhatsApp</string>
+    <string name="sms_way_title">Отправили СМС с кодом подтверждения на ваш номер</string>
+    <string name="email_way_title">Отправили код подтверждения на вашу почту</string>
 </resources>

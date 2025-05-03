@@ -2,7 +2,6 @@ package com.example.geoblinker.ui.authorization
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,27 +20,26 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.PhoneNumberTextField
-import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.formatPhoneNumber
 import com.skydoves.cloudy.cloudy
 
 @Composable
 fun TwoScreen(
     threeScreen: (String) -> Unit,
-    backFun: () -> Unit
+    backFun: () -> Unit,
+    viewModel: AuthorizationViewModel
 ) {
     var value by remember { mutableStateOf("") }
     var isPhoneNumberIncorrect by remember { mutableStateOf(false) }
@@ -72,7 +70,7 @@ fun TwoScreen(
                 isPhoneNumberIncorrect = false
             },
             onDone = {
-                if (value.length < 12)
+                if (value.length < 10)
                     isPhoneNumberIncorrect = true
                 else
                     visiblePopup = true
@@ -84,7 +82,7 @@ fun TwoScreen(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.enter),
             onClick = {
-                if (value.length < 12)
+                if (value.length < 10)
                     isPhoneNumberIncorrect = true
                 else
                     visiblePopup = true
@@ -123,26 +121,20 @@ fun TwoScreen(
     }
 
     if (visiblePopup) {
+        viewModel.clearWays()
         LaunchedEffect(Unit) {
             focusManager.clearFocus()
             keyboardController?.hide()
         }
 
         CustomPopup(
-            phone = value,
+            phone = "+ 7 ${formatPhoneNumber(value)}",
             onChangeVisible = { visiblePopup = it },
             sendCode = {
                 visiblePopup = false
                 threeScreen(value)
-            }
+            },
+            addWay = { viewModel.addWay(it) }
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewTwo() {
-    GeoBlinkerTheme {
-        TwoScreen({}, {})
     }
 }
