@@ -1,6 +1,7 @@
 [versions]
-accompanistSystemuicontroller = "0.30.1"
 agp = "8.7.3"
+firebaseBom = "33.13.0"
+jetpackSdpSsp = "alpha-1.0"
 kotlin = "2.0.0"
 coreKtx = "1.16.0"
 junit = "4.13.2"
@@ -12,13 +13,18 @@ composeBom = "2025.04.00"
 material3 = "1.1.0"
 navigationCompose = "2.8.9"
 cloudy = "0.2.6"
-uiToolingPreview = "1.6.0"
-uiToolingVersion = "1.6.0"
+firebaseCrashlyticsKtx = "19.4.3"
+sdpAndroid = "1.2.0"
+sdpAndroidVersion = "1.1.1"
+sspAndroid = "1.2.0"
 
 [libraries]
-accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanistSystemuicontroller" }
-androidx-compose-ui-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "uiToolingVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+intuit-sdp-android = { module = "com.intuit.sdp:sdp-android", version.ref = "sdpAndroidVersion" }
+jetpack-sdp-ssp = { module = "com.github.muhammad-ahmed-lib:Jetpack-sdp-ssp", version.ref = "jetpackSdpSsp" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -35,7 +41,9 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 compose-cloudy = { module = "com.github.skydoves:cloudy", version.ref = "cloudy" }
 material3 = { module = "androidx.compose.material3:material3", version.ref = "material3" }
-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx", version.ref = "firebaseCrashlyticsKtx" }
+sdp-android = { module = "com.github.Kaaveh:sdp-android", version.ref = "sdpAndroid" }
+ssp-android = { module = "com.github.Kaaveh:ssp-android", version.ref = "sspAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "174931861614",
+    "project_id": "geoblinker-e0c86",
+    "storage_bucket": "geoblinker-e0c86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:174931861614:android:d941a9c823a0a09add467f",
+        "android_client_info": {
+          "package_name": "com.example.geoblinker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjSEnnRguFvD34-OP-xjhBAu03-ZXRrkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

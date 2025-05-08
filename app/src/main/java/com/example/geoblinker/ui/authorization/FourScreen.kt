@@ -10,19 +10,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.theme.sdp
+import kotlinx.coroutines.delay
 
 @Composable
-fun FourScreen() {
+fun FourScreen(
+    main: () -> Unit
+) {
+    LaunchedEffect(Unit) {
+        delay(4000)
+        main()
+    }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -31,9 +40,9 @@ fun FourScreen() {
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.size(240.dp, 162.dp)
+            modifier = Modifier.size(240.sdp(), 162.sdp())
         )
-        Spacer(Modifier.height(65.dp))
+        Spacer(Modifier.height(65.sdp()))
         Text(
             text = stringResource(R.string.welcome),
             lineHeight = 40.sp,
@@ -44,7 +53,7 @@ fun FourScreen() {
             lineHeight = 40.sp,
             style = MaterialTheme.typography.headlineLarge
         )
-        Spacer(Modifier.height(100.dp))
+        Spacer(Modifier.height(100.sdp()))
     }
 }
 
@@ -52,6 +61,6 @@ fun FourScreen() {
 @Composable
 fun PreviewFourScreen() {
     GeoBlinkerTheme {
-        FourScreen()
+        FourScreen({})
     }
 }

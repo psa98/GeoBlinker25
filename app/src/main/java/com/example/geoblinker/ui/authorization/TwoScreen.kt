@@ -26,13 +26,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.formatPhoneNumber
+import com.example.geoblinker.ui.theme.sdp
 import com.skydoves.cloudy.cloudy
 
 @Composable
@@ -55,15 +55,15 @@ fun TwoScreen(
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.width(200.dp).height(135.dp)
+            modifier = Modifier.width(200.sdp()).height(135.sdp())
         )
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(15.sdp()))
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(134.dp))
+        Spacer(Modifier.height(134.sdp()))
         PhoneNumberTextField(
             onValueChange = {
                 value = it
@@ -77,7 +77,7 @@ fun TwoScreen(
             },
             isError = isPhoneNumberIncorrect
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(20.sdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.enter),
@@ -88,7 +88,7 @@ fun TwoScreen(
                     visiblePopup = true
             }
         )
-        Spacer(Modifier.height(56.dp))
+        Spacer(Modifier.height(56.sdp()))
     }
 
     Column(
@@ -97,7 +97,7 @@ fun TwoScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         BackButton(backFun)
-        Spacer(Modifier.height(36.dp))
+        Spacer(Modifier.height(28.sdp()))
     }
 
     if (isPhoneNumberIncorrect) {
@@ -111,17 +111,16 @@ fun TwoScreen(
                 contentDescription = null,
                 tint = Color(0xFFC4162D)
             )
-            Spacer(Modifier.height(5.dp))
+            Spacer(Modifier.height(5.sdp()))
             Text(
                 stringResource(R.string.invalid_number),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(56.dp))
+            Spacer(Modifier.height(56.sdp()))
         }
     }
 
     if (visiblePopup) {
-        viewModel.clearWays()
         LaunchedEffect(Unit) {
             focusManager.clearFocus()
             keyboardController?.hide()
@@ -132,9 +131,9 @@ fun TwoScreen(
             onChangeVisible = { visiblePopup = it },
             sendCode = {
                 visiblePopup = false
+                viewModel.setWays(it)
                 threeScreen(value)
-            },
-            addWay = { viewModel.addWay(it) }
+            }
         )
     }
 }

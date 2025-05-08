@@ -11,11 +11,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.geoblinker.ui.theme.sdp
 
 enum class RegistrationScreen {
     One,
@@ -27,7 +27,8 @@ enum class RegistrationScreen {
 fun RegistrationScreen(
     application: Application,
     navController: NavHostController = rememberNavController(),
-    authorizationScreen: () -> Unit
+    authorizationScreen: () -> Unit,
+    mainScreen: () -> Unit
 ) {
     val viewModel = RegistrationViewModel(application)
     val name by viewModel.name.collectAsState()
@@ -42,7 +43,7 @@ fun RegistrationScreen(
             NavHost(
                 navController = navController,
                 startDestination = RegistrationScreen.One.name,
-                modifier = Modifier.width(360.dp)
+                modifier = Modifier.width(310.sdp())
             ) {
                 composable(route = RegistrationScreen.One.name) {
                     OneScreen(
@@ -62,7 +63,10 @@ fun RegistrationScreen(
                     )
                 }
                 composable(route = RegistrationScreen.Three.name) {
-                    ThreeScreen(name)
+                    ThreeScreen(
+                        name,
+                        mainScreen
+                    )
                 }
             }
         }

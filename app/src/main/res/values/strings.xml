@@ -34,4 +34,9 @@
     <string name="whatsapp_way_title">Отправили код подтверждения на ваш номер в WhatsApp</string>
     <string name="sms_way_title">Отправили СМС с кодом подтверждения на ваш номер</string>
     <string name="email_way_title">Отправили код подтверждения на вашу почту</string>
+    <string name="map">Карта</string>
+    <string name="list">Список</string>
+    <string name="link_device">Привязать устройство</string>
+    <string name="error">В приложении произошла ошибка. Просим вас перезапустить его</string>
+    <string name="new_device">Новое устройство</string>
 </resources>

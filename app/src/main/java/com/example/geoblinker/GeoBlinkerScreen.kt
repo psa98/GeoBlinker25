@@ -11,11 +11,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.ui.GeoBlinkerViewModel
 import com.example.geoblinker.ui.authorization.AuthorizationScreen
+import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.registration.RegistrationScreen
 
 enum class GeoBlinkerScreen {
     Authorization,
-    Registration
+    Registration,
+    Main
 }
 
 @Composable
@@ -27,19 +29,28 @@ fun GeoBlinkerScreen(
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = GeoBlinkerScreen.Authorization.name,
-            modifier = Modifier.padding(innerPadding)
+            startDestination = GeoBlinkerScreen.Authorization.name, // TODO: При дебаге Main
+            modifier = Modifier.padding(
+                top = innerPadding.calculateTopPadding()
+            )
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
                 AuthorizationScreen(
                     application,
-                    registrationScreen = { navController.navigate(GeoBlinkerScreen.Registration.name) }
+                    registrationScreen = { navController.navigate(GeoBlinkerScreen.Registration.name) },
+                    mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
                 )
             }
             composable(route = GeoBlinkerScreen.Registration.name) {
                 RegistrationScreen(
                     application,
-                    authorizationScreen = { navController.navigate(GeoBlinkerScreen.Authorization.name) }
+                    authorizationScreen = { navController.navigate(GeoBlinkerScreen.Authorization.name) },
+                    mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
+                )
+            }
+            composable(route = GeoBlinkerScreen.Main.name) {
+                MainScreen(
+                    application
                 )
             }
         }

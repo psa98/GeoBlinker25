@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.example.geoblinker.R
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 
 class AuthorizationViewModel(application: Application) : AndroidViewModel(application) {
     private val _wayCodes = mapOf("Telegram" to "1234", "WhatsApp" to "6940", "SMS" to "2233", "Email" to "1111")
@@ -17,21 +16,21 @@ class AuthorizationViewModel(application: Application) : AndroidViewModel(applic
     private val _waysGetCode = MutableStateFlow<List<String>>(emptyList())
     private val _nowWay = MutableStateFlow(0)
 
-    fun clearWays() {
-        _waysGetCode.value = emptyList()
+    fun setWays(ways: List<String>) {
+        _waysGetCode.value = ways
         _nowWay.value = 0
     }
 
-    fun addWay(way: String) {
-        _waysGetCode.update { _waysGetCode.value + way }
-    }
-
-    fun getNextWay(): Int {
+    fun getNextWay(): Int? {
+        if (_waysGetCode.value.isEmpty())
+            return null
         _nowWay.value = (_nowWay.value + 1) % _waysGetCode.value.size
         return _wayTitles[_waysGetCode.value[_nowWay.value]]!!
     }
 
-    fun getNowWay(): Int {
+    fun getNowWay(): Int? {
+        if (_waysGetCode.value.isEmpty())
+            return null
         return _wayTitles[_waysGetCode.value[_nowWay.value]]!!
     }
 

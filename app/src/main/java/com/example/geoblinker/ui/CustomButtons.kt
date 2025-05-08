@@ -27,8 +27,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.theme.sdp
 
 val greenGradient = Brush.verticalGradient(
     colors = listOf(Color(0xFF92FFDF), Color(0xFF21E3A5))
@@ -56,7 +56,7 @@ fun GreenButton(
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, Color.White)
+        border = BorderStroke(1.sdp(), Color.White)
     ) {
         Button(
             onClick = onClick,
@@ -64,8 +64,8 @@ fun GreenButton(
                 brush = greenGradient,
                 shape = MaterialTheme.shapes.large)
                 .fillMaxWidth()
-                .padding(1.dp)
-                .height(height.dp)
+                .padding(1.sdp())
+                .height(height.sdp())
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -80,9 +80,9 @@ fun GreenButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(it),
                         contentDescription = null,
-                        modifier = Modifier.width(23.dp).height(23.dp)
+                        modifier = Modifier.width(23.sdp()).height(23.sdp())
                     )
-                    Spacer(Modifier.width(17.dp))
+                    Spacer(Modifier.width(17.sdp()))
                 }
                 Text(
                     text,
@@ -90,6 +90,75 @@ fun GreenButton(
                 )
             }
         }
+    }
+}
+
+@Composable
+fun GreenMediumButton(
+    modifier: Modifier = Modifier,
+    @DrawableRes icon: Int? = null,
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    height: Int = 55
+) {
+    Surface(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        border = BorderStroke(1.sdp(), Color.White)
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = modifier.background(
+                brush = greenGradient,
+                shape = MaterialTheme.shapes.medium)
+                .fillMaxWidth()
+                .padding(1.sdp())
+                .height(height.sdp())
+            ,
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = blackBorder
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                icon?.let {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(it),
+                        contentDescription = null,
+                        modifier = Modifier.width(13.sdp()).height(13.sdp())
+                    )
+                    Spacer(Modifier.width(17.sdp()))
+                }
+                Text(
+                    text,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun GreenSmallButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.size(105.sdp(), 50.sdp()),
+        shape = MaterialTheme.shapes.small,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF73FAD3)
+        )
+    ) {
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 
@@ -105,15 +174,15 @@ fun BlackButton(
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, if (enabled) blackBorder else Color.White)
+        border = BorderStroke(1.sdp(), if (enabled) blackBorder else Color.White)
     ) {
         Button(
             onClick = onClick,
             modifier = modifier.background(
                 brush = if (enabled) blackGradient else grayGradient,
                 shape = MaterialTheme.shapes.large)
-                .padding(1.dp) // Компенсируем границу Surface
-                .height(height.dp)
+                .padding(1.sdp()) // Компенсируем границу Surface
+                .height(height.sdp())
             ,
             enabled = enabled,
             shape = MaterialTheme.shapes.large,
@@ -128,9 +197,9 @@ fun BlackButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(it),
                         contentDescription = null,
-                        modifier = Modifier.width(23.dp).height(23.dp)
+                        modifier = Modifier.width(23.sdp()).height(23.sdp())
                     )
-                    Spacer(Modifier.width(17.dp))
+                    Spacer(Modifier.width(17.sdp()))
                 }
                 Text(
                     text,
@@ -153,16 +222,16 @@ fun WhiteButton(
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, Color.White)
+        border = BorderStroke(1.sdp(), Color.White)
     ) {
         Button(
             onClick = onClick,
             modifier = modifier.background(
                 brush = whiteGradient,
                 shape = MaterialTheme.shapes.large)
-                .padding(1.dp) // Компенсируем границу Surface
+                .padding(1.sdp()) // Компенсируем границу Surface
                 .fillMaxWidth()
-                .height(height.dp)
+                .height(height.sdp())
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -177,9 +246,9 @@ fun WhiteButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(icon),
                         contentDescription = null,
-                        modifier = Modifier.width(23.dp).height(23.dp)
+                        modifier = Modifier.width(23.sdp()).height(23.sdp())
                     )
-                    Spacer(Modifier.width(17.dp))
+                    Spacer(Modifier.width(17.sdp()))
                 }
                 Text(
                     text,
@@ -191,25 +260,55 @@ fun WhiteButton(
 }
 
 @Composable
+fun WhiteSmallButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = MaterialTheme.shapes.small,
+        border = BorderStroke(1.sdp(), Color(0xFFDFDFDF))
+    ) {
+        Button(
+            onClick,
+            modifier = Modifier
+                .size(105.sdp(), 50.sdp())
+                .background(
+                brush = whiteGradient,
+                shape = MaterialTheme.shapes.small
+            ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+        ) {
+            Text(
+                text,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
 fun BackButton(
     onClick: () -> Unit
 ) {
     Surface(
-        shape = RoundedCornerShape(100.dp),
+        shape = RoundedCornerShape(100.sdp()),
         color = Color.White,
-        border = BorderStroke(1.dp, Color.White)
+        border = BorderStroke(1.sdp(), Color.White)
     ) {
         IconButton(
             onClick = onClick,
             modifier = Modifier
-                .size(65.dp, 65.dp)
-                .padding(1.dp)
+                .size(65.sdp(), 65.sdp())
+                .padding(1.sdp())
             ,
             colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFFEFEFEF))
         ) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.back),
-                contentDescription = stringResource(R.string.back)
+                contentDescription = stringResource(R.string.back),
+                modifier = Modifier.size(24.sdp())
             )
         }
     }

@@ -53,12 +53,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.theme.sdp
 
 data class DraggableItem(
     val text: String,
@@ -69,8 +71,7 @@ data class DraggableItem(
 fun CustomPopup(
     phone: String,
     onChangeVisible: (Boolean) -> Unit,
-    sendCode: () -> Unit,
-    addWay: (String) -> Unit
+    sendCode: (List<String>) -> Unit
 ) {
     val stringTelegram = stringResource(R.string.telegram)
     val stringWhatsApp = stringResource(R.string.whatsapp)
@@ -106,16 +107,16 @@ fun CustomPopup(
     Dialog({}) {
         Surface(
             modifier = Modifier
-                .width(360.dp)
+                .width(310.sdp())
                 .alpha(if (isEnterEmail) 0f else 1f),
             shape = MaterialTheme.shapes.large,
             color = Color.White,
-            shadowElevation = 2.dp,
-            border = BorderStroke(1.dp, Color(0xFFBEBEBE))
+            shadowElevation = 2.sdp(),
+            border = BorderStroke(1.sdp(), Color(0xFFBEBEBE))
         ) {
             Column(
                 modifier = Modifier
-                    .padding(30.dp)
+                    .padding(30.sdp())
                     //.verticalScroll(rememberScrollState()),
                 ,
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -123,20 +124,21 @@ fun CustomPopup(
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.sms),
                     contentDescription = null,
+                    modifier = Modifier.size(28.sdp()),
                     tint = Color.Unspecified
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(20.sdp()))
                 Text(
                     stringResource(R.string.get_the_confirmation_code),
                     style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(12.sdp()))
                 Text(
                     phone,
                     color = Color(0xFF999696),
                     style = MaterialTheme.typography.labelMedium
                 )
-                Spacer(Modifier.height(25.dp))
+                Spacer(Modifier.height(25.sdp()))
                 //Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     items.forEachIndexed { index, draggableItem ->
                         val currentItem = draggableItem.text
@@ -149,7 +151,7 @@ fun CustomPopup(
 
                         Box(
                             modifier = Modifier
-                                .padding(bottom = 5.dp)
+                                .padding(bottom = 5.sdp())
                                 .zIndex(if (draggedIndex == index) 1f else 0f) // Поднимает элемент над другими
                                 .graphicsLayer {
                                     if (draggedIndex == index) {
@@ -175,17 +177,17 @@ fun CustomPopup(
                             Surface(
                                 shape = MaterialTheme.shapes.medium,
                                 color = Color.Unspecified,
-                                border = BorderStroke(1.dp, Color(0xFFBEBEBE))
+                                border = BorderStroke(1.sdp(), Color(0xFFBEBEBE))
                             ) {
                                 if (draggableItem.isEmail) {
                                     Row(
                                         modifier = Modifier
-                                            .padding(10.dp)
-                                            .height(40.dp)
+                                            .padding(10.sdp())
+                                            .height(40.sdp())
                                             .fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Spacer(Modifier.width(72.dp))
+                                        Spacer(Modifier.width(72.sdp()))
                                         Text(
                                             email,
                                             modifier = Modifier
@@ -195,14 +197,14 @@ fun CustomPopup(
                                             textDecoration = TextDecoration.Underline,
                                             style = MaterialTheme.typography.bodyLarge
                                         )
-                                        Spacer(Modifier.width(52.dp))
+                                        Spacer(Modifier.width(52.sdp()))
                                     }
                                 }
 
                                 Row(
                                     modifier = Modifier
-                                        .padding(10.dp)
-                                        .height(40.dp)
+                                        .padding(10.sdp())
+                                        .height(40.sdp())
                                         .fillMaxWidth()
                                         .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
                                             // Обработка клика вне Switch
@@ -215,7 +217,7 @@ fun CustomPopup(
                                         imageVector = ImageVector.vectorResource(R.drawable.burger),
                                         contentDescription = null,
                                         modifier = Modifier
-                                            .size(16.dp, 16.dp)
+                                            .size(16.sdp(), 16.sdp())
                                             .aspectRatio(1f)
                                             .pointerInput(Unit) {
                                                 detectDragGestures(
@@ -252,7 +254,7 @@ fun CustomPopup(
                                         ,
                                         tint = Color.Unspecified
                                     )
-                                    Spacer(Modifier.width(9.dp))
+                                    Spacer(Modifier.width(9.sdp()))
                                     Text(
                                         draggableItem.text,
                                         modifier = Modifier.weight(1f),
@@ -268,7 +270,7 @@ fun CustomPopup(
                                                 email = ""
                                             }
                                         },
-                                        modifier = Modifier.fillMaxHeight(),
+                                        modifier = Modifier.size(40.sdp(), 20.sdp()),
                                         colors = SwitchDefaults.colors(
                                             uncheckedThumbColor = Color(0xFFBEBEBE),
                                             uncheckedTrackColor = Color.Unspecified,
@@ -283,7 +285,7 @@ fun CustomPopup(
                         }
                     }
                 //}
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(20.sdp()))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -297,6 +299,7 @@ fun CustomPopup(
                     Switch(
                         checked = checkedChoice,
                         { checkedChoice = it },
+                        modifier = Modifier.size(40.sdp(), 21.sdp()),
                         colors = SwitchDefaults.colors(
                             uncheckedThumbColor = Color(0xFFBEBEBE),
                             uncheckedTrackColor = Color.Unspecified,
@@ -307,18 +310,21 @@ fun CustomPopup(
                         )
                     )
                 }
-                Spacer(Modifier.height(25.dp))
+                Spacer(Modifier.height(25.sdp()))
                 GreenButton(
                     text = stringResource(R.string.send_the_code),
                     onClick = {
+                        val ways = emptyList<String>().toMutableList()
                         items.forEach { draggableItem ->
-                            if (switchStates[draggableItem.text]!!)
-                                addWay(draggableItem.text)
+                            if (switchStates[draggableItem.text]!!) {
+                                ways += draggableItem.text
+                            }
                         }
-                        sendCode()
+                        if (ways.isNotEmpty())
+                            sendCode(ways)
                     }
                 )
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(20.sdp()))
                 Text(
                     stringResource(R.string.send_to_another_number),
                     modifier = Modifier.clickable { onChangeVisible(false) },
@@ -335,7 +341,7 @@ fun CustomPopup(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         BackWhiteButton({ onChangeVisible(false) })
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(24.sdp()))
     }
      */
     if (isEnterEmail) {
@@ -368,8 +374,8 @@ fun round(fl: Float): Int {
 fun FullScreenBox() {
     // Получаем размеры экрана
     val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val screenHeight = configuration.screenHeightDp.dp
+    val screenWidth = configuration.screenWidthDp.sdp()
+    val screenHeight = configuration.screenHeightDp.sdp()
 
     Box(
         modifier = Modifier
@@ -404,19 +410,19 @@ fun CustomEmailPopup(
 
     Dialog({}) {
         Surface(
-            modifier = Modifier.width(350.dp),
+            modifier = Modifier.width(350.sdp()),
             shape = MaterialTheme.shapes.large,
             color = Color.White
         ) {
             Column(
-                modifier = Modifier.padding(30.dp),
+                modifier = Modifier.padding(30.sdp()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     stringResource(R.string.specify_the_email),
                     style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(Modifier.height(40.dp))
+                Spacer(Modifier.height(40.sdp()))
                 EmailTextField(
                     email = value,
                     placeholder = stringResource(R.string.your_email),
@@ -424,17 +430,61 @@ fun CustomEmailPopup(
                     onDone = { onDone(value) },
                     isError = isError
                 )
-                Spacer(Modifier.height(25.dp))
+                Spacer(Modifier.height(25.sdp()))
                 GreenButton(
                     text = stringResource(R.string.confirm),
                     onClick = { onDone(value) }
                 )
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(10.sdp()))
                 WhiteButton(
                     text = stringResource(R.string.cancellation),
                     onClick = onCancel
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewRowSwitch() {
+    GeoBlinkerTheme {
+        Row(
+            modifier = Modifier
+                .padding(10.sdp())
+                .height(40.sdp())
+                .fillMaxWidth()
+            ,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.burger),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(16.sdp(), 16.sdp())
+                    .aspectRatio(1f)
+                ,
+                tint = Color.Unspecified
+            )
+            Spacer(Modifier.width(9.sdp()))
+            Text(
+                "Telegram",
+                modifier = Modifier.weight(1f),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Switch(
+                false,
+                {},
+                modifier = Modifier.fillMaxHeight(),
+                colors = SwitchDefaults.colors(
+                    uncheckedThumbColor = Color(0xFFBEBEBE),
+                    uncheckedTrackColor = Color.Unspecified,
+                    uncheckedBorderColor = Color(0xFFBEBEBE),
+                    checkedThumbColor = Color(0xFF12CD4A),
+                    checkedTrackColor = Color.Unspecified,
+                    checkedBorderColor = Color(0xFFBEBEBE),
+                )
+            )
         }
     }
 }

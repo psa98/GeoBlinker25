@@ -27,39 +27,38 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.theme.sdp
 
 val red = Color(0xFFC4162D)
 
 @Composable
 fun CodeTextField(
+    value: String,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
     @StringRes placeholder: Int,
     isError: Boolean = false
 ) {
-    var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = "")) }
     var isFocused by remember { mutableStateOf(false) }
 
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
-            value = textFieldValueState,
+            value = TextFieldValue(
+                text = value,
+                selection = TextRange(value.length)
+            ),
             onValueChange = {
-                textFieldValueState = TextFieldValue(
-                    text = it.text.take(4),
-                    selection = TextRange(it.text.take(4).length)
-                )
-                onValueChange(textFieldValueState.text)
+                onValueChange(it.text.take(4))
             },
             modifier = Modifier
-                .height(81.dp)
+                .height(81.sdp())
                 .fillMaxWidth()
-                .padding(1.dp)
+                .padding(1.sdp())
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
                 }
@@ -116,7 +115,7 @@ fun PhoneNumberTextField(
 
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = textFieldValueState,
@@ -130,7 +129,7 @@ fun PhoneNumberTextField(
                 )
             },
             modifier = Modifier
-                .height(81.dp)
+                .height(81.sdp())
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
@@ -183,7 +182,7 @@ fun NameTextField(
 
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = value,
@@ -192,7 +191,7 @@ fun NameTextField(
                 onValueChange(value)
             },
             modifier = Modifier
-                .height(81.dp)
+                .height(81.sdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
@@ -236,7 +235,7 @@ fun EmailTextField(
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = email,
@@ -244,7 +243,7 @@ fun EmailTextField(
                 onValueChange(newValue.filter { it != ' ' })
             },
             modifier = Modifier
-                .height(81.dp)
+                .height(81.sdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
@@ -283,7 +282,7 @@ fun EmailTextField(
 fun PreviewSimpleTextField() {
     GeoBlinkerTheme {
         Surface(Modifier.fillMaxSize()) {
-            CodeTextField({}, {}, R.string.enter_the_code)
+            CodeTextField("1234", {}, {}, R.string.enter_the_code)
         }
     }
 }

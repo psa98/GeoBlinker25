@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +25,6 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
@@ -32,6 +32,7 @@ import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.NameTextField
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.formatPhoneNumber
+import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun OneScreen(
@@ -63,22 +64,23 @@ fun OneScreen(
     ) {
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
-            contentDescription = null
+            contentDescription = null,
+            modifier = Modifier.width(200.sdp()).height(135.sdp())
         )
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(15.sdp()))
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(33.dp))
+        Spacer(Modifier.height(33.sdp()))
         if (isErrorPhone) {
             Text(
                 stringResource(R.string.invalid_number),
                 color = Color(0xFFC4162D),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(15.dp))
+            Spacer(Modifier.height(15.sdp()))
         }
         else if (isErrorName) {
             Text(
@@ -86,7 +88,7 @@ fun OneScreen(
                 color = Color(0xFFC4162D),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(15.dp))
+            Spacer(Modifier.height(15.sdp()))
         }
         PhoneNumberTextField(
             onValueChange = {
@@ -97,7 +99,7 @@ fun OneScreen(
             onDone = { onClick() },
             isError = isErrorPhone
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(20.sdp()))
         NameTextField(
             placeholder = stringResource(R.string.your_name),
             onValueChange = {
@@ -108,13 +110,13 @@ fun OneScreen(
             onDone = { onClick() },
             isError = isErrorName
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(20.sdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
         )
-        Spacer(Modifier.height(56.dp))
+        Spacer(Modifier.height(56.sdp()))
     }
 
     Column(
@@ -123,11 +125,10 @@ fun OneScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         BackButton(backFun)
-        Spacer(Modifier.height(40.dp))
+        Spacer(Modifier.height(28.sdp()))
     }
 
     if (visiblePopup) {
-        viewModel.clearWays()
         LaunchedEffect(Unit) {
             focusManager.clearFocus()
             keyboardController?.hide()
@@ -138,9 +139,9 @@ fun OneScreen(
             onChangeVisible = { visiblePopup = it },
             sendCode = {
                 visiblePopup = false
+                viewModel.setWays(it)
                 twoScreen(phone, name)
-            },
-            addWay = { viewModel.addWay(it) }
+            }
         )
     }
 }

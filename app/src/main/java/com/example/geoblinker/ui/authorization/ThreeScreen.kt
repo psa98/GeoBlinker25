@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import com.example.geoblinker.ui.theme.sdp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
@@ -43,7 +43,7 @@ fun ThreeScreen(
     var changeMode by remember { mutableStateOf(false) }
     var remainingTime by remember { mutableIntStateOf(30) }
     var checkTimer by remember { mutableStateOf(true) }
-    var textTitle by remember { mutableIntStateOf(viewModel.getNowWay()) }
+    var textTitle by remember { mutableStateOf(viewModel.getNowWay()) }
 
     // Запускаем таймер
     LaunchedEffect(checkTimer) {
@@ -70,37 +70,39 @@ fun ThreeScreen(
         if (!changeMode) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.comment_alt_dots_1),
-                contentDescription = null
+                contentDescription = null,
+                modifier = Modifier.size(28.sdp())
             )
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(20.sdp()))
             Text(
-                stringResource(textTitle),
+                stringResource(textTitle ?: R.string.error),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
-            Spacer(Modifier.height(57.dp))
+            Spacer(Modifier.height(57.sdp()))
         }
         else {
             if (isError) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.attention),
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(28.sdp()),
                     tint = Color(0xFFC4162D)
                 )
-                Spacer(Modifier.height(5.dp))
+                Spacer(Modifier.height(5.sdp()))
                 Text(
                     stringResource(R.string.invalid_code),
-                    modifier = Modifier.height(22.dp),
+                    modifier = Modifier.height(22.sdp()),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                Spacer(Modifier.height(57.dp))
+                Spacer(Modifier.height(57.sdp()))
             }
             else
-                Spacer(Modifier.height(112.dp))
+                Spacer(Modifier.height(112.sdp()))
         }
         CodeTextField(
+            value = value,
             onValueChange = {
                 value = it
                 isError = false
@@ -109,38 +111,48 @@ fun ThreeScreen(
             placeholder = R.string.enter_the_code,
             isError = isError
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(20.sdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
             enabled = !isError && value.length == 4
         )
-        Spacer(Modifier.height(45.dp))
+        Spacer(Modifier.height(45.sdp()))
         Text(
             text = stringResource(R.string.send_to_another_number),
             modifier = Modifier.clickable { backFun() },
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(15.dp))
+        Spacer(Modifier.height(15.sdp()))
         Text(
             text = stringResource(R.string.get_the_code_in_another_way),
-            modifier = Modifier.clickable {  },
+            modifier = Modifier.clickable {
+                if (changeMode) {
+                    changeMode = false
+                    isError = false
+                }
+                checkTimer = !checkTimer
+                remainingTime = 30
+                textTitle = viewModel.getNextWay()
+                value = ""
+            },
             style = MaterialTheme.typography.bodyLarge
         )
 
         if (!changeMode) {
-            Spacer(Modifier.height(15.dp))
+            Spacer(Modifier.height(15.sdp()))
             Text(
                 text = if (remainingTime > 0)
                     "${stringResource(R.string.resend)} ... $remainingTime c"
                 else
                     stringResource(R.string.resend),
                 modifier = Modifier.clickable {
-                    checkTimer = !checkTimer
-                    remainingTime = 30
-                    textTitle = viewModel.getNextWay()
-                    value = ""
+                    if (remainingTime == 0) {
+                        checkTimer = !checkTimer
+                        remainingTime = 30
+                        //textTitle = viewModel.getNextWay()
+                    }
                 },
                 color = if (remainingTime > 0)
                     Color(0xFF636363)
@@ -148,9 +160,9 @@ fun ThreeScreen(
                     Color.Unspecified,
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(96.dp))
+            Spacer(Modifier.height(100.sdp()))
         } else {
-            Spacer(Modifier.height(228.dp))
+            Spacer(Modifier.height(228.sdp()))
         }
     }
 
@@ -164,7 +176,7 @@ fun ThreeScreen(
             color = Color(0xFFC4162D),
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(25.dp))
+        Spacer(Modifier.height(25.sdp()))
         BackButton {
             if (changeMode) {
                 changeMode = false
@@ -172,6 +184,6 @@ fun ThreeScreen(
             } else
                 backFun()
         }
-        Spacer(Modifier.height(36.dp))
+        Spacer(Modifier.height(28.sdp()))
     }
 }

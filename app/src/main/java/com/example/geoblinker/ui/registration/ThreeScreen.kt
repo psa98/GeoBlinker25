@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -17,16 +18,24 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.ssp
+import kotlinx.coroutines.delay
 
 @Composable
 fun ThreeScreen(
-    name: String
+    name: String,
+    main: () -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        delay(4000)
+        main()
+    }
+
     // Фоновое изображение
     Image(
         painter = painterResource(R.drawable.background_registration),
@@ -42,26 +51,27 @@ fun ThreeScreen(
     ) {
         Text(
             stringResource(R.string.registration_completed_successfully),
+            textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
         )
-        Spacer(Modifier.height(48.dp))
+        Spacer(Modifier.height(48.sdp()))
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.size(240.dp, 162.dp)
+            modifier = Modifier.size(240.sdp(), 162.sdp())
         )
-        Spacer(Modifier.height(65.dp))
+        Spacer(Modifier.height(65.sdp()))
         Text(
             text = stringResource(R.string.welcome),
-            lineHeight = 40.sp,
+            lineHeight = 40.ssp(),
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
             text = "$name!",
-            lineHeight = 40.sp,
+            lineHeight = 40.ssp(),
             style = MaterialTheme.typography.headlineLarge
         )
-        Spacer(Modifier.height(202.dp))
+        Spacer(Modifier.height(202.sdp()))
     }
 }
 
@@ -69,6 +79,6 @@ fun ThreeScreen(
 @Composable
 fun PreviewFourScreen() {
     GeoBlinkerTheme {
-        ThreeScreen("Константин Гусевский")
+        ThreeScreen("Константин Гусевский", {})
     }
 }
