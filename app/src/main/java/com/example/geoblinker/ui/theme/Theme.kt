@@ -84,6 +84,12 @@ fun GeoBlinkerTheme(
                 fontWeight = FontWeight.Normal,
                 fontSize = 20.scaledSp()
             ),
+            headlineSmall = TextStyle(
+                color = black,
+                fontFamily = Manrope,
+                fontWeight = FontWeight.Normal,
+                fontSize = 18.scaledSp()
+            ),
             titleLarge = TextStyle(
                 color = black,
                 fontFamily = Manrope,

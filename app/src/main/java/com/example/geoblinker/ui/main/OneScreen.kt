@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,20 +47,26 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.CustomEmptyDevicesPopup
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.GreenSmallButton
 import com.example.geoblinker.ui.WhiteSmallButton
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
+import kotlinx.coroutines.delay
 
 @Composable
-fun OneScreen() {
+fun OneScreen(
+    checkDevices: () -> Boolean,
+    toBindingScreen: () -> Unit
+) {
     val context = LocalContext.current
     val webView = remember { WebView(context) }
     var isDarkTheme by remember { mutableStateOf(false) }
     var isSatellite by remember { mutableStateOf(false) }
     var currentZoom by remember { mutableIntStateOf(10) }
+    var isShowPopup by remember { mutableStateOf(false) }
 
     // Интерфейс для взаимодействия с JavaScript
     webView.addJavascriptInterface(object {
@@ -69,37 +76,14 @@ fun OneScreen() {
         }
     }, "Android")
 
-    MapFromAssets(webView)
-
-    Surface(
-        shape = RoundedCornerShape(bottomStart = 30.sdp(), bottomEnd = 30.sdp()),
-        color = Color.White.copy(alpha = 0.6f)
-    ) {
-        Row(
-            Modifier.fillMaxWidth().padding(10.sdp()),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
-                contentDescription = null,
-                modifier = Modifier.size(50.sdp()),
-                tint = Color.Unspecified
-            )
-            Spacer(Modifier.width(10.sdp()))
-            GreenSmallButton(
-                stringResource(R.string.map),
-                {}
-            )
-            Spacer(Modifier.width(10.sdp()))
-            WhiteSmallButton(
-                stringResource(R.string.list),
-                {}
-            )
-            Spacer(Modifier.width(10.sdp()))
-            Notifications(3)
+    LaunchedEffect(Unit) {
+        if (!checkDevices()) {
+            delay(2000)
+            isShowPopup = true
         }
     }
+
+    MapFromAssets(webView)
 
     Box(
         Modifier
@@ -204,10 +188,19 @@ fun OneScreen() {
         contentAlignment = Alignment.BottomCenter
     ) {
         GreenMediumButton(
-            modifier = Modifier.width(280.sdp()),
+            modifier = Modifier.width(260.sdp()),
             icon = R.drawable.plus,
             text = stringResource(R.string.link_device),
-            onClick = {}
+            onClick = toBindingScreen
+        )
+    }
+
+    if (isShowPopup) {
+        CustomEmptyDevicesPopup(
+            {
+                isShowPopup = false
+            },
+            toBindingScreen
         )
     }
 }

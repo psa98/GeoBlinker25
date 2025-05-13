@@ -37,7 +37,7 @@ import com.example.geoblinker.ui.theme.sdp
 @Composable
 fun OneScreen(
     twoScreen: (String, String) -> Unit,
-    backFun: () -> Unit,
+    toBack: () -> Unit,
     viewModel: RegistrationViewModel
 ) {
     var phone by remember { mutableStateOf("") }
@@ -119,14 +119,7 @@ fun OneScreen(
         Spacer(Modifier.height(56.sdp()))
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        BackButton(backFun)
-        Spacer(Modifier.height(28.sdp()))
-    }
+    BackButton(toBack)
 
     if (visiblePopup) {
         LaunchedEffect(Unit) {

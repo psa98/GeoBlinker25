@@ -1,5 +1,6 @@
 package com.example.geoblinker
 
+import android.annotation.SuppressLint
 import android.app.Application
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -9,10 +10,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.geoblinker.data.Repository
 import com.example.geoblinker.ui.GeoBlinkerViewModel
 import com.example.geoblinker.ui.authorization.AuthorizationScreen
+import com.example.geoblinker.ui.authorization.AuthorizationViewModel
+import com.example.geoblinker.ui.device.DeviceViewModel
 import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.registration.RegistrationScreen
+import com.example.geoblinker.ui.registration.RegistrationViewModel
 
 enum class GeoBlinkerScreen {
     Authorization,
@@ -20,9 +25,10 @@ enum class GeoBlinkerScreen {
     Main
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun GeoBlinkerScreen(
-    application: Application,
+    repository: Repository,
     viewModel: GeoBlinkerViewModel,
     navController: NavHostController = rememberNavController()
 ) {
@@ -30,27 +36,25 @@ fun GeoBlinkerScreen(
         NavHost(
             navController = navController,
             startDestination = GeoBlinkerScreen.Authorization.name, // TODO: При дебаге Main
-            modifier = Modifier.padding(
-                top = innerPadding.calculateTopPadding()
-            )
+            modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
                 AuthorizationScreen(
-                    application,
+                    AuthorizationViewModel(),
                     registrationScreen = { navController.navigate(GeoBlinkerScreen.Registration.name) },
                     mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
                 )
             }
             composable(route = GeoBlinkerScreen.Registration.name) {
                 RegistrationScreen(
-                    application,
+                    RegistrationViewModel(),
                     authorizationScreen = { navController.navigate(GeoBlinkerScreen.Authorization.name) },
                     mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
                 )
             }
             composable(route = GeoBlinkerScreen.Main.name) {
                 MainScreen(
-                    application
+                    DeviceViewModel(repository)
                 )
             }
         }

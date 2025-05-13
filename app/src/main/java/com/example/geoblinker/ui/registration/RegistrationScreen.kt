@@ -1,6 +1,5 @@
 package com.example.geoblinker.ui.registration
 
-import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,12 +24,11 @@ enum class RegistrationScreen {
 
 @Composable
 fun RegistrationScreen(
-    application: Application,
+    viewModel: RegistrationViewModel,
     navController: NavHostController = rememberNavController(),
     authorizationScreen: () -> Unit,
     mainScreen: () -> Unit
 ) {
-    val viewModel = RegistrationViewModel(application)
     val name by viewModel.name.collectAsState()
 
     Scaffold { innerPadding ->

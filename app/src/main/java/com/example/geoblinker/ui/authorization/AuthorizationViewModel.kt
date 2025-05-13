@@ -1,11 +1,10 @@
 package com.example.geoblinker.ui.authorization
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import com.example.geoblinker.R
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class AuthorizationViewModel(application: Application) : AndroidViewModel(application) {
+class AuthorizationViewModel : ViewModel() {
     private val _wayCodes = mapOf("Telegram" to "1234", "WhatsApp" to "6940", "SMS" to "2233", "Email" to "1111")
     private val _wayTitles = mapOf(
         "Telegram" to R.string.telegram_way_title,

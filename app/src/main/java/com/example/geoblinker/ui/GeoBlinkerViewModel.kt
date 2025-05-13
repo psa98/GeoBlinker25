@@ -1,7 +1,6 @@
 package com.example.geoblinker.ui
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 
-class GeoBlinkerViewModel(application: Application) : AndroidViewModel(application) {
+class GeoBlinkerViewModel : ViewModel() {
 }

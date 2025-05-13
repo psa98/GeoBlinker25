@@ -51,12 +51,15 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
@@ -104,7 +107,9 @@ fun CustomPopup(
     }
 
     FullScreenBox()
-    Dialog({}) {
+    Dialog(
+        {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(
             modifier = Modifier
                 .width(310.sdp())
@@ -359,6 +364,56 @@ fun CustomPopup(
                     switchStates[stringEmail] = false
             }
         )
+    }
+}
+
+@Composable
+fun CustomEmptyDevicesPopup(
+    onChangeVisible: (Boolean) -> Unit,
+    toBindingScreen: () -> Unit
+) {
+    FullScreenBox()
+    Dialog(
+        onDismissRequest = { onChangeVisible(false) },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Surface(
+            modifier = Modifier.width(310.sdp()),
+            shape = MaterialTheme.shapes.large,
+            color = Color.White,
+            shadowElevation = 2.sdp()
+        ) {
+            Column(
+                modifier = Modifier.padding(vertical = 30.sdp(), horizontal = 25.sdp()),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.comment_info),
+                    contentDescription = null,
+                    modifier = Modifier.size(28.sdp()),
+                    tint = Color.Unspecified
+                )
+                Spacer(Modifier.height(21.sdp()))
+                Text(
+                    stringResource(R.string.ask_add_new_device),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(Modifier.height(53.sdp()))
+                GreenMediumButton(
+                    modifier = Modifier.width(260.sdp()),
+                    icon = R.drawable.plus,
+                    text = stringResource(R.string.link_device),
+                    onClick = toBindingScreen
+                )
+                Spacer(Modifier.height(20.sdp()))
+                Text(
+                    stringResource(R.string.problems_with_linking),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
     }
 }
 

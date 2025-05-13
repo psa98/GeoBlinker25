@@ -2,11 +2,13 @@ package com.example.geoblinker.ui.authorization
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +37,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun ThreeScreen(
     fourScreen: () -> Unit,
-    backFun: () -> Unit,
+    toBack: () -> Unit,
     viewModel: AuthorizationViewModel
 ) {
     var value by remember { mutableStateOf("") }
@@ -121,7 +123,7 @@ fun ThreeScreen(
         Spacer(Modifier.height(45.sdp()))
         Text(
             text = stringResource(R.string.send_to_another_number),
-            modifier = Modifier.clickable { backFun() },
+            modifier = Modifier.clickable { toBack() },
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(15.sdp()))
@@ -166,24 +168,28 @@ fun ThreeScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally,
+        contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = stringResource(R.string.is_the_code_not_coming),
-            color = Color(0xFFC4162D),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(Modifier.height(25.sdp()))
-        BackButton {
+        Box(
+            modifier = Modifier.offset(y = 208.sdp())
+        ) {
+            Text(
+                text = stringResource(R.string.is_the_code_not_coming),
+                color = Color(0xFFC4162D),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+
+    BackButton(
+        onClick = {
             if (changeMode) {
                 changeMode = false
                 isError = false
             } else
-                backFun()
+                toBack()
         }
-        Spacer(Modifier.height(28.sdp()))
-    }
+    )
 }

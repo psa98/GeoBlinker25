@@ -38,7 +38,7 @@ import com.skydoves.cloudy.cloudy
 @Composable
 fun TwoScreen(
     threeScreen: (String) -> Unit,
-    backFun: () -> Unit,
+    toBack: () -> Unit,
     viewModel: AuthorizationViewModel
 ) {
     var value by remember { mutableStateOf("") }
@@ -91,14 +91,9 @@ fun TwoScreen(
         Spacer(Modifier.height(56.sdp()))
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().cloudy(16, visiblePopup),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        BackButton(backFun)
-        Spacer(Modifier.height(28.sdp()))
-    }
+    BackButton(
+        onClick = toBack
+    )
 
     if (isPhoneNumberIncorrect) {
         Column(

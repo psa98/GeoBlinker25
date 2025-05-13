@@ -5,6 +5,7 @@ plugins {
     //id("com.android.application")
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("kotlin-kapt")
 }
 
 android {
@@ -52,6 +53,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.transport.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,4 +68,22 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
+    implementation(libs.threetenabp)
+    implementation(libs.google.accompanist.permissions)
+
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation (libs.androidx.runtime.livedata)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    annotationProcessor(libs.androidx.room.room.compiler)
+    kapt(libs.androidx.room.room.compiler)
+
+    // CameraX
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // ML Kit Barcode Scanning
+    implementation(libs.barcode.scanning)
 }

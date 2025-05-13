@@ -39,4 +39,13 @@
     <string name="link_device">Привязать устройство</string>
     <string name="error">В приложении произошла ошибка. Просим вас перезапустить его</string>
     <string name="new_device">Новое устройство</string>
+    <string name="scan_the_imei">Ввести или отсканировать IMEI</string>
+    <string name="imei">IMEI</string>
+    <string name="link">Привязать</string>
+    <string name="imei_not_found">IMEI не найден</string>
+    <string name="specify_a_name_for_the_new_device">Укажите имя для нового устройства</string>
+    <string name="configure_the_signals">Настроить сигналы</string>
+    <string name="view_on_the_map">Посмотреть на карте</string>
+    <string name="ask_add_new_device">Активные устройства не найдены. Привязать новое?</string>
+    <string name="problems_with_linking">Проблемы с привязкой?</string>
 </resources>
