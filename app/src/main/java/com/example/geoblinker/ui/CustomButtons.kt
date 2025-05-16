@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -106,18 +107,19 @@ fun GreenMediumButton(
     onClick: () -> Unit,
     enabled: Boolean = true,
     height: Int = 55,
+    shape: Shape = MaterialTheme.shapes.medium,
     style: TextStyle = MaterialTheme.typography.bodyLarge
 ) {
     Surface(
         modifier = modifier,
-        shape = MaterialTheme.shapes.medium,
+        shape = shape,
         border = BorderStroke(1.sdp(), Color.White)
     ) {
         Button(
             onClick = onClick,
             modifier = modifier.background(
                 brush = greenGradient,
-                shape = MaterialTheme.shapes.medium)
+                shape = shape)
                 .fillMaxWidth()
                 .padding(1.sdp())
                 .height(height.sdp())
@@ -143,6 +145,56 @@ fun GreenMediumButton(
                     text,
                     style = style
                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun GreenMediumRightIconButton(
+    modifier: Modifier = Modifier,
+    @DrawableRes icon: Int? = null,
+    text: String,
+    onClick: () -> Unit,
+    enabled: Boolean = true,
+    height: Int = 55,
+    style: TextStyle = MaterialTheme.typography.bodyLarge
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(10.sdp()),
+        border = BorderStroke(1.sdp(), Color.White)
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = modifier.background(
+                brush = greenGradient,
+                shape = RoundedCornerShape(10.sdp()))
+                .fillMaxWidth()
+                .padding(1.sdp())
+                .height(height.sdp())
+            ,
+            enabled = enabled,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = blackBorder
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text,
+                    style = style
+                )
+                icon?.let {
+                    Spacer(Modifier.width(17.sdp()))
+                    Icon(
+                        imageVector = ImageVector.vectorResource(it),
+                        contentDescription = null,
+                        modifier = Modifier.width(18.sdp()).height(18.sdp())
+                    )
+                }
             }
         }
     }
@@ -223,7 +275,6 @@ fun BlackMediumButton(
     @DrawableRes icon: Int? = null,
     text: String,
     onClick: () -> Unit,
-    textStyle: TextStyle = MaterialTheme.typography.headlineMedium,
     enabled: Boolean = true
 ) {
     Surface(
@@ -251,7 +302,7 @@ fun BlackMediumButton(
                 Text(
                     text,
                     color = if (enabled) Color.White else gray,
-                    style = textStyle
+                    style = MaterialTheme.typography.bodyLarge
                 )
                 icon?.let {
                     Spacer(Modifier.width(16.sdp()))
@@ -344,6 +395,36 @@ fun WhiteSmallButton(
 }
 
 @Composable
+fun WhiteRedMediumButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(10.sdp()),
+        border = BorderStroke(1.sdp(), Color.White)
+    ) {
+        Button(
+            onClick,
+            modifier = Modifier
+                .size(330.sdp(), 55.sdp())
+                .background(
+                    brush = whiteGradient,
+                    shape = RoundedCornerShape(10.sdp())
+                ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+        ) {
+            Text(
+                text,
+                color = Color(0xFFC4162D),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
 fun BackButton(
     onClick: () -> Unit
 ) {
@@ -381,5 +462,32 @@ fun BackButton(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun OkButton(
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .size(65.sdp())
+            .background(
+            brush = if (enabled) greenGradient else whiteGradient,
+            shape = MaterialTheme.shapes.small
+        ),
+        enabled = enabled,
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = Color.Transparent
+        )
+    ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.ok),
+            contentDescription = null,
+            modifier = Modifier.size(23.sdp(), 17.sdp()),
+            tint = Color.Unspecified
+        )
     }
 }

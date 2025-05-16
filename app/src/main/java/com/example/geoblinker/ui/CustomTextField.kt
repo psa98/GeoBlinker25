@@ -4,12 +4,6 @@ package com.example.geoblinker.ui
 
 import android.Manifest
 import androidx.annotation.StringRes
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -41,8 +35,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -50,18 +42,11 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.geoblinker.R
-import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.mlkit.vision.barcode.BarcodeScanner
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.common.InputImage
 
 val red = Color(0xFFC4162D)
 
@@ -272,7 +257,7 @@ fun NameDeviceTextField(
         TextField(
             value = value,
             onValueChange = {
-                onValueChange(it.filter { c -> c.isLetterOrDigit() || c == ' ' })
+                onValueChange(it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(64))
             },
             modifier = Modifier
                 .height(65.sdp())
@@ -459,6 +444,65 @@ fun ImeiTextField(
                         modifier = Modifier.size(35.sdp())
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun SearchDevice(
+    key: String,
+    onValueChange: (String) -> Unit
+) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Surface(
+        shape = RoundedCornerShape(10.sdp()),
+        color = Color.Unspecified,
+        border = BorderStroke(1.sdp(), Color(0xFFC0C0C0))
+    ) {
+        TextField(
+            key,
+            { onValueChange(it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(65)) },
+            modifier = Modifier
+                .height(45.sdp())
+                .fillMaxWidth()
+            ,
+            textStyle = MaterialTheme.typography.bodySmall,
+            placeholder = {
+                Text(
+                    stringResource(R.string.search_for_a_device_by_name_or_imei),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = { keyboardController?.hide() }
+            ),
+            singleLine = true,
+            shape = RoundedCornerShape(10.sdp()),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White.copy(alpha = 0.4f),
+                focusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent, // Убираем линию в фокусе
+                unfocusedIndicatorColor = Color.Transparent // Убираем линию без фокуса
+            )
+        )
+
+        if (key.isEmpty()) {
+            Box(
+                Modifier.fillMaxWidth().padding(8.sdp()),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.search),
+                    contentDescription = null,
+                    modifier = Modifier.size(26.sdp(), 28.sdp()),
+                    tint = Color.Unspecified
+                )
             }
         }
     }

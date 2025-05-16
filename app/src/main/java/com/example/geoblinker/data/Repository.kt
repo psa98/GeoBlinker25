@@ -14,4 +14,8 @@ class Repository(private val deviceDao: DeviceDao) {
     }
 
     fun getDevices(): Flow<List<Device>> = deviceDao.getAllDevices()
+
+    suspend fun updateDevice(device: Device) {
+        deviceDao.updateDevice(device)
+    }
 }

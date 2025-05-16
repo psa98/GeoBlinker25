@@ -27,11 +27,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
-import com.example.geoblinker.ui.theme.sdp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CodeTextField
+import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.delay
 
 @Composable

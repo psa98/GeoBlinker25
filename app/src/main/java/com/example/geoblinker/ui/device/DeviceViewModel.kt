@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.data.Repository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,7 +52,18 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
         }
     }
 
+    fun updateDevice(device: Device) {
+        viewModelScope.launch {
+            repository.updateDevice(device)
+            _device.value = device
+        }
+    }
+
     fun checkDevices(): Boolean {
         return _devices.asStateFlow().value.isNotEmpty()
+    }
+
+    fun setDevice(device: Device) {
+        _device.value = device
     }
 }

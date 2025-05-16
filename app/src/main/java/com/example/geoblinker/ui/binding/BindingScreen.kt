@@ -1,38 +1,40 @@
 package com.example.geoblinker.ui.binding
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.geoblinker.ui.device.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 enum class BindingScreen {
     One,
-    Two
+    Two,
+    Three
 }
 
 @Composable
 fun BindingScreen(
+    viewModel: DeviceViewModel,
     navController: NavHostController = rememberNavController(),
-    toDevice: (String, String) -> Unit,
     toBack: () -> Unit
 ) {
     var imei by remember { mutableStateOf("") }
+    val device by viewModel.device.collectAsState()
 
     Row(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFF6F6F6)),
+        modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.Center
     ) {
         NavHost(
@@ -51,8 +53,18 @@ fun BindingScreen(
             composable(route = BindingScreen.Two.name) {
                 TwoScreen(
                     imei,
-                    { toDevice(imei, it) },
+                    { name ->
+                        viewModel.insertDevice(imei, name)
+                        navController.navigate(BindingScreen.Three.name)
+                    },
                     { navController.navigate(BindingScreen.One.name) }
+                )
+            }
+            composable(route = BindingScreen.Three.name) {
+                ThreeScreen(
+                    device,
+                    { navController.navigate(BindingScreen.One.name) },
+                    toBack
                 )
             }
         }

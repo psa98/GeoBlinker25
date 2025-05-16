@@ -48,4 +48,19 @@
     <string name="view_on_the_map">Посмотреть на карте</string>
     <string name="ask_add_new_device">Активные устройства не найдены. Привязать новое?</string>
     <string name="problems_with_linking">Проблемы с привязкой?</string>
+    <string name="no_active_devices_found">Активные устройства не найдены</string>
+    <string name="search_for_a_device_by_name_or_imei">Поиск устройства по имени или IMEI</string>
+    <string name="by_name">По имени</string>
+    <string name="sort_devices">Сортировать устройства:</string>
+    <string name="by_device_type">По типу устройства</string>
+    <string name="by_distance">По удаленности</string>
+    <string name="by_binding_date">По дате привязки</string>
+    <string name="by_signal_strength">По уровню сигнала</string>
+    <string name="by_charge_level">По уровню заряда</string>
+    <string name="an_unnamed_device">Устройство без имени</string>
+    <string name="no_devices_found_for_request">По вашему запросу устройства не найдены</string>
+    <string name="signal_log">Журнал сигналов</string>
+    <string name="detach_the_device">Отвязать устройство</string>
+    <string name="devices_name">Имя устройства:</string>
+    <string name="device_name_updated">Имя устройства обновлено!</string>
 </resources>

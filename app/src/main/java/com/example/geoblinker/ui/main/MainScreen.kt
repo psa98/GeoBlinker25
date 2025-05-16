@@ -1,16 +1,18 @@
 package com.example.geoblinker.ui.main
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,7 +40,7 @@ import com.example.geoblinker.ui.device.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 enum class MainScreen {
-    One,
+    Map,
     Binding,
     Device,
     List
@@ -73,16 +75,15 @@ fun TopBar(
                 tint = Color.Unspecified
             )
             Spacer(Modifier.width(10.sdp()))
-            if (currentRoute == MainScreen.One.name) {
+            if (currentRoute == MainScreen.Map.name) {
                 GreenSmallButton(
                     stringResource(R.string.map),
                     {}
                 )
-            }
-            else {
+            } else {
                 WhiteSmallButton(
                     stringResource(R.string.map),
-                    { navController.navigate(MainScreen.One.name) }
+                    { navController.navigate(MainScreen.Map.name) }
                 )
             }
             Spacer(Modifier.width(10.sdp()))
@@ -91,11 +92,10 @@ fun TopBar(
                     stringResource(R.string.list),
                     {}
                 )
-            }
-            else {
+            } else {
                 WhiteSmallButton(
                     stringResource(R.string.list),
-                    {}
+                    { navController.navigate(MainScreen.List.name) }
                 )
             }
             Spacer(Modifier.width(10.sdp()))
@@ -109,43 +109,71 @@ fun MainScreen(
     viewModel: DeviceViewModel,
     navController: NavHostController = rememberNavController(),
 ) {
-    var currentRoute by remember { mutableStateOf(MainScreen.One.name) }
+    var currentRoute by remember { mutableStateOf(MainScreen.Map.name) }
+
+    fun BackgroundColor(): Color {
+        return when(currentRoute) {
+            MainScreen.Binding.name -> Color(0xFFF6F6F6)
+            else -> Color(0xFFEFEFEF)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.clearDevice()
     }
 
-    Scaffold {
-        NavHost(
-            navController = navController,
-            startDestination = MainScreen.One.name,
-            modifier = Modifier.padding(it)
-        ) {
-            composable(route = MainScreen.One.name) {
-                currentRoute = MainScreen.One.name
-                OneScreen(
-                    { viewModel.checkDevices() },
-                    { navController.navigate("${MainScreen.Binding.name}/${MainScreen.One.name}") }
-                )
-            }
-            composable(route = "${MainScreen.Binding.name}/{previousScreen}") { backStackEntry ->
-                currentRoute = MainScreen.Binding.name
-                val previousScreen = backStackEntry.arguments?.getString("previousScreen")!!
-                BindingScreen(
-                    toDevice = { imei, name ->
-                        viewModel.insertDevice(imei, name)
-                        navController.navigate("${MainScreen.Device.name}/${previousScreen}")
-                    },
-                    toBack = { navController.navigate(previousScreen) }
-                )
-            }
-            composable(route = "${MainScreen.Device.name}/{previousScreen}") { backStackEntry ->
-                currentRoute = MainScreen.Device.name
-                val previousScreen = backStackEntry.arguments?.getString("previousScreen")!!
+    NavHost(
+        navController = navController,
+        startDestination = MainScreen.Map.name,
+        modifier = Modifier.background(BackgroundColor())
+    ) {
+        composable(route = MainScreen.Map.name) {
+            currentRoute = MainScreen.Map.name
+            MapScreen(
+                { viewModel.checkDevices() },
+                { navController.navigate("${MainScreen.Binding.name}/${MainScreen.Map.name}") }
+            )
+        }
+        composable(route = "${MainScreen.Binding.name}/{previousScreen}") { backStackEntry ->
+            currentRoute = MainScreen.Binding.name
+            val previousScreen = backStackEntry.arguments?.getString("previousScreen")!!
+            BindingScreen(
+                viewModel,
+                toBack = { navController.navigate(previousScreen) }
+            )
+        }
+        composable(route = "${MainScreen.Device.name}/{previousScreen}") { backStackEntry ->
+            currentRoute = MainScreen.Device.name
+            val previousScreen = backStackEntry.arguments?.getString("previousScreen")!!
+            Box(Modifier
+                .fillMaxSize()
+                .padding(
+                    start = 15.sdp(),
+                    top = 90.sdp(),
+                    end = 15.sdp()
+                )) {
                 DeviceScreen(
                     viewModel,
-                    toBindingScreen = { navController.navigate("${MainScreen.Binding.name}/${MainScreen.Device.name}") },
                     toBack = { navController.navigate(previousScreen) }
+                )
+            }
+        }
+        composable(route = MainScreen.List.name) {
+            currentRoute = MainScreen.List.name
+            Box(Modifier
+                .fillMaxSize()
+                .padding(
+                    start = 15.sdp(),
+                    top = 90.sdp(),
+                    end = 15.sdp()
+                )) {
+                ListScreen(
+                    viewModel,
+                    toBindingScreen = { navController.navigate("${MainScreen.Binding.name}/${MainScreen.List.name}") },
+                    toDeviceScreen = { device ->
+                        viewModel.setDevice(device)
+                        navController.navigate("${MainScreen.Device.name}/${MainScreen.List.name}")
+                    }
                 )
             }
         }

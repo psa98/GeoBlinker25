@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
@@ -416,6 +415,99 @@ fun CustomEmptyDevicesPopup(
         }
     }
 }
+
+/*
+@Composable
+fun CustomListPopup(
+    onKeySort: (Int) -> Unit
+) {
+    FullScreenBox()
+    Popup(
+        onDismissRequest = { isShow = false }
+    ) {
+        Surface(
+            modifier = Modifier.width(246.sdp()),
+            shape = MaterialTheme.shapes.large,
+            color = Color.White,
+            shadowElevation = 2.sdp()
+        ) {
+            Column(
+                modifier = Modifier.padding(
+                    start = 20.sdp(),
+                    top = 26.sdp(),
+                    bottom = 37.sdp()
+                )
+            ) {
+                Text(
+                    stringResource(R.string.sort_devices),
+                    color = Color(0xFF747474),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Spacer(Modifier.height(20.sdp()))
+                Text(
+                    stringResource(R.string.by_name),
+                    modifier = Modifier.clickable {
+                        onKeySort(R.string.by_name)
+                        label = R.string.by_name
+                        isShow = false
+                    },
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(Modifier.height(15.sdp()))
+                Text(
+                    stringResource(R.string.by_device_type),
+                    modifier = Modifier.clickable {
+                        onKeySort(R.string.by_device_type)
+                        label = R.string.by_device_type
+                        isShow = false
+                    },
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(Modifier.height(15.sdp()))
+                Text(
+                    stringResource(R.string.by_distance),
+                    modifier = Modifier.clickable {
+                        onKeySort(R.string.by_distance)
+                        label = R.string.by_distance
+                        isShow = false
+                    },
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(Modifier.height(15.sdp()))
+                Text(
+                    stringResource(R.string.by_binding_date),
+                    modifier = Modifier.clickable {
+                        onKeySort(R.string.by_binding_date)
+                        label = R.string.by_binding_date
+                        isShow = false
+                    },
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(Modifier.height(15.sdp()))
+                Text(
+                    stringResource(R.string.by_signal_strength),
+                    modifier = Modifier.clickable {
+                        onKeySort(R.string.by_signal_strength)
+                        label = R.string.by_signal_strength
+                        isShow = false
+                    },
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Spacer(Modifier.height(15.sdp()))
+                Text(
+                    stringResource(R.string.by_charge_level),
+                    modifier = Modifier.clickable {
+                        onKeySort(R.string.by_charge_level)
+                        label = R.string.by_charge_level
+                        isShow = false
+                    },
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+        }
+    }
+}
+ */
 
 fun round(fl: Float): Int {
     if (fl >= 1)
