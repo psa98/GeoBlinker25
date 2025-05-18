@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.binding
+package com.example.geoblinker.ui.main.binding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,7 +28,7 @@ import com.example.geoblinker.ui.NameDeviceTextField
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
-fun TwoScreen(
+fun BindingTwoScreen(
     imei: String,
     toDevice: (String) -> Unit,
     toBack: () -> Unit
@@ -37,7 +37,6 @@ fun TwoScreen(
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

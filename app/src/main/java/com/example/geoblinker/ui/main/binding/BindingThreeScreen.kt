@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.binding
+package com.example.geoblinker.ui.main.binding
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,14 +35,14 @@ import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
-fun ThreeScreen(
+fun BindingThreeScreen(
     device: Device,
     toBindingScreen: () -> Unit,
+    toConfigureSignals: () -> Unit,
     toBack: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Row(
@@ -122,7 +122,7 @@ fun ThreeScreen(
         BlackMediumButton(
             icon = R.drawable.bell,
             text = stringResource(R.string.configure_the_signals),
-            onClick = {}
+            onClick = toConfigureSignals
         )
         Spacer(Modifier.height(15.sdp()))
         BlackMediumButton(

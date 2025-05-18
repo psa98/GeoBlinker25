@@ -425,6 +425,34 @@ fun WhiteRedMediumButton(
 }
 
 @Composable
+fun RedButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(10.sdp()),
+        color = Color(0xFFC4162D),
+        border = BorderStroke(1.sdp(), Color.White)
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier.fillMaxWidth()
+                .height(55.sdp()),
+            shape = RoundedCornerShape(10.sdp()),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+        ) {
+            Text(
+                text,
+                color = Color.White,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
 fun BackButton(
     onClick: () -> Unit
 ) {

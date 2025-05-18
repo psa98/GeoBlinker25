@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.binding
+package com.example.geoblinker.ui.main.binding
 
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
@@ -43,7 +43,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 
 @Composable
-fun OneScreen(
+fun BindingOneScreen(
     toTwoScreen: (String) -> Unit,
     toBack: () -> Unit
 ) {
@@ -60,7 +60,6 @@ fun OneScreen(
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(

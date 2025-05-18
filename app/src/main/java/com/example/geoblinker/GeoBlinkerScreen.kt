@@ -1,7 +1,6 @@
 package com.example.geoblinker
 
 import android.annotation.SuppressLint
-import android.app.Application
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -14,7 +13,7 @@ import com.example.geoblinker.data.Repository
 import com.example.geoblinker.ui.GeoBlinkerViewModel
 import com.example.geoblinker.ui.authorization.AuthorizationScreen
 import com.example.geoblinker.ui.authorization.AuthorizationViewModel
-import com.example.geoblinker.ui.device.DeviceViewModel
+import com.example.geoblinker.ui.main.DeviceViewModel
 import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.registration.RegistrationScreen
 import com.example.geoblinker.ui.registration.RegistrationViewModel

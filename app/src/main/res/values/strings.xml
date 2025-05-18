@@ -23,7 +23,7 @@
     <string name="telegram">Telegram</string>
     <string name="whatsapp">WhatsApp</string>
     <string name="sms">SMS</string>
-    <string name="email">Email</string>
+    <string name="email">email</string>
     <string name="specify_the_email">Укажите email:</string>
     <string name="cancellation">Отмена</string>
     <string name="remember_my_choice">Запомнить мой выбор</string>
@@ -63,4 +63,12 @@
     <string name="detach_the_device">Отвязать устройство</string>
     <string name="devices_name">Имя устройства:</string>
     <string name="device_name_updated">Имя устройства обновлено!</string>
+    <string name="setting_up_signals">Настройка сигналов</string>
+    <string name="push">пуш</string>
+    <string name="alert">тревога</string>
+    <string name="detach_device">Отвязка устройства</string>
+    <string name="label_detach_device">Вы уверены, что хотите отвязать устройство</string>
+    <string name="subtitle_detach_device">IMEI устройства сохранится в истории аккаунта</string>
+    <string name="detach">Отвязать</string>
+    <string name="untied">отвязано!</string>
 </resources>

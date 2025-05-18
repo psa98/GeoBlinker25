@@ -44,7 +44,6 @@ import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
-import com.example.geoblinker.ui.device.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -61,9 +60,10 @@ fun ListScreen(
         R.string.by_name -> stateDevices.value.sortedBy { it.name }
         R.string.by_binding_date -> stateDevices.value.sortedBy { it.bindingTime }
         else -> stateDevices.value.sortedBy { it.name }
-    }.filter { keySearch.isEmpty() || keySearch in it.name || keySearch in it.imei }
+    }.filter { it.isConnected }
+    var sortedNullDevices = stateDevices.value.filter { !it.isConnected }
 
-    if (!viewModel.checkDevices()) {
+    if (sortedDevices.isEmpty() && sortedNullDevices.isEmpty()) {
         Box(
             Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -77,13 +77,15 @@ fun ListScreen(
         }
     }
     else {
+        sortedDevices = sortedDevices.filter { keySearch.isEmpty() || keySearch in it.name || keySearch in it.imei }
+        sortedNullDevices = sortedNullDevices.filter { keySearch.isEmpty() || keySearch in it.imei }
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SearchDevice(keySearch) { keySearch = it }
             Spacer(Modifier.height(25.sdp()))
-            if (sortedDevices.isEmpty()) {
+            if (sortedDevices.isEmpty() && sortedNullDevices.isEmpty()) {
                 Box(
                     Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -127,8 +129,7 @@ fun ListScreen(
                                 .fillMaxWidth()
                                 .clickable {
                                     toDeviceScreen(item)
-                                }
-                            ,
+                                },
                             shape = RoundedCornerShape(10.sdp()),
                             color = Color.White
                         ) {
@@ -191,6 +192,37 @@ fun ListScreen(
                                         tint = Color.Unspecified
                                     )
                                 }
+                            }
+                        }
+                    }
+                    items(sortedNullDevices) { item ->
+                        Spacer(Modifier.height(15.sdp()))
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(10.sdp()),
+                            color = Color.White
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(15.sdp()),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    Modifier.size(9.sdp()).background(
+                                        Color(0xFFC4162D),
+                                        MaterialTheme.shapes.small
+                                    )
+                                )
+                                Spacer(Modifier.width(11.sdp()))
+                                Text(
+                                    "IMEI: ",
+                                    color = Color(0xFF737373),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                                Text(
+                                    item.imei,
+                                    color = Color(0xFF737373),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.device
+package com.example.geoblinker.ui.main.device
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +24,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,22 +41,24 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.window.Dialog
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
-import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumRightIconButton
 import com.example.geoblinker.ui.OkButton
 import com.example.geoblinker.ui.WhiteRedMediumButton
+import com.example.geoblinker.ui.main.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.delay
 
 @Composable
-fun OneScreen(
-    device: Device,
-    updateDevice: (Device) -> Unit,
+fun DeviceOneScreen(
+    viewModel: DeviceViewModel,
+    toTwo: () -> Unit,
+    toDetach: () -> Unit,
     toBack: () -> Unit
 ) {
+    val device by viewModel.device.collectAsState()
     var isShow by remember { mutableStateOf(false) }
     var timer by remember { mutableStateOf(false) }
 
@@ -189,7 +192,7 @@ fun OneScreen(
         BlackMediumButton(
             icon = R.drawable.bell,
             text = stringResource(R.string.configure_the_signals),
-            onClick = {}
+            onClick = toTwo
         )
         Spacer(Modifier.height(15.sdp()))
         BlackMediumButton(
@@ -206,7 +209,7 @@ fun OneScreen(
         Spacer(Modifier.height(15.sdp()))
         WhiteRedMediumButton(
             text = stringResource(R.string.detach_the_device),
-            onClick = {}
+            onClick = toDetach
         )
         Spacer(Modifier.height(64.sdp()))
     }
@@ -257,7 +260,7 @@ fun OneScreen(
                             ),
                             keyboardActions = KeyboardActions(
                                 onDone = {
-                                    updateDevice(device.copy(name = value))
+                                    viewModel.updateDevice(device.copy(name = value))
                                     enabled = false
                                     timer = true
                                 }
@@ -274,7 +277,7 @@ fun OneScreen(
                         OkButton(
                             enabled
                         ) {
-                            updateDevice(device.copy(name = value))
+                            viewModel.updateDevice(device.copy(name = value))
                             enabled = false
                             timer = true
                         }

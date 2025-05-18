@@ -78,7 +78,7 @@ fun CustomPopup(
     val stringTelegram = stringResource(R.string.telegram)
     val stringWhatsApp = stringResource(R.string.whatsapp)
     val stringSMS = stringResource(R.string.sms)
-    val stringEmail = stringResource(R.string.email)
+    val stringEmail = stringResource(R.string.email).capitalize()
     var isEnterEmail by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var checkedChoice by remember { mutableStateOf(false) }
