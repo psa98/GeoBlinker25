@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +27,9 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
+import com.example.geoblinker.data.TypeSignal
+import com.example.geoblinker.ui.BackButton
+import com.example.geoblinker.ui.BlueButton
 import com.example.geoblinker.ui.main.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 import java.util.Locale
@@ -36,6 +40,7 @@ fun DeviceThreeScreen(
     toBack: () -> Unit
 ) {
     val device by viewModel.device.collectAsState()
+    val typeSignal by viewModel.typeSignal.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -59,13 +64,19 @@ fun DeviceThreeScreen(
         }
         Spacer(Modifier.height(10.sdp()))
         Text(
-            stringResource(R.string.setting_up_signals),
+            when(typeSignal.type) {
+                TypeSignal.SignalType.MovementStarted -> "Начато движение"
+                TypeSignal.SignalType.Stop -> "Остановка"
+                TypeSignal.SignalType.LowCharge -> "Низкий заряд"
+                TypeSignal.SignalType.DoorOpen -> "Дверь открыта"
+                TypeSignal.SignalType.ReachedLocation -> "Достиг локации"
+            },
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(Modifier.height(25.sdp()))
         Surface(
-            modifier = Modifier.size(330.sdp(), 419.sdp()),
+            modifier = Modifier.width(330.sdp()),
             shape = RoundedCornerShape(10.sdp()),
             color = Color.White
         ) {
@@ -73,15 +84,22 @@ fun DeviceThreeScreen(
                 modifier = Modifier.padding(15.sdp())
             ) {
                 Row(
-                    horizontalArrangement = Arrangement.SpaceAround
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         stringResource(R.string.push).capitalize(),
                         style = MaterialTheme.typography.labelMedium
                     )
                     Switch(
-                        checked = false,
-                        onCheckedChange = {},
+                        checked = typeSignal.checkedPush,
+                        onCheckedChange = {
+                            viewModel.updateTypeSignal(
+                                typeSignal.copy(
+                                    checkedPush = it
+                                )
+                            )
+                        },
                         modifier = Modifier.size(40.sdp(), 20.sdp()),
                         colors = SwitchDefaults.colors(
                             uncheckedThumbColor = Color(0xFFBEBEBE),
@@ -99,15 +117,22 @@ fun DeviceThreeScreen(
                     color = Color(0xFFDAD9D9)
                 )
                 Row(
-                    horizontalArrangement = Arrangement.SpaceAround
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         stringResource(R.string.email).capitalize(),
                         style = MaterialTheme.typography.labelMedium
                     )
                     Switch(
-                        checked = false,
-                        onCheckedChange = {},
+                        checked = typeSignal.checkedEmail,
+                        onCheckedChange = {
+                            viewModel.updateTypeSignal(
+                                typeSignal.copy(
+                                    checkedEmail = it
+                                )
+                            )
+                        },
                         modifier = Modifier.size(40.sdp(), 20.sdp()),
                         colors = SwitchDefaults.colors(
                             uncheckedThumbColor = Color(0xFFBEBEBE),
@@ -125,15 +150,22 @@ fun DeviceThreeScreen(
                     color = Color(0xFFDAD9D9)
                 )
                 Row(
-                    horizontalArrangement = Arrangement.SpaceAround
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
                         stringResource(R.string.alert).capitalize(),
                         style = MaterialTheme.typography.labelMedium
                     )
                     Switch(
-                        checked = false,
-                        onCheckedChange = {},
+                        checked = typeSignal.checkedAlarm,
+                        onCheckedChange = {
+                            viewModel.updateTypeSignal(
+                                typeSignal.copy(
+                                    checkedAlarm = it
+                                )
+                            )
+                        },
                         modifier = Modifier.size(40.sdp(), 20.sdp()),
                         colors = SwitchDefaults.colors(
                             uncheckedThumbColor = Color(0xFFBEBEBE),
@@ -145,14 +177,15 @@ fun DeviceThreeScreen(
                         )
                     )
                 }
-                HorizontalDivider(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
-                    thickness = 1.sdp(),
-                    color = Color(0xFFDAD9D9)
-                )
             }
         }
         Spacer(Modifier.height(25.sdp()))
-
+        BlueButton(
+            stringResource(R.string.select_alarm_sound),
+            enabled = typeSignal.checkedAlarm,
+            onClick = {}
+        )
     }
+
+    BackButton { toBack() }
 }

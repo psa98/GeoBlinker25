@@ -31,7 +31,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             GeoBlinkerTheme {
                 GeoBlinkerScreen(
-                    Repository(AppDatabase.getInstance(application).deviceDao()),
+                    Repository(
+                        AppDatabase.getInstance(application).deviceDao(),
+                        AppDatabase.getInstance(application).typeSignalDao()
+                    ),
                     GeoBlinkerViewModel()
                 )
             }

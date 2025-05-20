@@ -43,6 +43,7 @@ import com.example.geoblinker.ui.main.binding.BindingOneScreen
 import com.example.geoblinker.ui.main.binding.BindingThreeScreen
 import com.example.geoblinker.ui.main.binding.BindingTwoScreen
 import com.example.geoblinker.ui.main.device.DeviceOneScreen
+import com.example.geoblinker.ui.main.device.DeviceThreeScreen
 import com.example.geoblinker.ui.main.device.DeviceTwoScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
@@ -57,6 +58,7 @@ enum class MainScreen {
     Device,
     DeviceOne,
     DeviceTwo,
+    DeviceThree,
     List,
     DeviceDetach,
     DeviceDetachOne,
@@ -229,7 +231,14 @@ fun MainScreen(
             composable(route = MainScreen.DeviceTwo.name) {
                 DeviceTwoScreen(
                     viewModel,
+                    { navController.navigate(MainScreen.DeviceThree.name) },
                     { navController.navigate("${MainScreen.Device.name}/${previousScreen}") }
+                )
+            }
+            composable(route = MainScreen.DeviceThree.name) {
+                DeviceThreeScreen(
+                    viewModel,
+                    { navController.navigateUp() }
                 )
             }
         }

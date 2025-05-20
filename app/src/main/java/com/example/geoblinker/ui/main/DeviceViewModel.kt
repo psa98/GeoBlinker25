@@ -4,17 +4,23 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.data.Repository
+import com.example.geoblinker.data.TypeSignal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 
 class DeviceViewModel(private val repository: Repository): ViewModel() {
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
     private val _device = MutableStateFlow(Device("", "", false, 0))
+    private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
+    private val _typeSignal = MutableStateFlow(TypeSignal(deviceId = "", type = TypeSignal.SignalType.MovementStarted))
     val devices: StateFlow<List<Device>> = _devices.asStateFlow()
     val device: StateFlow<Device> = _device.asStateFlow()
+    val typesSignals: StateFlow<List<TypeSignal>> = _typesSignals.asStateFlow()
+    val typeSignal: StateFlow<TypeSignal> = _typeSignal.asStateFlow()
 
     init {
         // Запускаем подписку на изменения
@@ -34,7 +40,12 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
                 bindingTime = Instant.now().toEpochMilli()
             )
             repository.insertDevice(device)
+            repository.insertAllTypeSignal(imei)
             _device.value = device
+            repository.getTypeSignal(device.imei)
+                .collect {
+                    _typesSignals.value = it
+                }
         }
     }
 
@@ -55,8 +66,8 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     fun updateDevice(device: Device) {
         viewModelScope.launch {
             repository.updateDevice(device)
-            _device.value = device
         }
+        _device.value = device
     }
 
     fun checkDevices(): Boolean {
@@ -65,5 +76,25 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
 
     fun setDevice(device: Device) {
         _device.value = device
+        viewModelScope.launch {
+            repository.getTypeSignal(device.imei)
+                .collect {
+                    _typesSignals.value = it
+                }
+        }
+    }
+
+    fun setTypeSignal(typeSignal: TypeSignal) {
+        _typeSignal.value = typeSignal
+    }
+
+    fun updateTypeSignal(typeSignal: TypeSignal) {
+        viewModelScope.launch {
+            repository.updateTypeSignal(typeSignal)
+        }
+        _typeSignal.value = typeSignal
+        _typesSignals.update { typesSignals ->
+            typesSignals.map { if (it.type == typeSignal.type) typeSignal else it }
+        }
     }
 }

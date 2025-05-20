@@ -48,6 +48,9 @@ val whiteGradient = Brush.verticalGradient(
 val grayGradient = Brush.verticalGradient(
     colors = listOf(Color(0xFFF2F2F2), Color(0xFFE0E0E0))
 )
+val blueGradient = Brush.verticalGradient(
+    colors = listOf(Color(0xFF90C7EA), Color(0xFF4187D2))
+)
 val blackBorder = Color(0xFF212120)
 val gray = Color(0xFF878787)
 
@@ -446,6 +449,41 @@ fun RedButton(
             Text(
                 text,
                 color = Color.White,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+}
+
+@Composable
+fun BlueButton(
+    text: String,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(10.sdp()),
+        border = BorderStroke(1.sdp(), Color.White)
+    ) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(55.sdp())
+                .background(
+                    if (enabled) blueGradient else whiteGradient,
+                    RoundedCornerShape(10.sdp())
+                ),
+            enabled = enabled,
+            shape = RoundedCornerShape(10.sdp()),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent
+            )
+        ) {
+            Text(
+                text,
+                color = if (enabled) Color.White else Color(0xFF878787),
                 style = MaterialTheme.typography.bodyLarge
             )
         }

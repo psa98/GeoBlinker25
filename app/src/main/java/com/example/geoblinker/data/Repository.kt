@@ -2,7 +2,10 @@ package com.example.geoblinker.data
 
 import kotlinx.coroutines.flow.Flow
 
-class Repository(private val deviceDao: DeviceDao) {
+class Repository(
+    private val deviceDao: DeviceDao,
+    private val typeSignalDao: TypeSignalDao
+) {
     suspend fun insertDevice(device: Device) {
         deviceDao.insert(device)
     }
@@ -17,5 +20,22 @@ class Repository(private val deviceDao: DeviceDao) {
 
     suspend fun updateDevice(device: Device) {
         deviceDao.updateDevice(device)
+    }
+
+    suspend fun insertAllTypeSignal(imei: String) {
+        val listTypeSignal = listOf(
+            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.MovementStarted),
+            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.Stop),
+            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.LowCharge),
+            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.DoorOpen),
+            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.ReachedLocation),
+        )
+        typeSignalDao.insertAll(listTypeSignal)
+    }
+
+    fun getTypeSignal(imei: String): Flow<List<TypeSignal>> = typeSignalDao.getTypesSignalsDevice(imei)
+
+    suspend fun updateTypeSignal(typeSignal: TypeSignal) {
+        typeSignalDao.update(typeSignal)
     }
 }
