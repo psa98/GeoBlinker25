@@ -4,7 +4,8 @@ import kotlinx.coroutines.flow.Flow
 
 class Repository(
     private val deviceDao: DeviceDao,
-    private val typeSignalDao: TypeSignalDao
+    private val typeSignalDao: TypeSignalDao,
+    private val signalDao: SignalDao
 ) {
     suspend fun insertDevice(device: Device) {
         deviceDao.insert(device)
@@ -38,4 +39,12 @@ class Repository(
     suspend fun updateTypeSignal(typeSignal: TypeSignal) {
         typeSignalDao.update(typeSignal)
     }
+
+    suspend fun insertSignal(signal: Signal) {
+        signalDao.insert(signal)
+    }
+
+    fun getAllSignals(): Flow<List<Signal>> = signalDao.getAll()
+
+    fun getAllDeviceSignals(imei: String): Flow<List<Signal>> = signalDao.getAllDevice(imei)
 }

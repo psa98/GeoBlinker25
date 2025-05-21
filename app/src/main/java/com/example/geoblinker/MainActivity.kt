@@ -33,7 +33,8 @@ class MainActivity : ComponentActivity() {
                 GeoBlinkerScreen(
                     Repository(
                         AppDatabase.getInstance(application).deviceDao(),
-                        AppDatabase.getInstance(application).typeSignalDao()
+                        AppDatabase.getInstance(application).typeSignalDao(),
+                        AppDatabase.getInstance(application).signalDao()
                     ),
                     GeoBlinkerViewModel()
                 )

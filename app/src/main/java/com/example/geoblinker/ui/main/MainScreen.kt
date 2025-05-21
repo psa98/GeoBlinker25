@@ -3,12 +3,10 @@ package com.example.geoblinker.ui.main
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -42,6 +40,7 @@ import com.example.geoblinker.ui.WhiteSmallButton
 import com.example.geoblinker.ui.main.binding.BindingOneScreen
 import com.example.geoblinker.ui.main.binding.BindingThreeScreen
 import com.example.geoblinker.ui.main.binding.BindingTwoScreen
+import com.example.geoblinker.ui.main.device.DeviceListSignalScreen
 import com.example.geoblinker.ui.main.device.DeviceOneScreen
 import com.example.geoblinker.ui.main.device.DeviceThreeScreen
 import com.example.geoblinker.ui.main.device.DeviceTwoScreen
@@ -59,6 +58,7 @@ enum class MainScreen {
     DeviceOne,
     DeviceTwo,
     DeviceThree,
+    DeviceListSignalScreen,
     List,
     DeviceDetach,
     DeviceDetachOne,
@@ -224,6 +224,7 @@ fun MainScreen(
                 DeviceOneScreen(
                     viewModel,
                     { navController.navigate(MainScreen.DeviceTwo.name) },
+                    { navController.navigate(MainScreen.DeviceListSignalScreen.name) },
                     { navController.navigate(MainScreen.DeviceDetachOne.name) },
                     { navController.navigate(previousScreen) }
                 )
@@ -237,6 +238,12 @@ fun MainScreen(
             }
             composable(route = MainScreen.DeviceThree.name) {
                 DeviceThreeScreen(
+                    viewModel,
+                    { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.DeviceListSignalScreen.name) {
+                DeviceListSignalScreen(
                     viewModel,
                     { navController.navigateUp() }
                 )

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.data.Repository
+import com.example.geoblinker.data.Signal
 import com.example.geoblinker.data.TypeSignal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,10 +18,12 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     private val _device = MutableStateFlow(Device("", "", false, 0))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
     private val _typeSignal = MutableStateFlow(TypeSignal(deviceId = "", type = TypeSignal.SignalType.MovementStarted))
+    private val _signalsDevice = MutableStateFlow<List<Signal>>(emptyList())
     val devices: StateFlow<List<Device>> = _devices.asStateFlow()
     val device: StateFlow<Device> = _device.asStateFlow()
     val typesSignals: StateFlow<List<TypeSignal>> = _typesSignals.asStateFlow()
     val typeSignal: StateFlow<TypeSignal> = _typeSignal.asStateFlow()
+    val signalsDevice: StateFlow<List<Signal>> = _signalsDevice.asStateFlow()
 
     init {
         // Запускаем подписку на изменения
@@ -33,19 +36,35 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     }
 
     fun insertDevice(imei: String, name: String) {
+        val nowTime = Instant.now().toEpochMilli()
+        val device = Device(
+            imei,
+            name,
+            bindingTime = nowTime
+        )
+        _device.value = device
         viewModelScope.launch {
-            val device = Device(
-                imei,
-                name,
-                bindingTime = Instant.now().toEpochMilli()
-            )
             repository.insertDevice(device)
-            repository.insertAllTypeSignal(imei)
-            _device.value = device
-            repository.getTypeSignal(device.imei)
-                .collect {
-                    _typesSignals.value = it
-                }
+            launch {
+                repository.insertAllTypeSignal(imei)
+                repository.getTypeSignal(device.imei)
+                    .collect {
+                        _typesSignals.value = it
+                    }
+            }
+            launch {
+                repository.insertSignal(
+                    Signal(
+                        deviceId = imei,
+                        name = "Устройство привязано",
+                        dateTime = nowTime
+                    )
+                )
+                repository.getAllDeviceSignals(device.imei)
+                    .collect {
+                        _signalsDevice.value = it
+                    }
+            }
         }
     }
 
@@ -77,10 +96,18 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     fun setDevice(device: Device) {
         _device.value = device
         viewModelScope.launch {
-            repository.getTypeSignal(device.imei)
-                .collect {
-                    _typesSignals.value = it
-                }
+            launch {
+                repository.getTypeSignal(device.imei)
+                    .collect {
+                        _typesSignals.value = it
+                    }
+            }
+            launch {
+                repository.getAllDeviceSignals(device.imei)
+                    .collect {
+                        _signalsDevice.value = it
+                    }
+            }
         }
     }
 

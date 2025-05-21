@@ -72,4 +72,7 @@
     <string name="detach">Отвязать</string>
     <string name="untied">отвязано!</string>
     <string name="select_alarm_sound">Выбрать звуковой сигнал тревоги</string>
+    <string name="by_date_of_signal">По дате сигнала</string>
+    <string name="by_signal_type">По типу сигнала</string>
+    <string name="sort_signals">Сортировать сигналы:</string>
 </resources>

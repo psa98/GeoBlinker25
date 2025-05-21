@@ -8,15 +8,32 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [Device::class, TypeSignal::class], // Ваши Entity-классы
-    version = 2
+    entities = [Device::class, TypeSignal::class, Signal::class], // Ваши Entity-классы
+    version = 3
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao // Метод для доступа к DAO
     abstract fun typeSignalDao(): TypeSignalDao
+    abstract fun signalDao(): SignalDao
 
     companion object {
-        private val MIRGATION_1_2 = object : Migration(1, 2) {
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE 'signals' (
+                            'id' INTEGER NOT NULL PRIMARY KEY,
+                            'deviceId' TEXT NOT NULL,
+                            'name' TEXT NOT NULL,
+                            'dateTime' INTEGER NOT NULL,
+                             FOREIGN KEY ('deviceId') REFERENCES 'devices' ('imei') ON DELETE CASCADE
+                        )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     """
@@ -45,7 +62,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "app_database"
-                ).addMigrations(MIRGATION_1_2)
+                )
+                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance

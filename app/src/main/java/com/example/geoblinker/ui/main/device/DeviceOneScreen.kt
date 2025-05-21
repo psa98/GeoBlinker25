@@ -55,6 +55,7 @@ import kotlinx.coroutines.delay
 fun DeviceOneScreen(
     viewModel: DeviceViewModel,
     toTwo: () -> Unit,
+    toListSignal: () -> Unit,
     toDetach: () -> Unit,
     toBack: () -> Unit
 ) {
@@ -198,7 +199,7 @@ fun DeviceOneScreen(
         BlackMediumButton(
             icon = R.drawable.rectangle_list,
             text = stringResource(R.string.signal_log),
-            onClick = {}
+            onClick = toListSignal
         )
         Spacer(Modifier.height(15.sdp()))
         GreenMediumRightIconButton(

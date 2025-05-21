@@ -1,6 +1,7 @@
 package com.example.geoblinker.ui
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateOffsetAsState
 import androidx.compose.animation.core.spring
@@ -59,6 +60,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
@@ -416,14 +418,16 @@ fun CustomEmptyDevicesPopup(
     }
 }
 
-/*
 @Composable
 fun CustomListPopup(
-    onKeySort: (Int) -> Unit
+    @StringRes label: Int,
+    listLabels: List<Int>,
+    onClick: (Int) -> Unit,
+    changeIsShow: (Boolean) -> Unit
 ) {
     FullScreenBox()
     Popup(
-        onDismissRequest = { isShow = false }
+        onDismissRequest = { changeIsShow(false) }
     ) {
         Surface(
             modifier = Modifier.width(246.sdp()),
@@ -439,75 +443,24 @@ fun CustomListPopup(
                 )
             ) {
                 Text(
-                    stringResource(R.string.sort_devices),
+                    stringResource(label),
                     color = Color(0xFF747474),
                     style = MaterialTheme.typography.bodySmall
                 )
-                Spacer(Modifier.height(20.sdp()))
-                Text(
-                    stringResource(R.string.by_name),
-                    modifier = Modifier.clickable {
-                        onKeySort(R.string.by_name)
-                        label = R.string.by_name
-                        isShow = false
-                    },
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(Modifier.height(15.sdp()))
-                Text(
-                    stringResource(R.string.by_device_type),
-                    modifier = Modifier.clickable {
-                        onKeySort(R.string.by_device_type)
-                        label = R.string.by_device_type
-                        isShow = false
-                    },
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(Modifier.height(15.sdp()))
-                Text(
-                    stringResource(R.string.by_distance),
-                    modifier = Modifier.clickable {
-                        onKeySort(R.string.by_distance)
-                        label = R.string.by_distance
-                        isShow = false
-                    },
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(Modifier.height(15.sdp()))
-                Text(
-                    stringResource(R.string.by_binding_date),
-                    modifier = Modifier.clickable {
-                        onKeySort(R.string.by_binding_date)
-                        label = R.string.by_binding_date
-                        isShow = false
-                    },
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(Modifier.height(15.sdp()))
-                Text(
-                    stringResource(R.string.by_signal_strength),
-                    modifier = Modifier.clickable {
-                        onKeySort(R.string.by_signal_strength)
-                        label = R.string.by_signal_strength
-                        isShow = false
-                    },
-                    style = MaterialTheme.typography.headlineSmall
-                )
-                Spacer(Modifier.height(15.sdp()))
-                Text(
-                    stringResource(R.string.by_charge_level),
-                    modifier = Modifier.clickable {
-                        onKeySort(R.string.by_charge_level)
-                        label = R.string.by_charge_level
-                        isShow = false
-                    },
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                listLabels.forEach { item ->
+                    Spacer(Modifier.height(20.sdp()))
+                    Text(
+                        stringResource(item),
+                        modifier = Modifier.clickable {
+                            onClick(item)
+                        },
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
             }
         }
     }
 }
- */
 
 fun round(fl: Float): Int {
     if (fl >= 1)
