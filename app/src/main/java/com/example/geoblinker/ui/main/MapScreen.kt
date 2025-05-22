@@ -1,27 +1,36 @@
 package com.example.geoblinker.ui.main
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,32 +42,46 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
 import com.example.geoblinker.R
+import com.example.geoblinker.data.Device
+import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomEmptyDevicesPopup
+import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumButton
-import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.SearchDevice
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 
 @Composable
 fun MapScreen(
-    checkDevices: () -> Boolean,
-    toBindingScreen: () -> Unit
+    viewModel: DeviceViewModel,
+    selectMarker: Device? = null,
+    toBindingScreen: () -> Unit,
+    toDeviceScreen: (Device) -> Unit
 ) {
+    val devices by viewModel.devices.collectAsState()
     val context = LocalContext.current
     val webView = remember { WebView(context) }
     var isDarkTheme by remember { mutableStateOf(false) }
     var isSatellite by remember { mutableStateOf(false) }
     var currentZoom by remember { mutableIntStateOf(10) }
     var isShowPopup by remember { mutableStateOf(false) }
+    var isShowPopupSearch by remember { mutableStateOf(false) }
+    var selectedMarker by remember { mutableStateOf<Device?>(null) }
+    var dontSearch by remember { mutableStateOf(false) }
 
     // Интерфейс для взаимодействия с JavaScript
     webView.addJavascriptInterface(object {
@@ -69,13 +92,19 @@ fun MapScreen(
     }, "Android")
 
     LaunchedEffect(Unit) {
-        if (!checkDevices()) {
+        if (!viewModel.checkDevices()) {
             delay(2000)
             isShowPopup = true
         }
     }
 
-    MapFromAssets(webView)
+    MapFromAssets(webView, viewModel, toDeviceScreen)
+
+    LaunchedEffect(Unit) {
+        selectMarker?.let {
+            selectedMarker = it
+        }
+    }
 
     Box(
         Modifier.fillMaxSize(),
@@ -90,7 +119,7 @@ fun MapScreen(
                         brush = Brush.verticalGradient(listOf(Color(0xFF373736), Color(0xFF212120))),
                         shape = MaterialTheme.shapes.small
                     )
-                    .clickable {  }
+                    .clickable { isShowPopupSearch = true }
                 ,
                 contentAlignment = Alignment.Center
             ) {
@@ -184,6 +213,70 @@ fun MapScreen(
         )
     }
 
+    if (isShowPopupSearch) {
+        var keySearch by remember { mutableStateOf("") }
+        FullScreenBox()
+        Dialog(
+            onDismissRequest = {
+                isShowPopupSearch = false
+                dontSearch = false
+            }
+        ) {
+            Surface(
+                modifier = Modifier.size(350.sdp(), 246.sdp()),
+                shape = RoundedCornerShape(10.sdp()),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 10.sdp()).padding(top = 28.sdp()),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        stringResource(R.string.map_search),
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    if (!dontSearch) {
+                        Spacer(Modifier.height(23.sdp()))
+                        SearchDevice(keySearch) { keySearch = it }
+                        Spacer(Modifier.height(15.sdp()))
+                        GreenMediumButton(
+                            text = stringResource(R.string.find),
+                            onClick = {
+                                val findDevices =
+                                    devices.filter { keySearch in it.imei || keySearch in it.name }
+                                if (findDevices.isEmpty())
+                                    dontSearch = true
+                                else {
+                                    selectedMarker = findDevices[0]
+                                    isShowPopupSearch = false
+                                }
+                            }
+                        )
+                    } else {
+                        Box(
+                            Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                stringResource(R.string.no_devices_found_for_request),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    CustomDevicePopup(
+        selectedMarker,
+        webView,
+        { selectedMarker = null },
+        toDeviceScreen
+    )
+
     if (isShowPopup) {
         CustomEmptyDevicesPopup(
             {
@@ -195,107 +288,203 @@ fun MapScreen(
             }
         )
     }
+
+    if (dontSearch) {
+        BackButton { dontSearch = false }
+    }
 }
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun MapFromAssets(webView: WebView, lat: Double = 55.7558, lng: Double = 37.6176, zoom: Int = 10) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.sdp()
-    val screenHeight = configuration.screenHeightDp.sdp()
+fun MapFromAssets(
+    webView: WebView,
+    viewModel: DeviceViewModel,
+    toDeviceScreen: (Device) -> Unit
+) {
     val addWidth = 30.sdp()
     val addHeight = 45.sdp()
     val scaleIcons = sc()
 
-    val markers = remember {
-        listOf(
-            Triple(55.823262 to 37.645905, "marker_tractor.svg", 38),
-        )
+    val devices by viewModel.devices.collectAsState()
+    var selectedMarker by remember { mutableStateOf<Device?>(null) }
+
+    val context = LocalContext.current
+    var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            LocationHelper(context) { location ->
+                currentLocation = location
+            }.getLastLocation()
+        }
     }
 
-    AndroidView(
-        factory = { _ ->
-            webView.apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                settings.javaScriptEnabled = true
-                webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        // Вызываем JS-функцию после загрузки страницы
-                        markers.forEach { (coord, svg, size) ->
-                            evaluateJavascript(
-                                "addSvgMarker(${coord.first}, ${coord.second}, '$svg', ${size * scaleIcons})",
+    LaunchedEffect(Unit) {
+        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    if (currentLocation != null) {
+        AndroidView(
+            factory = { _ ->
+                webView.apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    settings.javaScriptEnabled = true
+                    addJavascriptInterface(
+                        WebAppInterface { markerId ->
+                            selectedMarker = devices.filter { it.imei == markerId }[0]
+                        },
+                        "AndroidInterface"
+                    )
+                    webViewClient = object : WebViewClient() {
+                        override fun onPageFinished(view: WebView?, url: String?) {
+                            // Вызываем JS-функцию после загрузки страницы
+                            devices.forEach { item ->
+                                evaluateJavascript(
+                                    "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons})",
+                                    null
+                                )
+                            }
+                            webView.evaluateJavascript(
+                                "setCenter(${currentLocation!!.latitude}, ${currentLocation!!.longitude})",
                                 null
                             )
                         }
                     }
+                    loadUrl("file:///android_asset/map.html")
                 }
-                loadUrl("file:///android_asset/map.html")
-            }
-        },
-        modifier = Modifier
-            .fillMaxSize()
-            .layout { measurable, constraints ->
-            // Игнорируем padding родителя
-            val looseConstraints = constraints.copy(
-                maxWidth = constraints.maxWidth + addWidth.roundToPx(),
-                maxHeight = constraints.maxHeight + addHeight.roundToPx() * 2
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .layout { measurable, constraints ->
+                    // Игнорируем padding родителя
+                    val looseConstraints = constraints.copy(
+                        maxWidth = constraints.maxWidth + addWidth.roundToPx(),
+                        maxHeight = constraints.maxHeight + addHeight.roundToPx() * 2
+                    )
+                    val placeable = measurable.measure(looseConstraints)
+                    layout(placeable.width, placeable.height) {
+                        placeable.place(0, -addHeight.roundToPx()) // Смещение
+                    }
+                }
+        )
+    }
+    else {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                stringResource(R.string.add_location_permissions),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
             )
-            val placeable = measurable.measure(looseConstraints)
-            layout(placeable.width, placeable.height) {
-                placeable.place(0, -addHeight.roundToPx()) // Смещение
-            }
         }
+    }
+
+    CustomDevicePopup(
+        selectedMarker,
+        webView,
+        { selectedMarker = null },
+        toDeviceScreen
     )
 }
 
 @Composable
-fun Notifications(
-    notificationsCount: Int = 0
+fun CustomDevicePopup(
+    selectedMarker: Device?,
+    webView: WebView,
+    onChangeValueToNull: () -> Unit,
+    toDeviceScreen: (Device) -> Unit
 ) {
-    Box {
-        Box(
-            Modifier.size(50.sdp()),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.notifications),
-                contentDescription = null,
-                modifier = Modifier.size(24.sdp())
-            )
-        }
+    selectedMarker?.let { item ->
+        webView.evaluateJavascript(
+            "setCenter(${item.lat}, ${item.lng})",
+            null
+        )
 
-        if (notificationsCount > 0) {
-            Box(
-                Modifier.size(50.sdp()).offset(12.sdp(), (-12).sdp()),
-                contentAlignment = Alignment.Center
+        Popup(
+            Alignment.Center,
+            offset = IntOffset(x = 0, y = (-290).sdp().value.toInt()),
+            onDismissRequest = onChangeValueToNull
+        ) {
+            Surface(
+                modifier = Modifier.width(332.sdp()).clickable {
+                    onChangeValueToNull()
+                    toDeviceScreen(item)
+                },
+                shape = ComicBubbleShape(
+                    cornerRadius = 10.sdp(),
+                    pointerHeight = 24.sdp(),
+                    pointerWidth = 20.sdp()),
+                color = Color.White
             ) {
-                Box(
-                    Modifier
-                        .background(
-                        color = Color(0xFFF1137E),
-                        shape = CircleShape
-                    ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        notificationsCount.toString(),
-                        modifier = Modifier.padding(horizontal = 6.sdp(), vertical = 1.sdp()),
-                        color = Color.White,
-                        style = MaterialTheme.typography.labelLarge
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(15.sdp()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            Modifier.size(9.sdp()).background(
+                                Color(0xFF12CD4A),
+                                MaterialTheme.shapes.small
+                            )
+                        )
+                        Spacer(Modifier.width(11.sdp()))
+                        if (item.name.isNotEmpty()) {
+                            Text(
+                                item.name,
+                                modifier = Modifier.weight(1f),
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        } else {
+                            Text(
+                                stringResource(R.string.an_unnamed_device),
+                                modifier = Modifier.weight(1f),
+                                color = Color(0xFF737373),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                        }
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.sdp(), 17.sdp()),
+                            tint = Color.Unspecified
+                        )
+                    }
+                    HorizontalDivider(
+                        Modifier.fillMaxWidth().padding(horizontal = 15.sdp()),
+                        1.sdp(),
+                        Color(0xFFDAD9D9).copy(alpha = 0.5f)
                     )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(15.sdp()).padding(bottom = 24.sdp()),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "Tracker ULTRA 3",
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.battery_full),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.sdp()),
+                            tint = Color.Unspecified
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewNotifications() {
-    GeoBlinkerTheme {
-        Notifications(33)
     }
 }

@@ -75,4 +75,11 @@
     <string name="by_date_of_signal">По дате сигнала</string>
     <string name="by_signal_type">По типу сигнала</string>
     <string name="sort_signals">Сортировать сигналы:</string>
+    <string name="all_notifications">Все уведомления</string>
+    <string name="signals_only">Только сигналы</string>
+    <string name="news_promotions_only">Только новости/сигналы</string>
+    <string name="show_notifications">Показывать уведомления:</string>
+    <string name="map_search">Поиск по карте</string>
+    <string name="find">Найти</string>
+    <string name="add_location_permissions">Добавьте в разрешения вашу геопозицию. Не волнуйтесь, мы не собираем данные о вашем местоположении. Ваше местоположение нужно только для корректной работы приложения.</string>
 </resources>

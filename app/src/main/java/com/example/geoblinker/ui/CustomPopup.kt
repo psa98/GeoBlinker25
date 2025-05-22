@@ -423,10 +423,12 @@ fun CustomListPopup(
     @StringRes label: Int,
     listLabels: List<Int>,
     onClick: (Int) -> Unit,
-    changeIsShow: (Boolean) -> Unit
+    changeIsShow: (Boolean) -> Unit,
+    alignment: Alignment = Alignment.TopStart
 ) {
     FullScreenBox()
     Popup(
+        alignment = alignment,
         onDismissRequest = { changeIsShow(false) }
     ) {
         Surface(

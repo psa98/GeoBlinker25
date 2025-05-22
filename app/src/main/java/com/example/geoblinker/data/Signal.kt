@@ -19,5 +19,6 @@ data class Signal(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val deviceId: String,
     val name: String,
-    val dateTime: Long
+    val dateTime: Long,
+    val isSeen: Boolean = false
 )

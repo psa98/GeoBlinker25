@@ -38,6 +38,7 @@ fun BindingThreeScreen(
     device: Device,
     toBindingScreen: () -> Unit,
     toConfigureSignals: () -> Unit,
+    toMap: () -> Unit,
     toBack: () -> Unit
 ) {
     Column(
@@ -127,7 +128,7 @@ fun BindingThreeScreen(
         BlackMediumButton(
             icon = R.drawable.gps_navigation,
             text = stringResource(R.string.view_on_the_map),
-            onClick = {}
+            onClick = toMap
         )
         Spacer(Modifier.height(15.sdp()))
         GreenMediumButton(

@@ -1,5 +1,8 @@
 package com.example.geoblinker.ui.main
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +48,9 @@ import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.CustomListPopup
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
+import com.example.geoblinker.ui.main.device.calculateDistance
 import com.example.geoblinker.ui.theme.sdp
+import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun ListScreen(
@@ -54,10 +61,27 @@ fun ListScreen(
     var keySearch by remember { mutableStateOf("") }
     var keySort by remember { mutableIntStateOf(R.string.by_name) }
     var isShow by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            LocationHelper(context) { location ->
+                currentLocation = location
+            }.getLastLocation()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
     val stateDevices = viewModel.devices.collectAsState()
     var sortedDevices = when(keySort) {
         R.string.by_name -> stateDevices.value.sortedBy { it.name }
         R.string.by_binding_date -> stateDevices.value.sortedByDescending { it.bindingTime }
+        R.string.by_distance -> if (currentLocation != null) stateDevices.value.sortedBy { calculateDistance(LatLng(it.lat, it.lng), currentLocation!!) } else stateDevices.value.sortedBy { it.name }
         else -> stateDevices.value.sortedBy { it.name }
     }.filter { it.isConnected }
     var sortedNullDevices = stateDevices.value.filter { !it.isConnected }

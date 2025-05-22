@@ -1,5 +1,9 @@
 package com.example.geoblinker.ui.main.device
 
+import android.Manifest
+import android.location.Location
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -33,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +53,9 @@ import com.example.geoblinker.ui.GreenMediumRightIconButton
 import com.example.geoblinker.ui.OkButton
 import com.example.geoblinker.ui.WhiteRedMediumButton
 import com.example.geoblinker.ui.main.DeviceViewModel
+import com.example.geoblinker.ui.main.LocationHelper
 import com.example.geoblinker.ui.theme.sdp
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 
 @Composable
@@ -56,12 +63,29 @@ fun DeviceOneScreen(
     viewModel: DeviceViewModel,
     toTwo: () -> Unit,
     toListSignal: () -> Unit,
+    toMap: () -> Unit,
     toDetach: () -> Unit,
     toBack: () -> Unit
 ) {
     val device by viewModel.device.collectAsState()
     var isShow by remember { mutableStateOf(false) }
     var timer by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            LocationHelper(context) { location ->
+                currentLocation = location
+            }.getLastLocation()
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
 
     LaunchedEffect(timer) {
         if (timer) {
@@ -167,7 +191,7 @@ fun DeviceOneScreen(
                         style = MaterialTheme.typography.labelMedium
                     )
                     Text(
-                        "2.1 км",
+                        formatDistance(LatLng(device.lat, device.lng),currentLocation),
                         style = MaterialTheme.typography.labelMedium
                     )
                 }
@@ -205,7 +229,7 @@ fun DeviceOneScreen(
         GreenMediumRightIconButton(
             icon = R.drawable.gps_navigation,
             text = stringResource(R.string.view_on_the_map),
-            onClick = {}
+            onClick = toMap
         )
         Spacer(Modifier.height(15.sdp()))
         WhiteRedMediumButton(
@@ -300,4 +324,27 @@ fun DeviceOneScreen(
             }
         }
     }
+}
+
+fun formatDistance(point1: LatLng, point2: LatLng?): String {
+    if (point2 == null)
+        return "Unknown"
+
+    val distance = calculateDistance(point1, point2)
+    return when {
+        distance > 1000 -> "${"%.1f".format(distance/1000)} км"
+        else -> "${"%.0f".format(distance)} м"
+    }
+}
+
+fun calculateDistance(point1: LatLng, point2: LatLng): Double {
+    val results = FloatArray(1)
+    Location.distanceBetween(
+        point1.latitude,
+        point1.longitude,
+        point2.latitude,
+        point2.longitude,
+        results
+    )
+    return results[0].toDouble()
 }

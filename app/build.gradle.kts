@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.transport.runtime)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.play.services.maps)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -72,6 +73,7 @@ dependencies {
     implementation(libs.threetenabp)
     implementation(libs.google.accompanist.permissions)
     implementation(libs.androidx.constraintlayout.compose)
+    implementation(libs.gms.play.services.location)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

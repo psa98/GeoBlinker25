@@ -64,7 +64,14 @@
         map.setView([lat, lng], zoom);
     }
 
-    function addSvgMarker(lat, lng, svgFileName, width, height) {
+    // Функция для изменения центра без изменения зума
+    function setCenter(lat, lng) {
+        if (!map) return;
+        const currentZoom = map.getZoom();
+        map.setView([lat, lng], currentZoom);
+    }
+
+    function addSvgMarker(imei, lat, lng, svgFileName, width, height) {
         if (!customIcons[svgFileName]) {
             customIcons[svgFileName] = L.icon({
                 iconUrl: 'file:///android_asset/' + svgFileName,
@@ -73,7 +80,11 @@
                 popupAnchor: [0, -height/2]
             });
         }
-        L.marker([lat, lng], {icon: customIcons[svgFileName]}).addTo(map);
+        L.marker([lat, lng], {icon: customIcons[svgFileName]})
+        .on('click', function(e) {
+            AndroidInterface.onMarkerClicked(imei);
+        })
+        .addTo(map);
     }
 
     function zoomIn() {

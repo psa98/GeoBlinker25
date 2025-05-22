@@ -34,7 +34,8 @@ class MainActivity : ComponentActivity() {
                     Repository(
                         AppDatabase.getInstance(application).deviceDao(),
                         AppDatabase.getInstance(application).typeSignalDao(),
-                        AppDatabase.getInstance(application).signalDao()
+                        AppDatabase.getInstance(application).signalDao(),
+                        AppDatabase.getInstance(application).newsDao()
                     ),
                     GeoBlinkerViewModel()
                 )

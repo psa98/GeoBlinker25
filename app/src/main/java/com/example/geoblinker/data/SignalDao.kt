@@ -3,6 +3,7 @@ package com.example.geoblinker.data
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -15,4 +16,7 @@ interface SignalDao {
 
     @Query("SELECT * FROM signals WHERE deviceId = :imei")
     fun getAllDevice(imei: String): Flow<List<Signal>>
+
+    @Update
+    suspend fun update(signal: Signal)
 }

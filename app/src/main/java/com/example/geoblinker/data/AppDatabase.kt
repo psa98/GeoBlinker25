@@ -8,15 +8,60 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
-    entities = [Device::class, TypeSignal::class, Signal::class], // Ваши Entity-классы
-    version = 3
+    entities = [Device::class, TypeSignal::class, Signal::class, News::class], // Ваши Entity-классы
+    version = 6
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao // Метод для доступа к DAO
     abstract fun typeSignalDao(): TypeSignalDao
     abstract fun signalDao(): SignalDao
+    abstract fun newsDao(): NewsDao
 
     companion object {
+        private val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        ALTER TABLE 'devices' ADD COLUMN 'lat' REAL NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                        ALTER TABLE 'devices' ADD COLUMN 'lng' REAL NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        ALTER TABLE 'news' ADD COLUMN 'isSeen' INTEGER NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                        ALTER TABLE 'signals' ADD COLUMN 'isSeen' INTEGER NOT NULL DEFAULT 0
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE 'news' (
+                            'id' INTEGER NOT NULL PRIMARY KEY,
+                            'description' TEXT NOT NULL,
+                            'dateTime' INTEGER NOT NULL
+                        )
+                    """.trimIndent()
+                )
+            }
+        }
+
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -65,6 +110,9 @@ abstract class AppDatabase : RoomDatabase() {
                 )
                     .addMigrations(MIGRATION_1_2)
                     .addMigrations(MIGRATION_2_3)
+                    .addMigrations(MIGRATION_3_4)
+                    .addMigrations(MIGRATION_4_5)
+                    .addMigrations(MIGRATION_5_6)
                     .build()
                 INSTANCE = instance
                 instance

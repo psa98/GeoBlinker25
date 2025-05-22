@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -53,6 +54,13 @@ fun DeviceListSignalScreen(
         R.string.by_date_of_signal -> signalsDevice.sortedByDescending { it.dateTime }
         R.string.by_signal_type -> signalsDevice.sortedBy { it.name }
         else -> signalsDevice.sortedByDescending { it.dateTime }
+    }
+
+    LaunchedEffect(signalsDevice) {
+        signalsDevice.forEach { item ->
+            if (!item.isSeen)
+                viewModel.updateSignal(item.copy(isSeen = true))
+        }
     }
 
     Column(
