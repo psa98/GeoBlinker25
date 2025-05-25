@@ -92,8 +92,8 @@ fun MapScreen(
     }, "Android")
 
     LaunchedEffect(Unit) {
+        delay(2000)
         if (!viewModel.checkDevices()) {
-            delay(2000)
             isShowPopup = true
         }
     }
@@ -197,20 +197,6 @@ fun MapScreen(
                 tint = Color.Unspecified
             )
         }
-    }
-
-    Box(
-        Modifier
-            .fillMaxSize()
-            .offset(y = (-17).sdp()),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        GreenMediumButton(
-            modifier = Modifier.width(260.sdp()),
-            icon = R.drawable.plus,
-            text = stringResource(R.string.link_device),
-            onClick = toBindingScreen
-        )
     }
 
     if (isShowPopupSearch) {

@@ -94,7 +94,7 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
 
     fun clearDevice() {
         viewModelScope.launch {
-            repository.clearDevice()
+            // repository.clearDevice()
             /**
              * TODO: Пока это новость-затычка, потом нужно убрать
              */
