@@ -8,24 +8,40 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun sc(baseWidth: Int = 360): Float {
-    val width = LocalConfiguration.current.screenWidthDp
-    val scale = width / baseWidth.toFloat()
+fun sc(
+    baseWidth: Int = 360
+): Float {
+    val current = LocalConfiguration.current
+    val width = current.screenWidthDp
+    val height = current.screenHeightDp
+    val baseHeight = baseWidth * (width / height.toFloat())
+    val scale = if (height < width)
+        height / baseHeight
+    else
+        width / baseWidth.toFloat()
     return scale
 }
 
 @Composable
-fun Int.sdp(baseWidth: Int = 360): Dp {
+fun Int.sdp(): Dp {
+    return (this * sc()).dp
+}
+
+@Composable
+fun Int.hdp(baseHeight: Int = 720): Dp {
+    val height = LocalConfiguration.current.screenHeightDp
+    val scale = height / baseHeight.toFloat()
+    return (this * scale).dp
+}
+
+@Composable
+fun Int.wdp(baseWidth: Int = 360): Dp {
     val width = LocalConfiguration.current.screenWidthDp
     val scale = width / baseWidth.toFloat()
     return (this * scale).dp
 }
 
 @Composable
-fun Int.ssp(
-    baseWidth: Int = 360, // Базовая ширина экрана для масштабирования
-): TextUnit {
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val scale = screenWidth / baseWidth.toFloat()
-    return (this * scale).sp
+fun Int.ssp(): TextUnit {
+    return (this * sc()).sp
 }

@@ -240,8 +240,7 @@ fun MainScreen(
             ListScreen(
                 viewModel,
                 toBindingScreen = { navController.navigate("${MainScreen.Binding.name}/${MainScreen.List.name}") },
-                toDeviceScreen = { device ->
-                    viewModel.setDevice(device)
+                toDeviceScreen = {
                     navController.navigate("${MainScreen.Device.name}/${MainScreen.List.name}")
                 }
             )

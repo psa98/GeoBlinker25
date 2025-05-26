@@ -3,6 +3,7 @@ package com.example.geoblinker.ui.main
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,9 +48,16 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
 import com.example.geoblinker.R
+import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
+import com.example.geoblinker.ui.CustomCommentsPopup
+import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomListPopup
+import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
 import com.example.geoblinker.ui.main.device.calculateDistance
@@ -56,13 +68,16 @@ import com.google.android.gms.maps.model.LatLng
 fun ListScreen(
     viewModel: DeviceViewModel,
     toBindingScreen: () -> Unit,
-    toDeviceScreen: (Device) -> Unit
+    toDeviceScreen: () -> Unit
 ) {
     var keySearch by remember { mutableStateOf("") }
     var keySort by remember { mutableIntStateOf(R.string.by_name) }
     var isShow by remember { mutableStateOf(false) }
+    var isShowDiagnosis by remember { mutableStateOf(false) }
+    var isShowComments by remember { mutableStateOf(false) }
     val context = LocalContext.current
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+    val device by viewModel.device.collectAsState()
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -73,7 +88,7 @@ fun ListScreen(
             }.getLastLocation()
         }
     }
-
+    Icons.Default.Build
     LaunchedEffect(Unit) {
         locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
@@ -144,110 +159,211 @@ fun ListScreen(
                         )
                     }
                 }
-                LazyColumn {
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     items(sortedDevices) { item ->
-                        Spacer(Modifier.height(15.sdp()))
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    toDeviceScreen(item)
-                                },
-                            shape = RoundedCornerShape(10.sdp()),
-                            color = Color.White
+                        var isShowAdd by remember { mutableStateOf(false) }
+
+                        Column(
+                            modifier = Modifier.width(330.sdp())
                         ) {
-                            Column {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(15.sdp()),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(
-                                        Modifier.size(9.sdp()).background(
-                                            Color(0xFF12CD4A),
-                                            MaterialTheme.shapes.small
-                                        )
-                                    )
-                                    Spacer(Modifier.width(11.sdp()))
-                                    if (item.name.isNotEmpty()) {
-                                        Text(
-                                            item.name,
-                                            modifier = Modifier.weight(1f),
-                                            overflow = TextOverflow.Ellipsis,
-                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                fontWeight = FontWeight.Bold
+                            Spacer(Modifier.height(15.sdp()))
+                            Surface(
+                                modifier = Modifier.fillMaxWidth().animateContentSize(),
+                                shape = RoundedCornerShape(10.sdp()),
+                                color = Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                            ) {
+                                Column {
+                                    Surface(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                if (isShowAdd) {
+                                                    viewModel.setDevice(item)
+                                                    toDeviceScreen()
+                                                }
+                                                isShowAdd = true
+                                            },
+                                        shape = RoundedCornerShape(10.sdp()),
+                                        color = Color.White,
+                                        shadowElevation = 4.sdp()
+                                    ) {
+                                        Column {
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(15.sdp()),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Box(
+                                                    Modifier.size(9.sdp()).background(
+                                                        Color(0xFF12CD4A),
+                                                        MaterialTheme.shapes.small
+                                                    )
+                                                )
+                                                Spacer(Modifier.width(11.sdp()))
+                                                if (item.name.isNotEmpty()) {
+                                                    Text(
+                                                        item.name,
+                                                        modifier = Modifier.weight(1f),
+                                                        overflow = TextOverflow.Ellipsis,
+                                                        style = MaterialTheme.typography.labelMedium.copy(
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    )
+                                                } else {
+                                                    Text(
+                                                        stringResource(R.string.an_unnamed_device),
+                                                        modifier = Modifier.weight(1f),
+                                                        color = Color(0xFF737373),
+                                                        style = MaterialTheme.typography.labelMedium.copy(
+                                                            fontWeight = FontWeight.Bold
+                                                        )
+                                                    )
+                                                }
+                                                Icon(
+                                                    imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.sdp(), 17.sdp()),
+                                                    tint = Color.Unspecified
+                                                )
+                                            }
+                                            HorizontalDivider(
+                                                Modifier.fillMaxWidth()
+                                                    .padding(horizontal = 15.sdp()),
+                                                1.sdp(),
+                                                Color(0xFFDAD9D9).copy(alpha = 0.5f)
                                             )
-                                        )
-                                    } else {
-                                        Text(
-                                            stringResource(R.string.an_unnamed_device),
-                                            modifier = Modifier.weight(1f),
-                                            color = Color(0xFF737373),
-                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        )
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(15.sdp()),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    "Tracker ULTRA 3",
+                                                    modifier = Modifier.weight(1f),
+                                                    style = MaterialTheme.typography.labelMedium
+                                                )
+                                                Icon(
+                                                    imageVector = ImageVector.vectorResource(R.drawable.battery_full),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.sdp()),
+                                                    tint = Color.Unspecified
+                                                )
+                                            }
+
+                                        }
                                     }
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.sdp(), 17.sdp()),
-                                        tint = Color.Unspecified
-                                    )
-                                }
-                                HorizontalDivider(
-                                    Modifier.fillMaxWidth().padding(horizontal = 15.sdp()),
-                                    1.sdp(),
-                                    Color(0xFFDAD9D9).copy(alpha = 0.5f)
-                                )
-                                Row(
-                                    modifier = Modifier.fillMaxWidth().padding(15.sdp()),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        "Tracker ULTRA 3",
-                                        modifier = Modifier.weight(1f),
-                                        style = MaterialTheme.typography.labelMedium
-                                    )
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(R.drawable.battery_full),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(24.sdp()),
-                                        tint = Color.Unspecified
-                                    )
+                                    if (isShowAdd) {
+                                        Column(
+                                            modifier = Modifier.padding(15.sdp())
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clickable {
+                                                        viewModel.setDevice(item)
+                                                        isShowDiagnosis = true
+                                                    },
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceBetween
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.Build,
+                                                    contentDescription = null,
+                                                    tint = Color(0xFF12CD4A)
+                                                )
+                                                Text(
+                                                    TimeUtils.formatToLocalTime(item.bindingTime),
+                                                    style = MaterialTheme.typography.labelMedium
+                                                )
+                                            }
+                                            HorizontalDivider(
+                                                Modifier.fillMaxWidth()
+                                                    .padding(vertical = 15.sdp()),
+                                                1.sdp(),
+                                                Color.LightGray
+                                            )
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.SpaceAround
+                                            ) {
+                                                Row(
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.Speed,
+                                                        contentDescription = null,
+                                                        tint = Color(0xFF12CD4A)
+                                                    )
+                                                    Spacer(Modifier.width(12.sdp()))
+                                                    Text(
+                                                        "0 км/ч",
+                                                        style = MaterialTheme.typography.labelMedium
+                                                    )
+                                                }
+                                                Row(
+                                                    modifier = Modifier.clickable {
+                                                        isShowComments = true
+                                                    },
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Filled.StarRate,
+                                                        contentDescription = null,
+                                                        tint = Color.Yellow
+                                                    )
+                                                    Spacer(Modifier.width(12.sdp()))
+                                                    Text(
+                                                        "5/5",
+                                                        style = MaterialTheme.typography.labelMedium
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                     items(sortedNullDevices) { item ->
-                        Spacer(Modifier.height(15.sdp()))
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(10.sdp()),
-                            color = Color.White
+                        Column(
+                            modifier = Modifier.width(330.sdp())
                         ) {
-                            Row(
-                                modifier = Modifier.padding(15.sdp()),
-                                verticalAlignment = Alignment.CenterVertically
+                            Spacer(Modifier.height(15.sdp()))
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(10.sdp()),
+                                color = Color.White
                             ) {
-                                Box(
-                                    Modifier.size(9.sdp()).background(
-                                        Color(0xFFC4162D),
-                                        MaterialTheme.shapes.small
+                                Row(
+                                    modifier = Modifier.padding(15.sdp()),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        Modifier.size(9.sdp()).background(
+                                            Color(0xFFC4162D),
+                                            MaterialTheme.shapes.small
+                                        )
                                     )
-                                )
-                                Spacer(Modifier.width(11.sdp()))
-                                Text(
-                                    "IMEI: ",
-                                    color = Color(0xFF737373),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    item.imei,
-                                    color = Color(0xFF737373),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                                    Spacer(Modifier.width(11.sdp()))
+                                    Text(
+                                        "IMEI: ",
+                                        color = Color(0xFF737373),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                    Text(
+                                        item.imei,
+                                        color = Color(0xFF737373),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
                             }
                         }
+                    }
+                    item {
+                        Spacer(Modifier.height(115.sdp()))
                     }
                 }
             }
@@ -284,6 +400,28 @@ fun ListScreen(
             {
                 isShow = it
             }
+        )
+    }
+
+    if (isShowDiagnosis) {
+        CustomDiagnosisPopup(
+            { isShowDiagnosis = false },
+            listOf(
+                device.bindingTime,
+                device.bindingTime,
+                device.bindingTime,
+                device.bindingTime,
+                device.bindingTime,
+                device.bindingTime,
+                device.bindingTime,
+                device.bindingTime,
+                )
+        )
+    }
+
+    if (isShowComments) {
+        CustomCommentsPopup(
+            { isShowComments = false }
         )
     }
 }

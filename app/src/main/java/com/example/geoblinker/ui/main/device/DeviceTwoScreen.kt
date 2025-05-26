@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -79,7 +80,7 @@ fun DeviceTwoScreen(
         )
         Spacer(Modifier.height(25.sdp()))
         Surface(
-            modifier = Modifier.size(330.sdp(), 419.sdp()),
+            modifier = Modifier.width(330.sdp()),
             shape = RoundedCornerShape(10.sdp()),
             color = Color.White
         ) {

@@ -74,6 +74,8 @@ dependencies {
     implementation(libs.google.accompanist.permissions)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.gms.play.services.location)
+    implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.material.icons.core)
 
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

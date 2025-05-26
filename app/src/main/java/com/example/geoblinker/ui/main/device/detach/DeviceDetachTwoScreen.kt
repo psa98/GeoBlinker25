@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.OkButton
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -25,13 +26,13 @@ fun DeviceDetachTwoScreen(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(147.sdp()))
+        Spacer(Modifier.height(147.hdp()))
         Text(
             "“$name”",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
         )
-        Spacer(Modifier.height(10.sdp()))
+        Spacer(Modifier.height(10.hdp()))
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -45,13 +46,13 @@ fun DeviceDetachTwoScreen(
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Spacer(Modifier.height(58.sdp()))
+        Spacer(Modifier.height(58.hdp()))
         Text(
             stringResource(R.string.untied),
             color = Color(0xFFC4162D),
             style = MaterialTheme.typography.titleLarge
         )
-        Spacer(Modifier.height(231.sdp()))
+        Spacer(Modifier.height(220.hdp()))
         OkButton(
             enabled = true,
             onClick = toMap

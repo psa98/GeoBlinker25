@@ -17,12 +17,19 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.StarRate
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -63,6 +70,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
+import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
 
@@ -110,7 +118,8 @@ fun CustomPopup(
     FullScreenBox()
     Dialog(
         {},
-        properties = DialogProperties(usePlatformDefaultWidth = false)) {
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
         Surface(
             modifier = Modifier
                 .width(310.sdp())
@@ -373,46 +382,53 @@ fun CustomEmptyDevicesPopup(
     onChangeVisible: (Boolean) -> Unit,
     toBindingScreen: () -> Unit
 ) {
-    FullScreenBox()
     Dialog(
         onDismissRequest = { onChangeVisible(false) },
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
-            modifier = Modifier.width(310.sdp()),
-            shape = MaterialTheme.shapes.large,
-            color = Color.White,
-            shadowElevation = 2.sdp()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f))
+                .clickable { onChangeVisible(false) },
+            contentAlignment = Alignment.Center
         ) {
-            Column(
-                modifier = Modifier.padding(vertical = 30.sdp(), horizontal = 25.sdp()),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Surface(
+                modifier = Modifier.width(310.sdp()),
+                shape = MaterialTheme.shapes.large,
+                color = Color.White,
+                shadowElevation = 2.sdp()
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.comment_info),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.sdp()),
-                    tint = Color.Unspecified
-                )
-                Spacer(Modifier.height(21.sdp()))
-                Text(
-                    stringResource(R.string.ask_add_new_device),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(Modifier.height(53.sdp()))
-                GreenMediumButton(
-                    modifier = Modifier.width(260.sdp()),
-                    icon = R.drawable.plus,
-                    text = stringResource(R.string.link_device),
-                    onClick = toBindingScreen
-                )
-                Spacer(Modifier.height(20.sdp()))
-                Text(
-                    stringResource(R.string.problems_with_linking),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Column(
+                    modifier = Modifier.padding(vertical = 30.sdp(), horizontal = 25.sdp()),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.comment_info),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.sdp()),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(Modifier.height(21.sdp()))
+                    Text(
+                        stringResource(R.string.ask_add_new_device),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(Modifier.height(53.sdp()))
+                    GreenMediumButton(
+                        modifier = Modifier.width(260.sdp()),
+                        icon = R.drawable.plus,
+                        text = stringResource(R.string.link_device),
+                        onClick = toBindingScreen
+                    )
+                    Spacer(Modifier.height(20.sdp()))
+                    Text(
+                        stringResource(R.string.problems_with_linking),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
             }
         }
     }
@@ -426,39 +442,231 @@ fun CustomListPopup(
     changeIsShow: (Boolean) -> Unit,
     alignment: Alignment = Alignment.TopStart
 ) {
-    FullScreenBox()
     Popup(
         alignment = alignment,
         onDismissRequest = { changeIsShow(false) }
     ) {
-        Surface(
-            modifier = Modifier.width(246.sdp()),
-            shape = MaterialTheme.shapes.large,
-            color = Color.White,
-            shadowElevation = 2.sdp()
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f))
+                .padding(start = 15.sdp(), top = 96.sdp(), end = 15.sdp())
+                .clickable { changeIsShow(false) },
+            contentAlignment = alignment
         ) {
-            Column(
-                modifier = Modifier.padding(
-                    start = 20.sdp(),
-                    top = 26.sdp(),
-                    bottom = 37.sdp()
-                )
+            Surface(
+                modifier = Modifier.width(246.sdp()),
+                shape = MaterialTheme.shapes.large,
+                color = Color.White,
+                shadowElevation = 2.sdp()
             ) {
-                Text(
-                    stringResource(label),
-                    color = Color(0xFF747474),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                listLabels.forEach { item ->
-                    Spacer(Modifier.height(20.sdp()))
-                    Text(
-                        stringResource(item),
-                        modifier = Modifier.clickable {
-                            onClick(item)
-                        },
-                        style = MaterialTheme.typography.headlineSmall
+                Column(
+                    modifier = Modifier.padding(
+                        start = 20.sdp(),
+                        top = 26.sdp(),
+                        bottom = 37.sdp()
                     )
+                ) {
+                    Text(
+                        stringResource(label),
+                        color = Color(0xFF747474),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    listLabels.forEach { item ->
+                        Spacer(Modifier.height(20.sdp()))
+                        Text(
+                            stringResource(item),
+                            modifier = Modifier.clickable {
+                                onClick(item)
+                            },
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomDiagnosisPopup(
+    onChangeVisible: (Boolean) -> Unit,
+    breakdowns: List<Long> = emptyList()
+) {
+    Dialog(
+        { onChangeVisible(false) },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f))
+                .clickable { onChangeVisible(false) },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                Spacer(Modifier.size(330.sdp(), 200.sdp()).clickable { onChangeVisible(false) })
+                Surface(
+                    modifier = Modifier.width(330.sdp()),
+                    shape = RoundedCornerShape(10.sdp()),
+                    color = Color.White
+                ) {
+                    Column(
+                        modifier = Modifier.padding(15.sdp())
+                    ) {
+                        Column {
+                            Text(
+                                "Прогноз поломок:",
+                                color = Color(0xFF737373),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(
+                                "Поломок не обнаружено",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        HorizontalDivider(
+                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            1.sdp(),
+                            Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                        )
+                        Column {
+                            Text(
+                                "Рекомендации по обслуживанию:",
+                                color = Color(0xFF737373),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(
+                                "Нет рекомендаций",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        HorizontalDivider(
+                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            1.sdp(),
+                            Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                        )
+                        Column {
+                            Text(
+                                "Критические неисправности:",
+                                color = Color(0xFF737373),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(
+                                "Критических неисправностей не обнаружено",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        Spacer(Modifier.height(15.sdp()))
+                        GreenMediumButton(
+                            text ="Обратиться в сервис",
+                            onClick = {}
+                        )
+                    }
+                }
+                Spacer(Modifier.size(330.sdp(), 260.sdp()).clickable { onChangeVisible(false) })
+            }
+
+            items(breakdowns) { item ->
+                Surface(
+                    modifier = Modifier.width(310.sdp()),
+                    shape = RoundedCornerShape(10.sdp()),
+                    color = Color.White
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.sdp())
+                    ) {
+                        Text(
+                            "Вышел из строя механизм затвора дверей. Был проведён ремонт в тех. сервисе X",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        HorizontalDivider(
+                            Modifier.fillMaxWidth().padding(vertical = 12.sdp()),
+                            1.sdp(),
+                            Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                "Дата:",
+                                color = Color(0xFF737373),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                            Text(
+                                TimeUtils.formatToLocalTime(item),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.size(330.sdp(), 12.sdp()).clickable { onChangeVisible(false) })
+            }
+
+            item {
+                Spacer(Modifier.size(330.sdp(), 100.sdp()).clickable { onChangeVisible(false) })
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomCommentsPopup(
+    onChangeVisible: (Boolean) -> Unit,
+    comments: List<String> = emptyList()
+) {
+    Dialog(
+        { onChangeVisible(false) },
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f))
+                .clickable { onChangeVisible(false) },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            item {
+                Spacer(Modifier.size(330.sdp(), 200.sdp()).clickable { onChangeVisible(false) })
+            }
+            items(8) {
+                Surface(
+                    modifier = Modifier.width(330.sdp()),
+                    shape = RoundedCornerShape(10.sdp()),
+                    color = Color.White
+                ) {
+                    Column(
+                        modifier = Modifier.padding(15.sdp())
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            for (i in 1..5) {
+                                Icon(
+                                    imageVector = Icons.Filled.StarRate,
+                                    contentDescription = null,
+                                    tint = Color.Yellow
+                                )
+                            }
+                        }
+                        HorizontalDivider(
+                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            1.sdp(),
+                            Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                        )
+                        Text(
+                            "Отличный сервис. Всё понравилось. Однозначно 5 звёзд из 5",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                }
+                Spacer(Modifier.size(330.sdp(), 15.sdp()).clickable { onChangeVisible(false) })
+            }
+
+            item {
+                Spacer(Modifier.size(330.sdp(), 100.sdp()).clickable { onChangeVisible(false) })
             }
         }
     }

@@ -55,11 +55,10 @@ fun GeoBlinkerTheme(
         else -> LightColorScheme
     }
     */
+    val sc = sc()
     val configuration = LocalConfiguration.current
     fun Int.scaledSp(): androidx.compose.ui.unit.TextUnit {
-        val baseScreenWidth = 360 // Базовое разрешение (пример для 360dp ширины)
-        val scaleFactor = configuration.screenWidthDp.toFloat() / baseScreenWidth
-        return (this * scaleFactor).sp
+        return (this * sc).sp
     }
 
     val dynamicTypography = remember(configuration) {

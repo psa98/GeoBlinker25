@@ -34,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 
 val greenGradient = Brush.verticalGradient(
@@ -72,9 +73,8 @@ fun GreenButton(
             modifier = modifier.background(
                 brush = greenGradient,
                 shape = MaterialTheme.shapes.large)
-                .fillMaxWidth()
+                .size(310.sdp(), height.sdp())
                 .padding(1.sdp())
-                .height(height.sdp())
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -124,8 +124,8 @@ fun GreenMediumButton(
                 brush = greenGradient,
                 shape = shape)
                 .fillMaxWidth()
-                .padding(1.sdp())
                 .height(height.sdp())
+                .padding(1.sdp())
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -174,8 +174,8 @@ fun GreenMediumRightIconButton(
                 brush = greenGradient,
                 shape = RoundedCornerShape(10.sdp()))
                 .fillMaxWidth()
-                .padding(1.sdp())
                 .height(height.sdp())
+                .padding(1.sdp())
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -242,8 +242,9 @@ fun BlackButton(
             modifier = modifier.background(
                 brush = if (enabled) blackGradient else grayGradient,
                 shape = MaterialTheme.shapes.large)
-                .padding(1.sdp()) // Компенсируем границу Surface
+                .fillMaxWidth()
                 .height(height.sdp())
+                .padding(1.sdp()) // Компенсируем границу Surface
             ,
             enabled = enabled,
             shape = MaterialTheme.shapes.large,
@@ -290,8 +291,8 @@ fun BlackMediumButton(
                 brush = if (enabled) blackGradient else grayGradient,
                 shape = RoundedCornerShape(10.sdp()))
                 .fillMaxWidth()
-                .padding(1.sdp()) // Компенсируем границу Surface
                 .height(55.sdp())
+                .padding(1.sdp()) // Компенсируем границу Surface
             ,
             enabled = enabled,
             shape = RoundedCornerShape(10.sdp()),
@@ -338,9 +339,9 @@ fun WhiteButton(
             modifier = modifier.background(
                 brush = whiteGradient,
                 shape = MaterialTheme.shapes.large)
-                .padding(1.sdp()) // Компенсируем границу Surface
                 .fillMaxWidth()
                 .height(height.sdp())
+                .padding(1.sdp()) // Компенсируем границу Surface
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -496,10 +497,10 @@ fun BackButton(
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.BottomCenter
     ) {
         Box(
-            modifier = Modifier.offset(y = 275.sdp())
+            modifier = Modifier.offset(y = (-32).sdp())
         ) {
             Surface(
                 modifier = Modifier.shadow(

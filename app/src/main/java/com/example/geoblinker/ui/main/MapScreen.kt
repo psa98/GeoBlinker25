@@ -8,6 +8,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +26,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -52,16 +59,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import com.example.geoblinker.R
+import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.BackButton
+import com.example.geoblinker.ui.CustomCommentsPopup
+import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomEmptyDevicesPopup
 import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.wdp
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 
@@ -201,56 +214,71 @@ fun MapScreen(
 
     if (isShowPopupSearch) {
         var keySearch by remember { mutableStateOf("") }
-        FullScreenBox()
         Dialog(
             onDismissRequest = {
                 isShowPopupSearch = false
                 dontSearch = false
-            }
+            },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
-            Surface(
-                modifier = Modifier.size(350.sdp(), 246.sdp()),
-                shape = RoundedCornerShape(10.sdp()),
-                color = Color.White
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.2f))
+                    .clickable {
+                        isShowPopupSearch = false
+                        dontSearch = false
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 10.sdp()).padding(top = 28.sdp()),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Surface(
+                    modifier = Modifier.size(350.sdp(), 246.sdp()),
+                    shape = RoundedCornerShape(10.sdp()),
+                    color = Color.White
                 ) {
-                    Text(
-                        stringResource(R.string.map_search),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    if (!dontSearch) {
-                        Spacer(Modifier.height(23.sdp()))
-                        SearchDevice(keySearch) { keySearch = it }
-                        Spacer(Modifier.height(15.sdp()))
-                        GreenMediumButton(
-                            text = stringResource(R.string.find),
-                            onClick = {
-                                val findDevices =
-                                    devices.filter { keySearch in it.imei || keySearch in it.name }
-                                if (findDevices.isEmpty())
-                                    dontSearch = true
-                                else {
-                                    selectedMarker = findDevices[0]
-                                    isShowPopupSearch = false
-                                }
-                            }
+                    Column(
+                        modifier = Modifier.padding(horizontal = 10.sdp()).padding(top = 28.sdp()),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            stringResource(R.string.map_search),
+                            style = MaterialTheme.typography.titleLarge
                         )
-                    } else {
-                        Box(
-                            Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                stringResource(R.string.no_devices_found_for_request),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.titleSmall
+                        if (!dontSearch) {
+                            Spacer(Modifier.height(23.sdp()))
+                            SearchDevice(keySearch) { keySearch = it }
+                            Spacer(Modifier.height(15.sdp()))
+                            GreenMediumButton(
+                                text = stringResource(R.string.find),
+                                onClick = {
+                                    val findDevices =
+                                        devices.filter { keySearch in it.imei || keySearch in it.name }
+                                    if (findDevices.isEmpty())
+                                        dontSearch = true
+                                    else {
+                                        selectedMarker = findDevices[0]
+                                        isShowPopupSearch = false
+                                    }
+                                }
                             )
+                        } else {
+                            Box(
+                                Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    stringResource(R.string.no_devices_found_for_request),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
                         }
                     }
+                }
+
+                if (dontSearch) {
+                    BackButton { dontSearch = false }
                 }
             }
         }
@@ -273,10 +301,6 @@ fun MapScreen(
                 toBindingScreen()
             }
         )
-    }
-
-    if (dontSearch) {
-        BackButton { dontSearch = false }
     }
 }
 
@@ -388,6 +412,14 @@ fun CustomDevicePopup(
     toDeviceScreen: (Device) -> Unit
 ) {
     selectedMarker?.let { item ->
+        var isShowAdd by remember { mutableStateOf(false) }
+        var isShowDiagnosis by remember { mutableStateOf(false) }
+        var isShowComments by remember { mutableStateOf(false) }
+        val offsetYAnimated by animateIntAsState(
+            targetValue = if (isShowAdd) (-414).hdp().value.toInt() else (-290).hdp().value.toInt(),
+            label = ""
+        )
+
         webView.evaluateJavascript(
             "setCenter(${item.lat}, ${item.lng})",
             null
@@ -395,82 +427,186 @@ fun CustomDevicePopup(
 
         Popup(
             Alignment.Center,
-            offset = IntOffset(x = 0, y = (-290).sdp().value.toInt()),
+            offset = IntOffset(x = 0, y = offsetYAnimated),
             onDismissRequest = onChangeValueToNull
         ) {
             Surface(
-                modifier = Modifier.width(332.sdp()).clickable {
-                    onChangeValueToNull()
-                    toDeviceScreen(item)
-                },
+                modifier = Modifier
+                    .width(332.sdp())
+                    .animateContentSize(),
                 shape = ComicBubbleShape(
                     cornerRadius = 10.sdp(),
                     pointerHeight = 24.sdp(),
                     pointerWidth = 20.sdp()),
-                color = Color.White
+                color = Color(0xFFDAD9D9)
             ) {
                 Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(15.sdp()),
-                        verticalAlignment = Alignment.CenterVertically
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (isShowAdd) {
+                                    onChangeValueToNull()
+                                    toDeviceScreen(item)
+                                }
+                                isShowAdd = true
+                            },
+                        shape = RoundedCornerShape(10.sdp()),
+                        color = Color.White,
+                        shadowElevation = 4.sdp()
                     ) {
-                        Box(
-                            Modifier.size(9.sdp()).background(
-                                Color(0xFF12CD4A),
-                                MaterialTheme.shapes.small
-                            )
-                        )
-                        Spacer(Modifier.width(11.sdp()))
-                        if (item.name.isNotEmpty()) {
-                            Text(
-                                item.name,
-                                modifier = Modifier.weight(1f),
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold
+                        Column {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(15.sdp()),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    Modifier.size(9.sdp()).background(
+                                        Color(0xFF12CD4A),
+                                        MaterialTheme.shapes.small
+                                    )
                                 )
-                            )
-                        } else {
-                            Text(
-                                stringResource(R.string.an_unnamed_device),
-                                modifier = Modifier.weight(1f),
-                                color = Color(0xFF737373),
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Bold
+                                Spacer(Modifier.width(11.sdp()))
+                                if (item.name.isNotEmpty()) {
+                                    Text(
+                                        item.name,
+                                        modifier = Modifier.weight(1f),
+                                        overflow = TextOverflow.Ellipsis,
+                                        maxLines = 1,
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                } else {
+                                    Text(
+                                        stringResource(R.string.an_unnamed_device),
+                                        modifier = Modifier.weight(1f),
+                                        color = Color(0xFF737373),
+                                        style = MaterialTheme.typography.labelMedium.copy(
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    )
+                                }
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.sdp(), 17.sdp()),
+                                    tint = Color.Unspecified
                                 )
+                            }
+                            HorizontalDivider(
+                                Modifier.fillMaxWidth().padding(horizontal = 15.sdp()),
+                                1.sdp(),
+                                Color(0xFFDAD9D9).copy(alpha = 0.5f)
                             )
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(15.sdp())
+                                    .padding(bottom = if (isShowAdd) 0.sdp() else 24.sdp()),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    "Tracker ULTRA 3",
+                                    modifier = Modifier.weight(1f),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.battery_full),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.sdp()),
+                                    tint = Color.Unspecified
+                                )
+                            }
                         }
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.sdp(), 17.sdp()),
-                            tint = Color.Unspecified
-                        )
                     }
-                    HorizontalDivider(
-                        Modifier.fillMaxWidth().padding(horizontal = 15.sdp()),
-                        1.sdp(),
-                        Color(0xFFDAD9D9).copy(alpha = 0.5f)
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(15.sdp()).padding(bottom = 24.sdp()),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "Tracker ULTRA 3",
-                            modifier = Modifier.weight(1f),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Icon(
-                            imageVector = ImageVector.vectorResource(R.drawable.battery_full),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.sdp()),
-                            tint = Color.Unspecified
-                        )
+                    if (isShowAdd) {
+                        Column(
+                            modifier = Modifier.padding(15.sdp()).padding(bottom = 24.sdp())
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        isShowDiagnosis = true
+                                    },
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Build,
+                                    contentDescription = null,
+                                    tint = Color(0xFF12CD4A)
+                                )
+                                Text(
+                                    TimeUtils.formatToLocalTime(item.bindingTime),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                            HorizontalDivider(
+                                Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                                1.sdp(),
+                                Color.Gray
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceAround
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Speed,
+                                        contentDescription = null,
+                                        tint = Color(0xFF12CD4A)
+                                    )
+                                    Spacer(Modifier.width(12.sdp()))
+                                    Text(
+                                        "0 км/ч",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.clickable { isShowComments = true },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.StarRate,
+                                        contentDescription = null,
+                                        tint = Color.Yellow
+                                    )
+                                    Spacer(Modifier.width(12.sdp()))
+                                    Text(
+                                        "5/5",
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
+        }
+
+        if (isShowDiagnosis) {
+            CustomDiagnosisPopup(
+                { isShowDiagnosis = false },
+                listOf(
+                    item.bindingTime,
+                    item.bindingTime,
+                    item.bindingTime,
+                    item.bindingTime,
+                    item.bindingTime,
+                    item.bindingTime,
+                    item.bindingTime,
+                    item.bindingTime,
+                )
+            )
+        }
+
+        if (isShowComments) {
+            CustomCommentsPopup(
+                { isShowComments = false }
+            )
         }
     }
 }

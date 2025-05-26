@@ -3,8 +3,10 @@ package com.example.geoblinker.ui.main.device.detach
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,6 +25,7 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.RedButton
 import com.example.geoblinker.ui.main.DeviceViewModel
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -34,6 +37,7 @@ fun DeviceDetachOneScreen(
     val device by viewModel.device.collectAsState()
 
     Column(
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (device.name.isNotEmpty()) {
@@ -53,27 +57,27 @@ fun DeviceDetachOneScreen(
                 )
             )
         }
-        Spacer(Modifier.height(10.sdp()))
+        Spacer(Modifier.height(10.hdp()))
         Text(
             stringResource(R.string.detach_device),
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(53.sdp()))
+        Spacer(Modifier.height(53.hdp()))
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.triangle_warning),
             contentDescription = null,
             modifier = Modifier.size(28.sdp()),
             tint = Color.Unspecified
         )
-        Spacer(Modifier.height(15.sdp()))
+        Spacer(Modifier.height(15.hdp()))
         Text(
             "${stringResource(R.string.label_detach_device)} “${device.name}”?",
             color = Color(0xFFC4162D),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
         )
-        Spacer(Modifier.height(18.sdp()))
+        Spacer(Modifier.height(18.hdp()))
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -87,27 +91,32 @@ fun DeviceDetachOneScreen(
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Spacer(Modifier.height(63.sdp()))
+        Spacer(Modifier.height(63.hdp()))
         Text(
             stringResource(R.string.subtitle_detach_device),
             color = Color(0xFF737373),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(75.sdp()))
-        RedButton(
-            stringResource(R.string.detach),
-            onClick = {
-                val name = device.name
-                val imei = device.imei
-                viewModel.updateDevice(device.copy(isConnected = false))
-                toTwo(name, imei)
-            }
-        )
-        Spacer(Modifier.height(15.sdp()))
-        BlackMediumButton(
-            text = stringResource(R.string.cancellation),
-            onClick = toBack
-        )
+        Spacer(Modifier.height(75.hdp()))
+        Column(
+            modifier = Modifier.width(330.sdp()),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            RedButton(
+                stringResource(R.string.detach),
+                onClick = {
+                    val name = device.name
+                    val imei = device.imei
+                    viewModel.updateDevice(device.copy(isConnected = false))
+                    toTwo(name, imei)
+                }
+            )
+            Spacer(Modifier.height(15.hdp()))
+            BlackMediumButton(
+                text = stringResource(R.string.cancellation),
+                onClick = toBack
+            )
+        }
     }
 }

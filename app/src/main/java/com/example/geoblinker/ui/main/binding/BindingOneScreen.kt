@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +37,7 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.ImeiTextField
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 import com.example.geoblinker.ui.theme.ssp
 import com.google.mlkit.vision.barcode.BarcodeScanner
@@ -57,54 +60,60 @@ fun BindingOneScreen(
             toTwoScreen(imei)
     }
 
-    Column(
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            stringResource(R.string.new_device),
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(Modifier.height(20.sdp()))
-        Image(
-            painter = painterResource(R.drawable.new_device_image),
-            contentDescription = null,
-            modifier = Modifier.size(310.sdp(), 222.sdp())
-        )
-        Spacer(Modifier.height(50.sdp()))
-        ImeiTextField(
-            imei,
-            {
-                imei = it
-                isError = false
-            },
-            { onDone() },
-            {
-                isShow = true
-            },
-            isError = isError
-        )
-        Spacer(Modifier.height(15.sdp()))
-        GreenMediumButton(
-            text = stringResource(R.string.link),
-            onClick = { onDone() },
-            height = 65,
-            style = MaterialTheme.typography.headlineMedium
-        )
+        item {
+            Column(
+                modifier = Modifier.width(310.sdp()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    stringResource(R.string.new_device),
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(Modifier.height(20.sdp()))
+                Image(
+                    painter = painterResource(R.drawable.new_device_image),
+                    contentDescription = null,
+                    modifier = Modifier.size(310.sdp(), 222.sdp())
+                )
+                Spacer(Modifier.height(50.sdp()))
+                ImeiTextField(
+                    imei,
+                    {
+                        imei = it
+                        isError = false
+                    },
+                    { onDone() },
+                    {
+                        isShow = true
+                    },
+                    isError = isError
+                )
+                Spacer(Modifier.height(15.sdp()))
+                GreenMediumButton(
+                    text = stringResource(R.string.link),
+                    onClick = { onDone() },
+                    height = 65,
+                    style = MaterialTheme.typography.headlineMedium
+                )
 
-        if (isError) {
-            Spacer(Modifier.height(10.sdp()))
-            Text(
-                stringResource(R.string.imei_not_found),
-                color = MaterialTheme.colorScheme.error,
-                lineHeight = 22.ssp(),
-                style = MaterialTheme.typography.bodyLarge
-            )
+                if (isError) {
+                    Spacer(Modifier.height(10.sdp()))
+                    Text(
+                        stringResource(R.string.imei_not_found),
+                        color = MaterialTheme.colorScheme.error,
+                        lineHeight = 22.ssp(),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                } else {
+                    Spacer(Modifier.height(32.sdp()))
+                }
+                Spacer(Modifier.height(115.sdp()))
+            }
         }
-        else{
-            Spacer(Modifier.height(32.sdp()))
-        }
-        Spacer(Modifier.height(30.sdp()))
     }
 
     BackButton(
