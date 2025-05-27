@@ -23,15 +23,22 @@ fun sc(
 }
 
 @Composable
+fun hsc(
+    baseHeight: Int = 720
+): Float {
+    val height = LocalConfiguration.current.screenHeightDp
+    val scale = height / baseHeight.toFloat()
+    return scale
+}
+
+@Composable
 fun Int.sdp(): Dp {
     return (this * sc()).dp
 }
 
 @Composable
-fun Int.hdp(baseHeight: Int = 720): Dp {
-    val height = LocalConfiguration.current.screenHeightDp
-    val scale = height / baseHeight.toFloat()
-    return (this * scale).dp
+fun Int.hdp(): Dp {
+    return (this * hsc()).dp
 }
 
 @Composable

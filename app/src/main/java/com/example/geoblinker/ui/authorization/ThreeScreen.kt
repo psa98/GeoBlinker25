@@ -31,7 +31,8 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CodeTextField
-import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.hdp
+import com.example.geoblinker.ui.theme.hdp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -66,42 +67,42 @@ fun ThreeScreen(
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(Modifier.height(51.hdp()))
         if (!changeMode) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.comment_alt_dots_1),
                 contentDescription = null,
-                modifier = Modifier.size(28.sdp())
+                modifier = Modifier.size(28.hdp())
             )
-            Spacer(Modifier.height(20.sdp()))
+            Spacer(Modifier.height(20.hdp()))
             Text(
                 stringResource(textTitle ?: R.string.error),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
-            Spacer(Modifier.height(57.sdp()))
+            Spacer(Modifier.height(57.hdp()))
         }
         else {
             if (isError) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.attention),
                     contentDescription = null,
-                    modifier = Modifier.size(28.sdp()),
+                    modifier = Modifier.size(28.hdp()),
                     tint = Color(0xFFC4162D)
                 )
-                Spacer(Modifier.height(5.sdp()))
+                Spacer(Modifier.height(5.hdp()))
                 Text(
                     stringResource(R.string.invalid_code),
-                    modifier = Modifier.height(22.sdp()),
+                    modifier = Modifier.height(22.hdp()),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                Spacer(Modifier.height(57.sdp()))
+                Spacer(Modifier.height(57.hdp()))
             }
             else
-                Spacer(Modifier.height(112.sdp()))
+                Spacer(Modifier.height(112.hdp()))
         }
         CodeTextField(
             value = value,
@@ -113,20 +114,20 @@ fun ThreeScreen(
             placeholder = R.string.enter_the_code,
             isError = isError
         )
-        Spacer(Modifier.height(20.sdp()))
+        Spacer(Modifier.height(20.hdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
             enabled = !isError && value.length == 4
         )
-        Spacer(Modifier.height(45.sdp()))
+        Spacer(Modifier.height(45.hdp()))
         Text(
             text = stringResource(R.string.send_to_another_number),
             modifier = Modifier.clickable { toBack() },
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(15.sdp()))
+        Spacer(Modifier.height(15.hdp()))
         Text(
             text = stringResource(R.string.get_the_code_in_another_way),
             modifier = Modifier.clickable {
@@ -143,7 +144,7 @@ fun ThreeScreen(
         )
 
         if (!changeMode) {
-            Spacer(Modifier.height(15.sdp()))
+            Spacer(Modifier.height(15.hdp()))
             Text(
                 text = if (remainingTime > 0)
                     "${stringResource(R.string.resend)} ... $remainingTime c"
@@ -162,18 +163,15 @@ fun ThreeScreen(
                     Color.Unspecified,
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(100.sdp()))
-        } else {
-            Spacer(Modifier.height(228.sdp()))
         }
     }
 
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.BottomCenter
     ) {
         Box(
-            modifier = Modifier.offset(y = 208.sdp())
+            modifier = Modifier.offset(y = (-112).hdp())
         ) {
             Text(
                 text = stringResource(R.string.is_the_code_not_coming),

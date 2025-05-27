@@ -32,7 +32,7 @@ import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.NameTextField
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.formatPhoneNumber
-import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.hdp
 
 @Composable
 fun OneScreen(
@@ -65,22 +65,22 @@ fun OneScreen(
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.width(200.sdp()).height(135.sdp())
+            modifier = Modifier.width(200.hdp()).height(135.hdp())
         )
-        Spacer(Modifier.height(15.sdp()))
+        Spacer(Modifier.height(15.hdp()))
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(33.sdp()))
+        Spacer(Modifier.height(33.hdp()))
         if (isErrorPhone) {
             Text(
                 stringResource(R.string.invalid_number),
                 color = Color(0xFFC4162D),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(15.sdp()))
+            Spacer(Modifier.height(15.hdp()))
         }
         else if (isErrorName) {
             Text(
@@ -88,7 +88,7 @@ fun OneScreen(
                 color = Color(0xFFC4162D),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(15.sdp()))
+            Spacer(Modifier.height(15.hdp()))
         }
         PhoneNumberTextField(
             onValueChange = {
@@ -99,7 +99,7 @@ fun OneScreen(
             onDone = { onClick() },
             isError = isErrorPhone
         )
-        Spacer(Modifier.height(20.sdp()))
+        Spacer(Modifier.height(20.hdp()))
         NameTextField(
             placeholder = stringResource(R.string.your_name),
             onValueChange = {
@@ -110,13 +110,13 @@ fun OneScreen(
             onDone = { onClick() },
             isError = isErrorName
         )
-        Spacer(Modifier.height(20.sdp()))
+        Spacer(Modifier.height(20.hdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
         )
-        Spacer(Modifier.height(56.sdp()))
+        Spacer(Modifier.height(56.hdp()))
     }
 
     BackButton(toBack)

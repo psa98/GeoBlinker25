@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,7 +33,8 @@ import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.formatPhoneNumber
-import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.hdp
+import com.example.geoblinker.ui.theme.hdp
 import com.skydoves.cloudy.cloudy
 
 @Composable
@@ -49,21 +51,21 @@ fun TwoScreen(
 
     Column(
         modifier = Modifier.fillMaxSize().cloudy(16, visiblePopup),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(Modifier.height(88.hdp()))
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.width(200.sdp()).height(135.sdp())
+            modifier = Modifier.width(200.hdp()).height(135.hdp())
         )
-        Spacer(Modifier.height(15.sdp()))
+        Spacer(Modifier.height(15.hdp()))
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(134.sdp()))
+        Spacer(Modifier.height(134.hdp()))
         PhoneNumberTextField(
             onValueChange = {
                 value = it
@@ -77,7 +79,7 @@ fun TwoScreen(
             },
             isError = isPhoneNumberIncorrect
         )
-        Spacer(Modifier.height(20.sdp()))
+        Spacer(Modifier.height(20.hdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.enter),
@@ -88,7 +90,6 @@ fun TwoScreen(
                     visiblePopup = true
             }
         )
-        Spacer(Modifier.height(56.sdp()))
     }
 
     BackButton(
@@ -104,14 +105,15 @@ fun TwoScreen(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.attention),
                 contentDescription = null,
+                modifier = Modifier.size(28.hdp()),
                 tint = Color(0xFFC4162D)
             )
-            Spacer(Modifier.height(5.sdp()))
+            Spacer(Modifier.height(5.hdp()))
             Text(
                 stringResource(R.string.invalid_number),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(56.sdp()))
+            Spacer(Modifier.height(56.hdp()))
         }
     }
 

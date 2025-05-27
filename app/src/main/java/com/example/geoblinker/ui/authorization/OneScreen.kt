@@ -22,7 +22,7 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.GreenButton
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
-import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.hdp
 
 @Composable
 fun OneScreen(
@@ -31,45 +31,37 @@ fun OneScreen(
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        Spacer(Modifier.height(88.hdp()))
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.width(200.sdp()).height(135.sdp())
+            modifier = Modifier.width(200.hdp()).height(135.hdp())
         )
-        Spacer(Modifier.height(15.sdp()))
+        Spacer(Modifier.height(15.hdp()))
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(134.sdp()))
+        Spacer(Modifier.height(134.hdp()))
         GreenButton(
             icon = R.drawable.phone,
             text = stringResource(R.string.log_in_by_number),
             onClick = twoScreen
         )
-        Spacer(Modifier.height(20.sdp()))
+        Spacer(Modifier.height(20.hdp()))
         BlackButton(
-            modifier = Modifier.fillMaxWidth(),
             icon = R.drawable.user_add,
             text = stringResource(R.string.new_user),
             onClick = registrationScreen
         )
-        Spacer(Modifier.height(56.sdp()))
-    }
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
+        Spacer(Modifier.height(50.hdp()))
         Text(
             stringResource(R.string.problems_logging),
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(50.sdp()))
     }
 }
 

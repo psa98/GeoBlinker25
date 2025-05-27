@@ -43,7 +43,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.example.geoblinker.R
-import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.hdp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -62,7 +62,7 @@ fun CodeTextField(
 
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = TextFieldValue(
@@ -73,9 +73,9 @@ fun CodeTextField(
                 onValueChange(it.text.take(4))
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(81.hdp())
                 .fillMaxWidth()
-                .padding(1.sdp())
+                .padding(1.hdp())
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
                 }
@@ -132,7 +132,7 @@ fun PhoneNumberTextField(
 
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = textFieldValueState,
@@ -146,7 +146,7 @@ fun PhoneNumberTextField(
                 )
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(81.hdp())
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
@@ -199,7 +199,7 @@ fun NameTextField(
 
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = value,
@@ -208,7 +208,7 @@ fun NameTextField(
                 onValueChange(value)
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(81.hdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
@@ -252,7 +252,7 @@ fun NameDeviceTextField(
 ) {
     Surface(
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = value,
@@ -260,7 +260,7 @@ fun NameDeviceTextField(
                 onValueChange(it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(64))
             },
             modifier = Modifier
-                .height(65.sdp())
+                .height(65.hdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -304,7 +304,7 @@ fun EmailTextField(
 ) {
     Surface(
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = email,
@@ -312,7 +312,7 @@ fun EmailTextField(
                 onValueChange(newValue.filter { it != ' ' })
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(81.hdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
@@ -373,7 +373,7 @@ fun ImeiTextField(
 
     Surface(
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFC0C0C0))
+        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFC0C0C0))
     ) {
         TextField(
             value = imei,
@@ -381,7 +381,7 @@ fun ImeiTextField(
                 onValueChange(newValue.filter { it.isDigit() }.take(15))
             },
             modifier = Modifier
-                .height(65.sdp())
+                .height(65.hdp())
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
@@ -418,7 +418,7 @@ fun ImeiTextField(
 
         if (isFocused) {
             Box(
-                Modifier.fillMaxWidth().padding(5.sdp()),
+                Modifier.fillMaxWidth().padding(5.hdp()),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Button(
@@ -430,18 +430,18 @@ fun ImeiTextField(
                             Brush.verticalGradient(
                                 colors = listOf(Color(0xFF373736), Color(0xFF212120))
                             ),
-                            RoundedCornerShape(12.sdp())
+                            RoundedCornerShape(12.hdp())
                         ),
-                    shape = RoundedCornerShape(12.sdp()),
+                    shape = RoundedCornerShape(12.hdp()),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Transparent
                     ),
-                    contentPadding = PaddingValues(10.sdp())
+                    contentPadding = PaddingValues(10.hdp())
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.imei_scan),
                         contentDescription = null,
-                        modifier = Modifier.size(35.sdp())
+                        modifier = Modifier.size(35.hdp())
                     )
                 }
             }
@@ -457,15 +457,15 @@ fun SearchDevice(
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Surface(
-        shape = RoundedCornerShape(10.sdp()),
+        shape = RoundedCornerShape(10.hdp()),
         color = Color.Unspecified,
-        border = BorderStroke(1.sdp(), Color(0xFFC0C0C0))
+        border = BorderStroke(1.hdp(), Color(0xFFC0C0C0))
     ) {
         TextField(
             key,
             { onValueChange(it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(65)) },
             modifier = Modifier
-                .height(45.sdp())
+                .height(45.hdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.bodySmall,
@@ -483,7 +483,7 @@ fun SearchDevice(
                 onSearch = { keyboardController?.hide() }
             ),
             singleLine = true,
-            shape = RoundedCornerShape(10.sdp()),
+            shape = RoundedCornerShape(10.hdp()),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White.copy(alpha = 0.4f),
                 focusedContainerColor = Color.White,
@@ -494,13 +494,13 @@ fun SearchDevice(
 
         if (key.isEmpty()) {
             Box(
-                Modifier.fillMaxWidth().padding(8.sdp()),
+                Modifier.fillMaxWidth().padding(8.hdp()),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.search),
                     contentDescription = null,
-                    modifier = Modifier.size(26.sdp(), 28.sdp()),
+                    modifier = Modifier.size(26.hdp(), 28.hdp()),
                     tint = Color.Unspecified
                 )
             }
