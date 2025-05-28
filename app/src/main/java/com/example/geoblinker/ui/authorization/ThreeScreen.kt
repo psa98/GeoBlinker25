@@ -1,7 +1,6 @@
 package com.example.geoblinker.ui.authorization
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,8 +30,7 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CodeTextField
-import com.example.geoblinker.ui.theme.hdp
-import com.example.geoblinker.ui.theme.hdp
+import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -69,40 +67,40 @@ fun ThreeScreen(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(51.hdp()))
+        Spacer(Modifier.height(51.sdp()))
         if (!changeMode) {
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.comment_alt_dots_1),
                 contentDescription = null,
-                modifier = Modifier.size(28.hdp())
+                modifier = Modifier.size(28.sdp())
             )
-            Spacer(Modifier.height(20.hdp()))
+            Spacer(Modifier.height(20.sdp()))
             Text(
                 stringResource(textTitle ?: R.string.error),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleLarge
             )
-            Spacer(Modifier.height(57.hdp()))
+            Spacer(Modifier.height(57.sdp()))
         }
         else {
             if (isError) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.attention),
                     contentDescription = null,
-                    modifier = Modifier.size(28.hdp()),
+                    modifier = Modifier.size(28.sdp()),
                     tint = Color(0xFFC4162D)
                 )
-                Spacer(Modifier.height(5.hdp()))
+                Spacer(Modifier.height(5.sdp()))
                 Text(
                     stringResource(R.string.invalid_code),
-                    modifier = Modifier.height(22.hdp()),
+                    modifier = Modifier.height(22.sdp()),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge
                 )
-                Spacer(Modifier.height(57.hdp()))
+                Spacer(Modifier.height(57.sdp()))
             }
             else
-                Spacer(Modifier.height(112.hdp()))
+                Spacer(Modifier.height(112.sdp()))
         }
         CodeTextField(
             value = value,
@@ -114,20 +112,20 @@ fun ThreeScreen(
             placeholder = R.string.enter_the_code,
             isError = isError
         )
-        Spacer(Modifier.height(20.hdp()))
+        Spacer(Modifier.height(20.sdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
             enabled = !isError && value.length == 4
         )
-        Spacer(Modifier.height(45.hdp()))
+        Spacer(Modifier.height(45.sdp()))
         Text(
             text = stringResource(R.string.send_to_another_number),
             modifier = Modifier.clickable { toBack() },
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(15.hdp()))
+        Spacer(Modifier.height(15.sdp()))
         Text(
             text = stringResource(R.string.get_the_code_in_another_way),
             modifier = Modifier.clickable {
@@ -144,7 +142,7 @@ fun ThreeScreen(
         )
 
         if (!changeMode) {
-            Spacer(Modifier.height(15.hdp()))
+            Spacer(Modifier.height(15.sdp()))
             Text(
                 text = if (remainingTime > 0)
                     "${stringResource(R.string.resend)} ... $remainingTime c"
@@ -171,7 +169,7 @@ fun ThreeScreen(
         contentAlignment = Alignment.BottomCenter
     ) {
         Box(
-            modifier = Modifier.offset(y = (-112).hdp())
+            modifier = Modifier.offset(y = (-112).sdp())
         ) {
             Text(
                 text = stringResource(R.string.is_the_code_not_coming),

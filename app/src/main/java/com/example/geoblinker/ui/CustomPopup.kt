@@ -1,6 +1,7 @@
 package com.example.geoblinker.ui
 
 import android.util.Log
+import androidx.annotation.InspectableProperty
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateOffsetAsState
@@ -29,6 +30,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.StarRate
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -71,8 +74,9 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
+import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
-import com.example.geoblinker.ui.theme.hdp
+import com.example.geoblinker.ui.theme.sdp
 
 data class DraggableItem(
     val text: String,
@@ -115,46 +119,49 @@ fun CustomPopup(
         Log.d("DraggedIndex", draggedIndex.toString())
     }
 
-    FullScreenBox()
     Dialog(
         {},
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Surface(
-            modifier = Modifier
-                .width(310.hdp())
-                .alpha(if (isEnterEmail) 0f else 1f),
-            shape = MaterialTheme.shapes.large,
-            color = Color.White,
-            shadowElevation = 2.hdp(),
-            border = BorderStroke(1.hdp(), Color(0xFFBEBEBE))
+        Box(
+            modifier = Modifier.padding(0.sdp()).fillMaxSize().background(Color.Black.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
         ) {
-            Column(
+            Surface(
                 modifier = Modifier
-                    .padding(30.hdp())
-                    //.verticalScroll(rememberScrollState()),
-                ,
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .width(310.sdp())
+                    .alpha(if (isEnterEmail) 0f else 1f),
+                shape = MaterialTheme.shapes.large,
+                color = Color.White,
+                shadowElevation = 2.sdp(),
+                border = BorderStroke(1.sdp(), Color(0xFFBEBEBE))
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.sms),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.hdp()),
-                    tint = Color.Unspecified
-                )
-                Spacer(Modifier.height(20.hdp()))
-                Text(
-                    stringResource(R.string.get_the_confirmation_code),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(Modifier.height(12.hdp()))
-                Text(
-                    phone,
-                    color = Color(0xFF999696),
-                    style = MaterialTheme.typography.labelMedium
-                )
-                Spacer(Modifier.height(25.hdp()))
-                //Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier
+                        .padding(30.sdp())
+                    //.verticalScroll(rememberScrollState()),
+                    ,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.sms),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.sdp()),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(Modifier.height(20.sdp()))
+                    Text(
+                        stringResource(R.string.get_the_confirmation_code),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(Modifier.height(12.sdp()))
+                    Text(
+                        phone,
+                        color = Color(0xFF999696),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Spacer(Modifier.height(25.sdp()))
+                    //Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     items.forEachIndexed { index, draggableItem ->
                         val currentItem = draggableItem.text
                         val offsetY by animateOffsetAsState(
@@ -166,7 +173,7 @@ fun CustomPopup(
 
                         Box(
                             modifier = Modifier
-                                .padding(bottom = 5.hdp())
+                                .padding(bottom = 5.sdp())
                                 .zIndex(if (draggedIndex == index) 1f else 0f) // Поднимает элемент над другими
                                 .graphicsLayer {
                                     if (draggedIndex == index) {
@@ -192,17 +199,17 @@ fun CustomPopup(
                             Surface(
                                 shape = MaterialTheme.shapes.medium,
                                 color = Color.Unspecified,
-                                border = BorderStroke(1.hdp(), Color(0xFFBEBEBE))
+                                border = BorderStroke(1.sdp(), Color(0xFFBEBEBE))
                             ) {
                                 if (draggableItem.isEmail) {
                                     Row(
                                         modifier = Modifier
-                                            .padding(10.hdp())
-                                            .height(40.hdp())
+                                            .padding(10.sdp())
+                                            .height(40.sdp())
                                             .fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Spacer(Modifier.width(72.hdp()))
+                                        Spacer(Modifier.width(72.sdp()))
                                         Text(
                                             email,
                                             modifier = Modifier
@@ -212,27 +219,28 @@ fun CustomPopup(
                                             textDecoration = TextDecoration.Underline,
                                             style = MaterialTheme.typography.bodyLarge
                                         )
-                                        Spacer(Modifier.width(52.hdp()))
+                                        Spacer(Modifier.width(52.sdp()))
                                     }
                                 }
 
                                 Row(
                                     modifier = Modifier
-                                        .padding(10.hdp())
-                                        .height(40.hdp())
+                                        .padding(10.sdp())
+                                        .height(40.sdp())
                                         .fillMaxWidth()
-                                        .clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+                                        .clickable(
+                                            indication = null,
+                                            interactionSource = remember { MutableInteractionSource() }) {
                                             // Обработка клика вне Switch
                                             focusManager.clearFocus()
-                                        }
-                                    ,
+                                        },
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
                                         imageVector = ImageVector.vectorResource(R.drawable.burger),
                                         contentDescription = null,
                                         modifier = Modifier
-                                            .size(16.hdp(), 16.hdp())
+                                            .size(16.sdp(), 16.sdp())
                                             .aspectRatio(1f)
                                             .pointerInput(Unit) {
                                                 detectDragGestures(
@@ -265,11 +273,10 @@ fun CustomPopup(
                                                         draggedOffset = Offset.Zero
                                                     }
                                                 )
-                                            }
-                                        ,
+                                            },
                                         tint = Color.Unspecified
                                     )
-                                    Spacer(Modifier.width(9.hdp()))
+                                    Spacer(Modifier.width(9.sdp()))
                                     Text(
                                         draggableItem.text,
                                         modifier = Modifier.weight(1f),
@@ -285,7 +292,7 @@ fun CustomPopup(
                                                 email = ""
                                             }
                                         },
-                                        modifier = Modifier.size(40.hdp(), 20.hdp()),
+                                        modifier = Modifier.size(40.sdp(), 20.sdp()),
                                         colors = SwitchDefaults.colors(
                                             uncheckedThumbColor = Color(0xFFBEBEBE),
                                             uncheckedTrackColor = Color.Unspecified,
@@ -299,52 +306,53 @@ fun CustomPopup(
                             }
                         }
                     }
-                //}
-                Spacer(Modifier.height(20.hdp()))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                    //}
+                    Spacer(Modifier.height(20.sdp()))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            stringResource(R.string.remember_my_choice),
+                            color = Color(0xFF636363),
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Switch(
+                            checked = checkedChoice,
+                            { checkedChoice = it },
+                            modifier = Modifier.size(40.sdp(), 21.sdp()),
+                            colors = SwitchDefaults.colors(
+                                uncheckedThumbColor = Color(0xFFBEBEBE),
+                                uncheckedTrackColor = Color.Unspecified,
+                                uncheckedBorderColor = Color(0xFFBEBEBE),
+                                checkedThumbColor = Color(0xFF212120),
+                                checkedTrackColor = Color.Unspecified,
+                                checkedBorderColor = Color(0xFFBEBEBE),
+                            )
+                        )
+                    }
+                    Spacer(Modifier.height(25.sdp()))
+                    GreenButton(
+                        text = stringResource(R.string.send_the_code),
+                        onClick = {
+                            val ways = emptyList<String>().toMutableList()
+                            items.forEach { draggableItem ->
+                                if (switchStates[draggableItem.text]!!) {
+                                    ways += draggableItem.text
+                                }
+                            }
+                            if (ways.isNotEmpty())
+                                sendCode(ways)
+                        }
+                    )
+                    Spacer(Modifier.height(20.sdp()))
                     Text(
-                        stringResource(R.string.remember_my_choice),
-                        color = Color(0xFF636363),
+                        stringResource(R.string.send_to_another_number),
+                        modifier = Modifier.clickable { onChangeVisible(false) },
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    Switch(
-                        checked = checkedChoice,
-                        { checkedChoice = it },
-                        modifier = Modifier.size(40.hdp(), 21.hdp()),
-                        colors = SwitchDefaults.colors(
-                            uncheckedThumbColor = Color(0xFFBEBEBE),
-                            uncheckedTrackColor = Color.Unspecified,
-                            uncheckedBorderColor = Color(0xFFBEBEBE),
-                            checkedThumbColor = Color(0xFF212120),
-                            checkedTrackColor = Color.Unspecified,
-                            checkedBorderColor = Color(0xFFBEBEBE),
-                        )
-                    )
                 }
-                Spacer(Modifier.height(25.hdp()))
-                GreenButton(
-                    text = stringResource(R.string.send_the_code),
-                    onClick = {
-                        val ways = emptyList<String>().toMutableList()
-                        items.forEach { draggableItem ->
-                            if (switchStates[draggableItem.text]!!) {
-                                ways += draggableItem.text
-                            }
-                        }
-                        if (ways.isNotEmpty())
-                            sendCode(ways)
-                    }
-                )
-                Spacer(Modifier.height(20.hdp()))
-                Text(
-                    stringResource(R.string.send_to_another_number),
-                    modifier = Modifier.clickable { onChangeVisible(false) },
-                    style = MaterialTheme.typography.bodyLarge
-                )
             }
         }
     }
@@ -356,7 +364,7 @@ fun CustomPopup(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         BackWhiteButton({ onChangeVisible(false) })
-        Spacer(Modifier.height(24.hdp()))
+        Spacer(Modifier.height(24.sdp()))
     }
      */
     if (isEnterEmail) {
@@ -394,36 +402,36 @@ fun CustomEmptyDevicesPopup(
             contentAlignment = Alignment.Center
         ) {
             Surface(
-                modifier = Modifier.width(310.hdp()),
+                modifier = Modifier.width(310.sdp()),
                 shape = MaterialTheme.shapes.large,
                 color = Color.White,
-                shadowElevation = 2.hdp()
+                shadowElevation = 2.sdp()
             ) {
                 Column(
-                    modifier = Modifier.padding(vertical = 30.hdp(), horizontal = 25.hdp()),
+                    modifier = Modifier.padding(vertical = 30.sdp(), horizontal = 25.sdp()),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.comment_info),
                         contentDescription = null,
-                        modifier = Modifier.size(28.hdp()),
+                        modifier = Modifier.size(28.sdp()),
                         tint = Color.Unspecified
                     )
-                    Spacer(Modifier.height(21.hdp()))
+                    Spacer(Modifier.height(21.sdp()))
                     Text(
                         stringResource(R.string.ask_add_new_device),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge
                     )
-                    Spacer(Modifier.height(53.hdp()))
+                    Spacer(Modifier.height(53.sdp()))
                     GreenMediumButton(
-                        modifier = Modifier.width(260.hdp()),
+                        modifier = Modifier.width(260.sdp()),
                         icon = R.drawable.plus,
                         text = stringResource(R.string.link_device),
                         onClick = toBindingScreen
                     )
-                    Spacer(Modifier.height(20.hdp()))
+                    Spacer(Modifier.height(20.sdp()))
                     Text(
                         stringResource(R.string.problems_with_linking),
                         style = MaterialTheme.typography.bodyLarge
@@ -450,21 +458,21 @@ fun CustomListPopup(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black.copy(alpha = 0.2f))
-                .padding(start = 15.hdp(), top = 96.hdp(), end = 15.hdp())
+                .padding(start = 15.sdp(), top = 96.sdp(), end = 15.sdp())
                 .clickable { changeIsShow(false) },
             contentAlignment = alignment
         ) {
             Surface(
-                modifier = Modifier.width(246.hdp()),
+                modifier = Modifier.width(246.sdp()),
                 shape = MaterialTheme.shapes.large,
                 color = Color.White,
-                shadowElevation = 2.hdp()
+                shadowElevation = 2.sdp()
             ) {
                 Column(
                     modifier = Modifier.padding(
-                        start = 20.hdp(),
-                        top = 26.hdp(),
-                        bottom = 37.hdp()
+                        start = 20.sdp(),
+                        top = 26.sdp(),
+                        bottom = 37.sdp()
                     )
                 ) {
                     Text(
@@ -473,7 +481,7 @@ fun CustomListPopup(
                         style = MaterialTheme.typography.bodySmall
                     )
                     listLabels.forEach { item ->
-                        Spacer(Modifier.height(20.hdp()))
+                        Spacer(Modifier.height(20.sdp()))
                         Text(
                             stringResource(item),
                             modifier = Modifier.clickable {
@@ -490,6 +498,8 @@ fun CustomListPopup(
 
 @Composable
 fun CustomDiagnosisPopup(
+    typeStatus: Device.TypeStatus,
+    onChangeStatus: (Device.TypeStatus) -> Unit,
     onChangeVisible: (Boolean) -> Unit,
     breakdowns: List<Long> = emptyList()
 ) {
@@ -505,14 +515,14 @@ fun CustomDiagnosisPopup(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(Modifier.size(330.hdp(), 200.hdp()).clickable { onChangeVisible(false) })
+                Spacer(Modifier.size(330.sdp(), 160.sdp()).clickable { onChangeVisible(false) })
                 Surface(
-                    modifier = Modifier.width(330.hdp()),
-                    shape = RoundedCornerShape(10.hdp()),
+                    modifier = Modifier.width(330.sdp()),
+                    shape = RoundedCornerShape(10.sdp()),
                     color = Color.White
                 ) {
                     Column(
-                        modifier = Modifier.padding(15.hdp())
+                        modifier = Modifier.padding(15.sdp())
                     ) {
                         Column {
                             Text(
@@ -526,8 +536,8 @@ fun CustomDiagnosisPopup(
                             )
                         }
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 15.hdp()),
-                            1.hdp(),
+                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
                         Column {
@@ -542,8 +552,8 @@ fun CustomDiagnosisPopup(
                             )
                         }
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 15.hdp()),
-                            1.hdp(),
+                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
                         Column {
@@ -557,32 +567,90 @@ fun CustomDiagnosisPopup(
                                 style = MaterialTheme.typography.labelMedium
                             )
                         }
-                        Spacer(Modifier.height(15.hdp()))
+                        HorizontalDivider(
+                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            1.sdp(),
+                            Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                        )
+                        Column {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    typeStatus == Device.TypeStatus.Available,
+                                    { onChangeStatus(Device.TypeStatus.Available) },
+                                    modifier = Modifier.size(24.sdp()),
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = Color(0xFF12CD4A)
+                                    )
+                                )
+                                Spacer(Modifier.width(15.sdp()))
+                                Text(
+                                    stringResource(R.string.available),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    typeStatus == Device.TypeStatus.Ready,
+                                    { onChangeStatus(Device.TypeStatus.Ready) },
+                                    modifier = Modifier.size(24.sdp()),
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = Color(0xFF12CD4A)
+                                    )
+                                )
+                                Spacer(Modifier.width(15.sdp()))
+                                Text(
+                                    stringResource(R.string.ready),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    typeStatus == Device.TypeStatus.RequiresRepair,
+                                    { onChangeStatus(Device.TypeStatus.RequiresRepair) },
+                                    modifier = Modifier.size(24.sdp()),
+                                    colors = CheckboxDefaults.colors(
+                                        checkedColor = Color(0xFF12CD4A)
+                                    )
+                                )
+                                Spacer(Modifier.width(15.sdp()))
+                                Text(
+                                    stringResource(R.string.requires_repair),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(15.sdp()))
                         GreenMediumButton(
                             text ="Обратиться в сервис",
                             onClick = {}
                         )
                     }
                 }
-                Spacer(Modifier.size(330.hdp(), 260.hdp()).clickable { onChangeVisible(false) })
+                Spacer(Modifier.size(330.sdp(), 60.sdp()).clickable { onChangeVisible(false) })
             }
 
             items(breakdowns) { item ->
                 Surface(
-                    modifier = Modifier.width(310.hdp()),
-                    shape = RoundedCornerShape(10.hdp()),
+                    modifier = Modifier.width(310.sdp()),
+                    shape = RoundedCornerShape(10.sdp()),
                     color = Color.White
                 ) {
                     Column(
-                        modifier = Modifier.padding(12.hdp())
+                        modifier = Modifier.padding(12.sdp())
                     ) {
                         Text(
                             "Вышел из строя механизм затвора дверей. Был проведён ремонт в тех. сервисе X",
                             style = MaterialTheme.typography.bodyLarge
                         )
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 12.hdp()),
-                            1.hdp(),
+                            Modifier.fillMaxWidth().padding(vertical = 12.sdp()),
+                            1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
                         Row(
@@ -601,11 +669,11 @@ fun CustomDiagnosisPopup(
                         }
                     }
                 }
-                Spacer(Modifier.size(330.hdp(), 12.hdp()).clickable { onChangeVisible(false) })
+                Spacer(Modifier.size(330.sdp(), 12.sdp()).clickable { onChangeVisible(false) })
             }
 
             item {
-                Spacer(Modifier.size(330.hdp(), 100.hdp()).clickable { onChangeVisible(false) })
+                Spacer(Modifier.size(330.sdp(), 100.sdp()).clickable { onChangeVisible(false) })
             }
         }
     }
@@ -628,16 +696,16 @@ fun CustomCommentsPopup(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(Modifier.size(330.hdp(), 200.hdp()).clickable { onChangeVisible(false) })
+                Spacer(Modifier.size(330.sdp(), 200.sdp()).clickable { onChangeVisible(false) })
             }
             items(8) {
                 Surface(
-                    modifier = Modifier.width(330.hdp()),
-                    shape = RoundedCornerShape(10.hdp()),
+                    modifier = Modifier.width(330.sdp()),
+                    shape = RoundedCornerShape(10.sdp()),
                     color = Color.White
                 ) {
                     Column(
-                        modifier = Modifier.padding(15.hdp())
+                        modifier = Modifier.padding(15.sdp())
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -652,8 +720,8 @@ fun CustomCommentsPopup(
                             }
                         }
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 15.hdp()),
-                            1.hdp(),
+                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
                         Text(
@@ -662,11 +730,11 @@ fun CustomCommentsPopup(
                         )
                     }
                 }
-                Spacer(Modifier.size(330.hdp(), 15.hdp()).clickable { onChangeVisible(false) })
+                Spacer(Modifier.size(330.sdp(), 15.sdp()).clickable { onChangeVisible(false) })
             }
 
             item {
-                Spacer(Modifier.size(330.hdp(), 100.hdp()).clickable { onChangeVisible(false) })
+                Spacer(Modifier.size(330.sdp(), 100.sdp()).clickable { onChangeVisible(false) })
             }
         }
     }
@@ -684,8 +752,8 @@ fun round(fl: Float): Int {
 fun FullScreenBox() {
     // Получаем размеры экрана
     val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.hdp()
-    val screenHeight = configuration.screenHeightDp.hdp()
+    val screenWidth = configuration.screenWidthDp.sdp()
+    val screenHeight = configuration.screenHeightDp.sdp()
 
     Box(
         modifier = Modifier
@@ -720,19 +788,19 @@ fun CustomEmailPopup(
 
     Dialog({}) {
         Surface(
-            modifier = Modifier.width(350.hdp()),
+            modifier = Modifier.width(350.sdp()),
             shape = MaterialTheme.shapes.large,
             color = Color.White
         ) {
             Column(
-                modifier = Modifier.padding(30.hdp()),
+                modifier = Modifier.padding(30.sdp()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     stringResource(R.string.specify_the_email),
                     style = MaterialTheme.typography.titleMedium
                 )
-                Spacer(Modifier.height(40.hdp()))
+                Spacer(Modifier.height(40.sdp()))
                 EmailTextField(
                     email = value,
                     placeholder = stringResource(R.string.your_email),
@@ -740,12 +808,12 @@ fun CustomEmailPopup(
                     onDone = { onDone(value) },
                     isError = isError
                 )
-                Spacer(Modifier.height(25.hdp()))
+                Spacer(Modifier.height(25.sdp()))
                 GreenButton(
                     text = stringResource(R.string.confirm),
                     onClick = { onDone(value) }
                 )
-                Spacer(Modifier.height(10.hdp()))
+                Spacer(Modifier.height(10.sdp()))
                 WhiteButton(
                     text = stringResource(R.string.cancellation),
                     onClick = onCancel
@@ -761,8 +829,8 @@ fun PreviewRowSwitch() {
     GeoBlinkerTheme {
         Row(
             modifier = Modifier
-                .padding(10.hdp())
-                .height(40.hdp())
+                .padding(10.sdp())
+                .height(40.sdp())
                 .fillMaxWidth()
             ,
             verticalAlignment = Alignment.CenterVertically
@@ -771,12 +839,12 @@ fun PreviewRowSwitch() {
                 imageVector = ImageVector.vectorResource(R.drawable.burger),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(16.hdp(), 16.hdp())
+                    .size(16.sdp(), 16.sdp())
                     .aspectRatio(1f)
                 ,
                 tint = Color.Unspecified
             )
-            Spacer(Modifier.width(9.hdp()))
+            Spacer(Modifier.width(9.sdp()))
             Text(
                 "Telegram",
                 modifier = Modifier.weight(1f),

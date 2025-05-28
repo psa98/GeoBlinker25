@@ -48,16 +48,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.Popup
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
-import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.CustomCommentsPopup
 import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomListPopup
-import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
 import com.example.geoblinker.ui.main.device.calculateDistance
@@ -271,6 +266,7 @@ fun ListScreen(
                                                 Icon(
                                                     imageVector = Icons.Filled.Build,
                                                     contentDescription = null,
+                                                    modifier = Modifier.size(24.sdp()),
                                                     tint = Color(0xFF12CD4A)
                                                 )
                                                 Text(
@@ -279,10 +275,9 @@ fun ListScreen(
                                                 )
                                             }
                                             HorizontalDivider(
-                                                Modifier.fillMaxWidth()
-                                                    .padding(vertical = 15.sdp()),
+                                                Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
                                                 1.sdp(),
-                                                Color.LightGray
+                                                Color(0xFFDAD9D9).copy(alpha = 0.5f)
                                             )
                                             Row(
                                                 modifier = Modifier.fillMaxWidth(),
@@ -295,6 +290,7 @@ fun ListScreen(
                                                     Icon(
                                                         imageVector = Icons.Filled.Speed,
                                                         contentDescription = null,
+                                                        modifier = Modifier.size(24.sdp()),
                                                         tint = Color(0xFF12CD4A)
                                                     )
                                                     Spacer(Modifier.width(12.sdp()))
@@ -304,19 +300,21 @@ fun ListScreen(
                                                     )
                                                 }
                                                 Row(
-                                                    modifier = Modifier.clickable {
-                                                        isShowComments = true
-                                                    },
+                                                    modifier = Modifier.clickable { isShowComments = true },
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    Icon(
-                                                        imageVector = Icons.Filled.StarRate,
-                                                        contentDescription = null,
-                                                        tint = Color.Yellow
-                                                    )
-                                                    Spacer(Modifier.width(12.sdp()))
+                                                    for (i in 1..5) {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.StarRate,
+                                                            contentDescription = null,
+                                                            modifier = Modifier.size(24.sdp()),
+                                                            tint = Color.Yellow
+                                                        )
+                                                        Spacer(Modifier.width(4.sdp()))
+                                                    }
+                                                    Spacer(Modifier.width(8.sdp()))
                                                     Text(
-                                                        "5/5",
+                                                        "8",
                                                         style = MaterialTheme.typography.labelMedium
                                                     )
                                                 }
@@ -405,6 +403,8 @@ fun ListScreen(
 
     if (isShowDiagnosis) {
         CustomDiagnosisPopup(
+            device.typeStatus,
+            { viewModel.updateDevice(device.copy(typeStatus = it)) },
             { isShowDiagnosis = false },
             listOf(
                 device.bindingTime,

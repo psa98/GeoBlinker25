@@ -25,7 +25,6 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.RedButton
 import com.example.geoblinker.ui.main.DeviceViewModel
-import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -57,27 +56,27 @@ fun DeviceDetachOneScreen(
                 )
             )
         }
-        Spacer(Modifier.height(10.hdp()))
+        Spacer(Modifier.height(10.sdp()))
         Text(
             stringResource(R.string.detach_device),
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(53.hdp()))
+        Spacer(Modifier.height(53.sdp()))
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.triangle_warning),
             contentDescription = null,
             modifier = Modifier.size(28.sdp()),
             tint = Color.Unspecified
         )
-        Spacer(Modifier.height(15.hdp()))
+        Spacer(Modifier.height(15.sdp()))
         Text(
             "${stringResource(R.string.label_detach_device)} “${device.name}”?",
             color = Color(0xFFC4162D),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
         )
-        Spacer(Modifier.height(18.hdp()))
+        Spacer(Modifier.height(18.sdp()))
         Row(
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -91,14 +90,14 @@ fun DeviceDetachOneScreen(
                 style = MaterialTheme.typography.titleMedium
             )
         }
-        Spacer(Modifier.height(63.hdp()))
+        Spacer(Modifier.height(63.sdp()))
         Text(
             stringResource(R.string.subtitle_detach_device),
             color = Color(0xFF737373),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(75.hdp()))
+        Spacer(Modifier.height(75.sdp()))
         Column(
             modifier = Modifier.width(330.sdp()),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -112,7 +111,7 @@ fun DeviceDetachOneScreen(
                     toTwo(name, imei)
                 }
             )
-            Spacer(Modifier.height(15.hdp()))
+            Spacer(Modifier.height(15.sdp()))
             BlackMediumButton(
                 text = stringResource(R.string.cancellation),
                 onClick = toBack

@@ -9,7 +9,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 
 @Database(
     entities = [Device::class, TypeSignal::class, Signal::class, News::class], // Ваши Entity-классы
-    version = 6
+    version = 7
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao // Метод для доступа к DAO
@@ -18,6 +18,16 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun newsDao(): NewsDao
 
     companion object {
+        private val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        ALTER TABLE 'devices' ADD COLUMN 'typeStatus' TEXT NOT NULL DEFAULT 'Available'
+                    """.trimIndent()
+                )
+            }
+        }
+
         private val MIGRATION_5_6 = object : Migration(5, 6) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -113,6 +123,7 @@ abstract class AppDatabase : RoomDatabase() {
                     .addMigrations(MIGRATION_3_4)
                     .addMigrations(MIGRATION_4_5)
                     .addMigrations(MIGRATION_5_6)
+                    .addMigrations(MIGRATION_6_7)
                     .build()
                 INSTANCE = instance
                 instance

@@ -82,4 +82,7 @@
     <string name="map_search">Поиск по карте</string>
     <string name="find">Найти</string>
     <string name="add_location_permissions">Добавьте в разрешения вашу геопозицию. Не волнуйтесь, мы не собираем данные о вашем местоположении. Ваше местоположение нужно только для корректной работы приложения.</string>
+    <string name="available">В доступе</string>
+    <string name="ready">Готов к работе</string>
+    <string name="requires_repair">Требуется ремонт</string>
 </resources>

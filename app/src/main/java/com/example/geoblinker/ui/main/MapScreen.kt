@@ -10,7 +10,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.animateIntOffsetAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -68,13 +66,10 @@ import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomCommentsPopup
 import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomEmptyDevicesPopup
-import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
-import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
-import com.example.geoblinker.ui.theme.wdp
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 
@@ -285,6 +280,7 @@ fun MapScreen(
     }
 
     CustomDevicePopup(
+        viewModel,
         selectedMarker,
         webView,
         { selectedMarker = null },
@@ -397,6 +393,7 @@ fun MapFromAssets(
     }
 
     CustomDevicePopup(
+        viewModel,
         selectedMarker,
         webView,
         { selectedMarker = null },
@@ -406,6 +403,7 @@ fun MapFromAssets(
 
 @Composable
 fun CustomDevicePopup(
+    viewModel: DeviceViewModel,
     selectedMarker: Device?,
     webView: WebView,
     onChangeValueToNull: () -> Unit,
@@ -416,7 +414,7 @@ fun CustomDevicePopup(
         var isShowDiagnosis by remember { mutableStateOf(false) }
         var isShowComments by remember { mutableStateOf(false) }
         val offsetYAnimated by animateIntAsState(
-            targetValue = if (isShowAdd) (-414).hdp().value.toInt() else (-290).hdp().value.toInt(),
+            targetValue = if (isShowAdd) (-414).sdp().value.toInt() else (-290).sdp().value.toInt(),
             label = ""
         )
 
@@ -525,15 +523,14 @@ fun CustomDevicePopup(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable {
-                                        isShowDiagnosis = true
-                                    },
+                                    .clickable { isShowDiagnosis = true },
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Build,
                                     contentDescription = null,
+                                    modifier = Modifier.size(24.sdp()),
                                     tint = Color(0xFF12CD4A)
                                 )
                                 Text(
@@ -544,7 +541,7 @@ fun CustomDevicePopup(
                             HorizontalDivider(
                                 Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
                                 1.sdp(),
-                                Color.Gray
+                                Color(0xFFDAD9D9).copy(alpha = 0.5f)
                             )
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -557,6 +554,7 @@ fun CustomDevicePopup(
                                     Icon(
                                         imageVector = Icons.Filled.Speed,
                                         contentDescription = null,
+                                        modifier = Modifier.size(24.sdp()),
                                         tint = Color(0xFF12CD4A)
                                     )
                                     Spacer(Modifier.width(12.sdp()))
@@ -569,14 +567,18 @@ fun CustomDevicePopup(
                                     modifier = Modifier.clickable { isShowComments = true },
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.StarRate,
-                                        contentDescription = null,
-                                        tint = Color.Yellow
-                                    )
-                                    Spacer(Modifier.width(12.sdp()))
+                                    for (i in 1..5) {
+                                        Icon(
+                                            imageVector = Icons.Filled.StarRate,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.sdp()),
+                                            tint = Color.Yellow
+                                        )
+                                        Spacer(Modifier.width(4.sdp()))
+                                    }
+                                    Spacer(Modifier.width(8.sdp()))
                                     Text(
-                                        "5/5",
+                                        "8",
                                         style = MaterialTheme.typography.labelMedium
                                     )
                                 }
@@ -589,6 +591,8 @@ fun CustomDevicePopup(
 
         if (isShowDiagnosis) {
             CustomDiagnosisPopup(
+                item.typeStatus,
+                { viewModel.updateDevice(item.copy(typeStatus = it)) },
                 { isShowDiagnosis = false },
                 listOf(
                     item.bindingTime,

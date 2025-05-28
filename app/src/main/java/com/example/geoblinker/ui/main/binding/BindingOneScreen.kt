@@ -37,7 +37,6 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.ImeiTextField
-import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 import com.example.geoblinker.ui.theme.ssp
 import com.google.mlkit.vision.barcode.BarcodeScanner

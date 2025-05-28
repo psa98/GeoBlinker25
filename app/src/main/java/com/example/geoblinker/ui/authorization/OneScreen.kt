@@ -1,11 +1,9 @@
 package com.example.geoblinker.ui.authorization
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +20,7 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.GreenButton
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
-import com.example.geoblinker.ui.theme.hdp
+import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun OneScreen(
@@ -33,31 +31,31 @@ fun OneScreen(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(Modifier.height(88.hdp()))
+        Spacer(Modifier.height(88.sdp()))
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.width(200.hdp()).height(135.hdp())
+            modifier = Modifier.width(200.sdp()).height(135.sdp())
         )
-        Spacer(Modifier.height(15.hdp()))
+        Spacer(Modifier.height(15.sdp()))
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(134.hdp()))
+        Spacer(Modifier.height(134.sdp()))
         GreenButton(
             icon = R.drawable.phone,
             text = stringResource(R.string.log_in_by_number),
             onClick = twoScreen
         )
-        Spacer(Modifier.height(20.hdp()))
+        Spacer(Modifier.height(20.sdp()))
         BlackButton(
             icon = R.drawable.user_add,
             text = stringResource(R.string.new_user),
             onClick = registrationScreen
         )
-        Spacer(Modifier.height(50.hdp()))
+        Spacer(Modifier.height(50.sdp()))
         Text(
             stringResource(R.string.problems_logging),
             style = MaterialTheme.typography.bodyLarge

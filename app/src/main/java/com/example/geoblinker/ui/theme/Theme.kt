@@ -55,7 +55,7 @@ fun GeoBlinkerTheme(
         else -> LightColorScheme
     }
     */
-    val sc = hsc()
+    val sc = sc()
     val configuration = LocalConfiguration.current
     fun Int.scaledSp(): androidx.compose.ui.unit.TextUnit {
         return (this * sc).sp
@@ -149,9 +149,9 @@ fun GeoBlinkerTheme(
     }
 
     val shapes = Shapes(
-        small = RoundedCornerShape(100.hdp()),
-        medium = RoundedCornerShape(16.hdp()),
-        large = RoundedCornerShape(30.hdp())
+        small = RoundedCornerShape(100.sdp()),
+        medium = RoundedCornerShape(16.sdp()),
+        large = RoundedCornerShape(30.sdp())
     )
 
     val colorScheme = LightColorScheme

@@ -33,8 +33,7 @@ import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.formatPhoneNumber
-import com.example.geoblinker.ui.theme.hdp
-import com.example.geoblinker.ui.theme.hdp
+import com.example.geoblinker.ui.theme.sdp
 import com.skydoves.cloudy.cloudy
 
 @Composable
@@ -53,19 +52,19 @@ fun TwoScreen(
         modifier = Modifier.fillMaxSize().cloudy(16, visiblePopup),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(88.hdp()))
+        Spacer(Modifier.height(88.sdp()))
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
-            modifier = Modifier.width(200.hdp()).height(135.hdp())
+            modifier = Modifier.width(200.sdp()).height(135.sdp())
         )
-        Spacer(Modifier.height(15.hdp()))
+        Spacer(Modifier.height(15.sdp()))
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(134.hdp()))
+        Spacer(Modifier.height(134.sdp()))
         PhoneNumberTextField(
             onValueChange = {
                 value = it
@@ -79,7 +78,7 @@ fun TwoScreen(
             },
             isError = isPhoneNumberIncorrect
         )
-        Spacer(Modifier.height(20.hdp()))
+        Spacer(Modifier.height(20.sdp()))
         BlackButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.enter),
@@ -105,15 +104,15 @@ fun TwoScreen(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.attention),
                 contentDescription = null,
-                modifier = Modifier.size(28.hdp()),
+                modifier = Modifier.size(28.sdp()),
                 tint = Color(0xFFC4162D)
             )
-            Spacer(Modifier.height(5.hdp()))
+            Spacer(Modifier.height(5.sdp()))
             Text(
                 stringResource(R.string.invalid_number),
                 style = MaterialTheme.typography.bodyLarge
             )
-            Spacer(Modifier.height(56.hdp()))
+            Spacer(Modifier.height(56.sdp()))
         }
     }
 
