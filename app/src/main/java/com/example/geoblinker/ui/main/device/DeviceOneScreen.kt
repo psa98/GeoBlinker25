@@ -23,6 +23,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
@@ -52,6 +54,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.window.Dialog
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
+import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.CustomCommentsPopup
@@ -241,7 +244,11 @@ fun DeviceOneScreen(
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Build,
+                                imageVector = when(device.typeStatus) {
+                                    Device.TypeStatus.Available -> Icons.Filled.LocationOn
+                                    Device.TypeStatus.Ready -> Icons.Filled.Home
+                                    Device.TypeStatus.RequiresRepair -> Icons.Filled.Build
+                                },
                                 contentDescription = null,
                                 modifier = Modifier.size(24.sdp()),
                                 tint = Color(0xFF12CD4A)
@@ -417,8 +424,17 @@ fun DeviceOneScreen(
 
     if (isShowDiagnosis) {
         CustomDiagnosisPopup(
-            device.typeStatus,
-            { viewModel.updateDevice(device.copy(typeStatus = it)) },
+            device,
+            {
+                if (it in arrayOf(Device.TypeStatus.Available, Device.TypeStatus.Ready))
+                    viewModel.updateDevice(device.copy(
+                        typeStatus = it,
+                        breakdownForecast = null,
+                        maintenanceRecommendations = null
+                    ))
+                else
+                    viewModel.updateDevice(device.copy(typeStatus = it))
+            },
             { isShowDiagnosis = false },
             listOf(
                 device.bindingTime,

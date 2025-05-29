@@ -105,6 +105,20 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
                     dateTime = Instant.now().toEpochMilli()
                 )
             )
+            if (_devices.value.isNotEmpty()) {
+                updateDevice(_devices.value[0].copy(
+                    typeStatus = Device.TypeStatus.RequiresRepair,
+                    breakdownForecast = "После очередного Пробега в 1000 км проверить колеса",
+                    maintenanceRecommendations = "Проверить колёса"
+                ))
+                if (_devices.value.size > 1) {
+                    updateDevice(_devices.value[1].copy(
+                        typeStatus = Device.TypeStatus.RequiresRepair,
+                        breakdownForecast = "У ТС часто короткие аренды",
+                        maintenanceRecommendations = "Необходимо проверить ТС"
+                    ))
+                }
+            }
         }
     }
 

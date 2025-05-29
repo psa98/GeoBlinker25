@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
@@ -50,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
+import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.CustomCommentsPopup
 import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomListPopup
@@ -83,7 +86,7 @@ fun ListScreen(
             }.getLastLocation()
         }
     }
-    Icons.Default.Build
+
     LaunchedEffect(Unit) {
         locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
@@ -264,7 +267,11 @@ fun ListScreen(
                                                 horizontalArrangement = Arrangement.SpaceBetween
                                             ) {
                                                 Icon(
-                                                    imageVector = Icons.Filled.Build,
+                                                    imageVector = when(item.typeStatus) {
+                                                        Device.TypeStatus.Available -> Icons.Filled.LocationOn
+                                                        Device.TypeStatus.Ready -> Icons.Filled.Home
+                                                        Device.TypeStatus.RequiresRepair -> Icons.Filled.Build
+                                                    },
                                                     contentDescription = null,
                                                     modifier = Modifier.size(24.sdp()),
                                                     tint = Color(0xFF12CD4A)
@@ -403,8 +410,17 @@ fun ListScreen(
 
     if (isShowDiagnosis) {
         CustomDiagnosisPopup(
-            device.typeStatus,
-            { viewModel.updateDevice(device.copy(typeStatus = it)) },
+            device,
+            {
+                if (it in arrayOf(Device.TypeStatus.Available, Device.TypeStatus.Ready))
+                    viewModel.updateDevice(device.copy(
+                        typeStatus = it,
+                        breakdownForecast = null,
+                        maintenanceRecommendations = null
+                    ))
+                else
+                    viewModel.updateDevice(device.copy(typeStatus = it))
+            },
             { isShowDiagnosis = false },
             listOf(
                 device.bindingTime,

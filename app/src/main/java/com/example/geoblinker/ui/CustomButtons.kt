@@ -557,3 +557,20 @@ fun OkButton(
         )
     }
 }
+
+@Composable
+fun CircleCheckbox(
+    checked: Boolean,
+    onCheckedChange: () -> Unit
+) {
+    Surface(
+        onClick = onCheckedChange,
+        modifier = Modifier.size(16.sdp()),
+        shape = RoundedCornerShape(100.sdp()),
+        color = if (checked) Color(0xFF12CD4A) else Color.Unspecified,
+        border = BorderStroke(
+            1.sdp(),
+            Color(0xFFDAD9D9).copy(alpha = 0.5f)
+        )
+    ) {}
+}

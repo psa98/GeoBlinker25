@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -498,7 +499,7 @@ fun CustomListPopup(
 
 @Composable
 fun CustomDiagnosisPopup(
-    typeStatus: Device.TypeStatus,
+    device: Device,
     onChangeStatus: (Device.TypeStatus) -> Unit,
     onChangeVisible: (Boolean) -> Unit,
     breakdowns: List<Long> = emptyList()
@@ -531,7 +532,7 @@ fun CustomDiagnosisPopup(
                                 style = MaterialTheme.typography.labelMedium
                             )
                             Text(
-                                "Поломок не обнаружено",
+                                device.breakdownForecast ?: "Поломок не обнаружено",
                                 style = MaterialTheme.typography.labelMedium
                             )
                         }
@@ -547,7 +548,7 @@ fun CustomDiagnosisPopup(
                                 style = MaterialTheme.typography.labelMedium
                             )
                             Text(
-                                "Нет рекомендаций",
+                                device.maintenanceRecommendations ?: "Нет рекомендаций",
                                 style = MaterialTheme.typography.labelMedium
                             )
                         }
@@ -576,13 +577,9 @@ fun CustomDiagnosisPopup(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Checkbox(
-                                    typeStatus == Device.TypeStatus.Available,
-                                    { onChangeStatus(Device.TypeStatus.Available) },
-                                    modifier = Modifier.size(24.sdp()),
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = Color(0xFF12CD4A)
-                                    )
+                                CircleCheckbox(
+                                    device.typeStatus == Device.TypeStatus.Available,
+                                    { onChangeStatus(Device.TypeStatus.Available) }
                                 )
                                 Spacer(Modifier.width(15.sdp()))
                                 Text(
@@ -593,13 +590,9 @@ fun CustomDiagnosisPopup(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Checkbox(
-                                    typeStatus == Device.TypeStatus.Ready,
-                                    { onChangeStatus(Device.TypeStatus.Ready) },
-                                    modifier = Modifier.size(24.sdp()),
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = Color(0xFF12CD4A)
-                                    )
+                                CircleCheckbox(
+                                    device.typeStatus == Device.TypeStatus.Ready,
+                                    { onChangeStatus(Device.TypeStatus.Ready) }
                                 )
                                 Spacer(Modifier.width(15.sdp()))
                                 Text(
@@ -610,13 +603,9 @@ fun CustomDiagnosisPopup(
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Checkbox(
-                                    typeStatus == Device.TypeStatus.RequiresRepair,
-                                    { onChangeStatus(Device.TypeStatus.RequiresRepair) },
-                                    modifier = Modifier.size(24.sdp()),
-                                    colors = CheckboxDefaults.colors(
-                                        checkedColor = Color(0xFF12CD4A)
-                                    )
+                                CircleCheckbox(
+                                    device.typeStatus == Device.TypeStatus.RequiresRepair,
+                                    { onChangeStatus(Device.TypeStatus.RequiresRepair) }
                                 )
                                 Spacer(Modifier.width(15.sdp()))
                                 Text(

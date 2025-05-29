@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
@@ -528,7 +530,11 @@ fun CustomDevicePopup(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.Build,
+                                    imageVector = when(item.typeStatus) {
+                                        Device.TypeStatus.Available -> Icons.Filled.LocationOn
+                                        Device.TypeStatus.Ready -> Icons.Filled.Home
+                                        Device.TypeStatus.RequiresRepair -> Icons.Filled.Build
+                                    },
                                     contentDescription = null,
                                     modifier = Modifier.size(24.sdp()),
                                     tint = Color(0xFF12CD4A)
@@ -591,8 +597,17 @@ fun CustomDevicePopup(
 
         if (isShowDiagnosis) {
             CustomDiagnosisPopup(
-                item.typeStatus,
-                { viewModel.updateDevice(item.copy(typeStatus = it)) },
+                item,
+                {
+                    if (it in arrayOf(Device.TypeStatus.Available, Device.TypeStatus.Ready))
+                        viewModel.updateDevice(item.copy(
+                            typeStatus = it,
+                            breakdownForecast = null,
+                            maintenanceRecommendations = null
+                        ))
+                    else
+                        viewModel.updateDevice(item.copy(typeStatus = it))
+                },
                 { isShowDiagnosis = false },
                 listOf(
                     item.bindingTime,
