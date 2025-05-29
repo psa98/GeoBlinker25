@@ -35,12 +35,9 @@ fun GeoBlinkerScreen(
     navController: NavHostController = rememberNavController()
 ) {
     Scaffold { innerPadding ->
-        BoxWithConstraints(Modifier.fillMaxSize()) {
-            Log.i("Height", maxHeight.toString())
-        }
         NavHost(
             navController = navController,
-            startDestination = GeoBlinkerScreen.Main.name, // TODO: При дебаге Main
+            startDestination = GeoBlinkerScreen.Authorization.name, // TODO: При дебаге Main
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {

@@ -56,6 +56,7 @@ dependencies {
     implementation(libs.transport.runtime)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.play.services.maps)
+    implementation(libs.core.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -76,7 +77,9 @@ dependencies {
     implementation(libs.gms.play.services.location)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material.icons.core)
+    implementation(libs.coil.compose)
 
+    // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation (libs.androidx.runtime.livedata)

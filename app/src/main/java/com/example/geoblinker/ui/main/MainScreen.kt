@@ -1,6 +1,7 @@
 package com.example.geoblinker.ui.main
 
 import android.annotation.SuppressLint
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,9 +30,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavHostController
@@ -41,6 +45,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import coil.compose.AsyncImage
 import com.example.geoblinker.R
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.GreenSmallButton
@@ -126,8 +131,11 @@ fun Notifications(
 fun TopBar(
     currentRoute: String,
     navController: NavHostController,
-    countNotifications: Int
+    countNotifications: Int,
+    viewModel: ProfileViewModel
 ) {
+    val avatarUri by viewModel.avatarUri.collectAsState()
+
     Surface(
         modifier = Modifier.shadow(
             4.sdp(),
@@ -145,16 +153,31 @@ fun TopBar(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(50.sdp())
-                    .clickable {
-                        navController.navigate(MainScreen.Profile.name)
-                    },
-                tint = Color.Unspecified
-            )
+            if (avatarUri == null) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(50.sdp())
+                        .clickable {
+                            navController.navigate(MainScreen.Profile.name)
+                        },
+                    tint = Color.Unspecified
+                )
+            }
+            else {
+                AsyncImage(
+                    avatarUri,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(50.sdp())
+                        .clickable {
+                            navController.navigate(MainScreen.Profile.name)
+                        },
+                    contentScale = ContentScale.Crop
+                )
+            }
             Spacer(Modifier.width(10.sdp()))
             if (currentRoute == MainScreen.Map.name) {
                 GreenSmallButton(
@@ -188,11 +211,24 @@ fun TopBar(
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun MainScreen(
     viewModel: DeviceViewModel,
     navController: NavHostController = rememberNavController(),
 ) {
+    // Получаем контекст
+    val context = LocalContext.current
+
+    // Получаем Application из контекста
+    val application = remember(context) {
+        context.applicationContext as Application
+    }
+
+    // Инициализируем ViewModel с application
+    val profileViewModel: ProfileViewModel = remember {
+        ProfileViewModel(application)
+    }
     val device by viewModel.device.collectAsState()
     val signals by viewModel.signals.collectAsState()
     val news by viewModel.news.collectAsState()
@@ -383,6 +419,8 @@ fun MainScreen(
             ) {
                 currentRoute = MainScreen.Profile.name
                 ProfileScreen(
+                    profileViewModel,
+
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -400,6 +438,7 @@ fun MainScreen(
     TopBar(
         currentRoute,
         navController,
-        countNotifications
+        countNotifications,
+        profileViewModel
     )
 }

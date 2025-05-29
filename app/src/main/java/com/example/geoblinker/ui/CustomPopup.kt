@@ -1,7 +1,6 @@
 package com.example.geoblinker.ui
 
 import android.util.Log
-import androidx.annotation.InspectableProperty
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateOffsetAsState

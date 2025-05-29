@@ -3,6 +3,7 @@ accompanistPermissionsVersion = "0.34.0"
 agp = "8.7.3"
 barcodeScanning = "17.2.0"
 cameraCamera2 = "1.3.0"
+coilComposeVersion = "2.6.0"
 constraintlayoutCompose = "1.0.1"
 firebaseBom = "33.13.0"
 kotlin = "2.0.0"
@@ -23,6 +24,7 @@ threetenabp = "1.4.4"
 transportRuntimeVersion = "2.2.6"
 constraintlayoutVersion = "2.2.1"
 playServicesMapsVersion = "19.2.0"
+coreKtxVersion = "1.6.1"
 
 [libraries]
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraCamera2" }
@@ -34,6 +36,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 barcode-scanning = { module = "com.google.mlkit:barcode-scanning", version.ref = "barcodeScanning" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilComposeVersion" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
@@ -64,6 +67,7 @@ threetenabp = { module = "com.jakewharton.threetenabp:threetenabp", version.ref 
 transport-runtime = { group = "com.google.android.datatransport", name = "transport-runtime", version.ref = "transportRuntimeVersion" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayoutVersion" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMapsVersion" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

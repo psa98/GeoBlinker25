@@ -1,50 +1,91 @@
 package com.example.geoblinker.ui.main.profile
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.Popup
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.content.ContextCompat
+import coil.compose.AsyncImage
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.WhiteMediumButton
+import com.example.geoblinker.ui.main.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun ProfileScreen(
+    viewModel: ProfileViewModel,
     toBack: () -> Unit
 ) {
+    var isShow by remember { mutableStateOf(false) }
+    val avatarUri by viewModel.avatarUri.collectAsState()
+    val errorMessage by viewModel.errorMessage.collectAsState()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
-            contentDescription = null,
-            modifier = Modifier.size(84.sdp()),
-            tint = Color.Unspecified
-        )
+        if (avatarUri == null) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
+                contentDescription = null,
+                modifier = Modifier.size(84.sdp()).clickable { isShow = true },
+                tint = Color.Unspecified
+            )
+        }
+        else {
+            AsyncImage(
+                avatarUri,
+                contentDescription = null,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(84.sdp())
+                    .clickable { isShow = true },
+                contentScale = ContentScale.Crop
+            )
+        }
         Spacer(Modifier.height(10.sdp()))
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -181,4 +222,146 @@ fun ProfileScreen(
     BackButton(
         onClick = toBack
     )
+
+    if (isShow) {
+        val context = LocalContext.current
+        val pickImageLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.GetContent()
+        ) { uri ->
+            uri?.let { viewModel.handleSelectedImage(context, it) }
+        }
+
+        val permissionLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted ->
+            if (isGranted) {
+                // Если разрешение получено - запускаем выбор изображения
+                pickImageLauncher.launch("image/*")
+            } else {
+                viewModel.setErrorMessage("Доступ к галерее запрещен")
+            }
+        }
+
+        Popup {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        color = Color.Black.copy(alpha = 0.2f)
+                    )
+                    .clickable {
+                        isShow = false
+                    },
+                contentAlignment = Alignment.TopCenter
+            ) {
+                Surface(
+                    modifier = Modifier.width(264.sdp()).offset(y = 50.sdp()),
+                    color = Color.White,
+                    shape = RoundedCornerShape(16.sdp())
+                ) {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 20.sdp(),
+                            top = 25.sdp(),
+                            end = 20.sdp()
+                        ),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (avatarUri == null) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
+                                contentDescription = null,
+                                modifier = Modifier.size(125.sdp()).clickable { isShow = true },
+                                tint = Color.Unspecified
+                            )
+                        } else {
+                            AsyncImage(
+                                avatarUri,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .size(125.sdp())
+                                    .clickable { isShow = true },
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        Spacer(Modifier.height(25.sdp()))
+                        if (avatarUri == null) {
+                            Text(
+                                "Установить фото",
+                                modifier = Modifier.clickable {
+                                    // Проверяем разрешение
+                                    val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        Manifest.permission.READ_MEDIA_IMAGES
+                                    } else {
+                                        Manifest.permission.READ_EXTERNAL_STORAGE
+                                    }
+
+                                    if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                                        pickImageLauncher.launch("image/*")
+                                    } else {
+                                        permissionLauncher.launch(permission)
+                                    }
+                                },
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        }
+                        else {
+                            var isCheck by remember { mutableStateOf(false) }
+
+                            Text(
+                                "Сменить фото",
+                                modifier = Modifier.clickable {
+                                    isCheck = false
+                                    // Проверяем разрешение
+                                    val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                        Manifest.permission.READ_MEDIA_IMAGES
+                                    } else {
+                                        Manifest.permission.READ_EXTERNAL_STORAGE
+                                    }
+
+                                    if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+                                        pickImageLauncher.launch("image/*")
+                                    } else {
+                                        permissionLauncher.launch(permission)
+                                    }
+                                },
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                            if (isCheck) {
+                                Spacer(Modifier.height(40.sdp()))
+                                Text(
+                                    "Вы действительно желаете удалить фото аккаунта?",
+                                    color = Color(0xFFC4162D),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                            }
+                            Spacer(Modifier.height(15.sdp()))
+                            Text(
+                                "Удалить фото",
+                                modifier = Modifier.clickable {
+                                    if (!isCheck)
+                                        isCheck = true
+                                    else
+                                        viewModel.removeAvatar()
+                                },
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        }
+                        Spacer(Modifier.height(40.sdp()))
+                        errorMessage?.let {
+                            Text(
+                                it,
+                                color = Color(0xFFC4162D),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Spacer(Modifier.height(30.sdp()))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
