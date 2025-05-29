@@ -54,6 +54,7 @@ import com.example.geoblinker.ui.main.device.DeviceThreeScreen
 import com.example.geoblinker.ui.main.device.DeviceTwoScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
+import com.example.geoblinker.ui.main.profile.ProfileScreen
 import com.example.geoblinker.ui.theme.sdp
 
 enum class MainScreen {
@@ -71,7 +72,9 @@ enum class MainScreen {
     DeviceDetach,
     DeviceDetachOne,
     DeviceDetachTwo,
-    Notifications
+    Notifications,
+    Profile,
+    ProfileOne
 }
 
 @Composable
@@ -145,7 +148,11 @@ fun TopBar(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
                 contentDescription = null,
-                modifier = Modifier.size(50.sdp()),
+                modifier = Modifier
+                    .size(50.sdp())
+                    .clickable {
+                        navController.navigate(MainScreen.Profile.name)
+                    },
                 tint = Color.Unspecified
             )
             Spacer(Modifier.width(10.sdp()))
@@ -363,6 +370,20 @@ fun MainScreen(
                     name,
                     imei,
                     { navController.navigate(MainScreen.Map.name) }
+                )
+            }
+        }
+
+        navigation(
+            route = MainScreen.Profile.name,
+            startDestination = MainScreen.ProfileOne.name
+        ) {
+            composable(
+                route = MainScreen.ProfileOne.name
+            ) {
+                currentRoute = MainScreen.Profile.name
+                ProfileScreen(
+                    toBack = { navController.navigateUp() }
                 )
             }
         }

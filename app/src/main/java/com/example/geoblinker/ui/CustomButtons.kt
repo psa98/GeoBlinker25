@@ -3,7 +3,9 @@ package com.example.geoblinker.ui
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -69,11 +71,12 @@ fun GreenButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = modifier.background(
-                brush = greenGradient,
-                shape = MaterialTheme.shapes.large)
+            modifier = modifier
                 .size(310.sdp(), height.sdp())
-                .padding(1.sdp())
+                .background(
+                    brush = greenGradient,
+                    shape = MaterialTheme.shapes.large
+                )
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -103,7 +106,7 @@ fun GreenButton(
 
 @Composable
 fun GreenMediumButton(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     @DrawableRes icon: Int? = null,
     text: String,
     onClick: () -> Unit,
@@ -119,12 +122,12 @@ fun GreenMediumButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = modifier.background(
-                brush = greenGradient,
-                shape = shape)
-                .fillMaxWidth()
+            modifier = modifier
                 .height(height.sdp())
-                .padding(1.sdp())
+                .background(
+                    brush = greenGradient,
+                    shape = shape
+                )
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -154,7 +157,7 @@ fun GreenMediumButton(
 
 @Composable
 fun GreenMediumRightIconButton(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     @DrawableRes icon: Int? = null,
     text: String,
     onClick: () -> Unit,
@@ -169,12 +172,12 @@ fun GreenMediumRightIconButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = modifier.background(
-                brush = greenGradient,
-                shape = RoundedCornerShape(10.sdp()))
-                .fillMaxWidth()
+            modifier = modifier
                 .height(height.sdp())
-                .padding(1.sdp())
+                .background(
+                    brush = greenGradient,
+                    shape = RoundedCornerShape(10.sdp())
+                )
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -242,7 +245,6 @@ fun BlackButton(
                 brush = if (enabled) blackGradient else grayGradient,
                 shape = MaterialTheme.shapes.large)
                 .size(310.sdp(), height.sdp())
-                .padding(1.sdp()) // Компенсируем границу Surface
             ,
             enabled = enabled,
             shape = MaterialTheme.shapes.large,
@@ -273,7 +275,7 @@ fun BlackButton(
 
 @Composable
 fun BlackMediumButton(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     @DrawableRes icon: Int? = null,
     text: String,
     onClick: () -> Unit,
@@ -285,20 +287,21 @@ fun BlackMediumButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = modifier.background(
-                brush = if (enabled) blackGradient else grayGradient,
-                shape = RoundedCornerShape(10.sdp()))
-                .fillMaxWidth()
+            modifier = modifier
                 .height(55.sdp())
-                .padding(1.sdp()) // Компенсируем границу Surface
+                .background(
+                    brush = if (enabled) blackGradient else grayGradient,
+                    shape = RoundedCornerShape(10.sdp()))
             ,
             enabled = enabled,
             shape = RoundedCornerShape(10.sdp()),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent
-            )
+            ),
+            contentPadding = PaddingValues(0.sdp())
         ) {
             Row(
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -321,7 +324,7 @@ fun BlackMediumButton(
 
 @Composable
 fun WhiteButton(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier.fillMaxWidth(),
     @DrawableRes icon: Int? = null,
     text: String,
     onClick: () -> Unit,
@@ -334,12 +337,12 @@ fun WhiteButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = modifier.background(
-                brush = whiteGradient,
-                shape = MaterialTheme.shapes.large)
-                .fillMaxWidth()
+            modifier = modifier
                 .height(height.sdp())
-                .padding(1.sdp()) // Компенсируем границу Surface
+                .background(
+                    brush = whiteGradient,
+                    shape = MaterialTheme.shapes.large
+                )
             ,
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(
@@ -363,6 +366,36 @@ fun WhiteButton(
                     style = MaterialTheme.typography.headlineMedium
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun WhiteMediumButton(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(10.sdp()),
+        border = BorderStroke(1.sdp(), Color(0xFF999696))
+    ) {
+        Button(
+            onClick,
+            modifier = modifier
+                .height(55.sdp())
+                .background(
+                    brush = whiteGradient,
+                    shape = RoundedCornerShape(10.sdp())
+                ),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+        ) {
+            Text(
+                text,
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 }

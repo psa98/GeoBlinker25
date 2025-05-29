@@ -40,7 +40,7 @@ fun GeoBlinkerScreen(
         }
         NavHost(
             navController = navController,
-            startDestination = GeoBlinkerScreen.Authorization.name, // TODO: При дебаге Main
+            startDestination = GeoBlinkerScreen.Main.name, // TODO: При дебаге Main
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
