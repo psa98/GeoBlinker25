@@ -52,12 +52,13 @@ import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.WhiteMediumButton
-import com.example.geoblinker.ui.main.ProfileViewModel
+import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel,
+    viewModel: AvatarViewModel,
+    toSubscription: () -> Unit,
     toBack: () -> Unit
 ) {
     var isShow by remember { mutableStateOf(false) }
@@ -120,7 +121,7 @@ fun ProfileScreen(
         Spacer(Modifier.height(28.sdp()))
         GreenMediumButton(
             text = "Купить подписку",
-            onClick = {},
+            onClick = toSubscription,
             shape = RoundedCornerShape(10.sdp())
         )
         Spacer(Modifier.height(10.sdp()))

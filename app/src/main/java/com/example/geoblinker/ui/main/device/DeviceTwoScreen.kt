@@ -33,7 +33,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.geoblinker.R
 import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.main.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -176,5 +176,7 @@ fun DeviceTwoScreen(
         }
     }
 
-    BackButton { toBack() }
+    BackButton(
+        onClick = toBack
+    )
 }

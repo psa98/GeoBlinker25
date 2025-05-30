@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.RedButton
-import com.example.geoblinker.ui.main.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable

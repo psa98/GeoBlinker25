@@ -5,6 +5,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -525,15 +526,49 @@ fun BlueButton(
 
 @Composable
 fun BackButton(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    color: Color = Color.White,
+    notPosition: Boolean = false
 ) {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomCenter
-    ) {
+    if (!notPosition) {
         Box(
-            modifier = Modifier.offset(y = (-28).sdp())
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
         ) {
+            Box(
+                modifier = Modifier.offset(y = (-28).sdp())
+            ) {
+                Surface(
+                    modifier = Modifier.shadow(
+                        4.sdp(),
+                        RoundedCornerShape(100.sdp()),
+                        clip = false,
+                        ambientColor = Color.Black,
+                        spotColor = Color.Black.copy(0.25f)
+                    ),
+                    shape = RoundedCornerShape(100.sdp()),
+                    color = Color.White,
+                    border = BorderStroke(1.sdp(), Color.White)
+                ) {
+                    IconButton(
+                        onClick = onClick,
+                        modifier = Modifier
+                            .size(65.sdp(), 65.sdp())
+                            .padding(1.sdp()),
+                        colors = IconButtonDefaults.iconButtonColors(containerColor = color)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.back),
+                            contentDescription = stringResource(R.string.back),
+                            modifier = Modifier.size(24.sdp())
+                        )
+                    }
+                }
+            }
+        }
+    }
+    else {
+        Column {
             Surface(
                 modifier = Modifier.shadow(
                     4.sdp(),
@@ -551,7 +586,7 @@ fun BackButton(
                     modifier = Modifier
                         .size(65.sdp(), 65.sdp())
                         .padding(1.sdp()),
-                    colors = IconButtonDefaults.iconButtonColors(containerColor = Color(0xFFEFEFEF))
+                    colors = IconButtonDefaults.iconButtonColors(containerColor = color)
                 ) {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.back),
@@ -560,6 +595,7 @@ fun BackButton(
                     )
                 }
             }
+            Spacer(Modifier.height(28.sdp()))
         }
     }
 }

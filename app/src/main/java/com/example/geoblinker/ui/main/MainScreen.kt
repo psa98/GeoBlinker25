@@ -60,6 +60,12 @@ import com.example.geoblinker.ui.main.device.DeviceTwoScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
+import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
+import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
+import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
+import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 enum class MainScreen {
@@ -79,7 +85,11 @@ enum class MainScreen {
     DeviceDetachTwo,
     Notifications,
     Profile,
-    ProfileOne
+    ProfileOne,
+    Subscription,
+    SubscriptionOne,
+    SubscriptionTwo,
+    SubscriptionReady
 }
 
 @Composable
@@ -132,7 +142,7 @@ fun TopBar(
     currentRoute: String,
     navController: NavHostController,
     countNotifications: Int,
-    viewModel: ProfileViewModel
+    viewModel: AvatarViewModel
 ) {
     val avatarUri by viewModel.avatarUri.collectAsState()
 
@@ -215,20 +225,10 @@ fun TopBar(
 @Composable
 fun MainScreen(
     viewModel: DeviceViewModel,
+    avatarViewModel: AvatarViewModel,
+    subscriptionViewModel: SubscriptionViewModel,
     navController: NavHostController = rememberNavController(),
 ) {
-    // Получаем контекст
-    val context = LocalContext.current
-
-    // Получаем Application из контекста
-    val application = remember(context) {
-        context.applicationContext as Application
-    }
-
-    // Инициализируем ViewModel с application
-    val profileViewModel: ProfileViewModel = remember {
-        ProfileViewModel(application)
-    }
     val device by viewModel.device.collectAsState()
     val signals by viewModel.signals.collectAsState()
     val news by viewModel.news.collectAsState()
@@ -414,14 +414,49 @@ fun MainScreen(
             route = MainScreen.Profile.name,
             startDestination = MainScreen.ProfileOne.name
         ) {
+            currentRoute = MainScreen.Profile.name
             composable(
                 route = MainScreen.ProfileOne.name
             ) {
-                currentRoute = MainScreen.Profile.name
                 ProfileScreen(
-                    profileViewModel,
-
+                    avatarViewModel,
+                    toSubscription = { navController.navigate("${MainScreen.Subscription.name}/${MainScreen.Profile.name}") },
                     toBack = { navController.navigateUp() }
+                )
+            }
+        }
+
+        navigation(
+            route = "${MainScreen.Subscription.name}/{previousScreen}",
+            startDestination = MainScreen.SubscriptionOne.name
+        ) {
+            currentRoute = MainScreen.Subscription.name
+            composable(route = MainScreen.SubscriptionOne.name) { backStackEntry ->
+                backStackEntry.arguments?.getString("previousScreen")?.let {
+                    previousScreen = it
+                }
+                SubscriptionOneScreen(
+                    subscriptionViewModel,
+                    { navController.navigate(MainScreen.SubscriptionTwo.name) },
+                    { navController.navigate(previousScreen) }
+                )
+            }
+            composable(route = MainScreen.SubscriptionTwo.name) {
+                SubscriptionTwoScreen(
+                    subscriptionViewModel,
+                    {
+                        if (subscriptionViewModel.paySubscription())
+                            navController.navigate(MainScreen.SubscriptionReady.name)
+                        else {
+                            // TODO: добавить экран об ошибке оплаты
+                        }
+                    },
+                    { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.SubscriptionReady.name) {
+                SubscriptionReadyScreen(
+                    toBack = { navController.navigate(previousScreen) }
                 )
             }
         }
@@ -439,6 +474,6 @@ fun MainScreen(
         currentRoute,
         navController,
         countNotifications,
-        profileViewModel
+        avatarViewModel
     )
 }

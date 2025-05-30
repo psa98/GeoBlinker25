@@ -45,6 +45,7 @@ import com.example.geoblinker.data.News
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomListPopup
 import com.example.geoblinker.ui.greenGradient
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable

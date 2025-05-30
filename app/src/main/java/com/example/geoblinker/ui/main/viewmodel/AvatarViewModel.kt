@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.main
+package com.example.geoblinker.ui.main.viewmodel
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-class ProfileViewModel(application: Application): ViewModel() {
+class AvatarViewModel(application: Application): ViewModel() {
     // Используем application для доступа к ресурсам, SharedPreferences и т.д.
     @SuppressLint("StaticFieldLeak")
     private val context = application.applicationContext

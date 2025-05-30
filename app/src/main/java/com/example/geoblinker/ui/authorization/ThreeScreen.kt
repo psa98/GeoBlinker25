@@ -186,6 +186,7 @@ fun ThreeScreen(
                 isError = false
             } else
                 toBack()
-        }
+        },
+        color = Color(0xFFEFEFEF)
     )
 }

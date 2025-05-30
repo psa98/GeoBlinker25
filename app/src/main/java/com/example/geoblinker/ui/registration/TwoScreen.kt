@@ -186,6 +186,7 @@ fun TwoScreen(
                 isError = false
             } else
                 toBack()
-        }
+        },
+        color = Color(0xFFEFEFEF)
     )
 }

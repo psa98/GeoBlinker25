@@ -68,6 +68,7 @@ import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomEmptyDevicesPopup
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
 import com.google.android.gms.maps.model.LatLng
@@ -273,7 +274,9 @@ fun MapScreen(
                 }
 
                 if (dontSearch) {
-                    BackButton { dontSearch = false }
+                    BackButton(
+                        onClick = { dontSearch = false }
+                    )
                 }
             }
         }

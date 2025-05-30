@@ -119,7 +119,10 @@ fun OneScreen(
         Spacer(Modifier.height(56.sdp()))
     }
 
-    BackButton(toBack)
+    BackButton(
+        toBack,
+        color = Color(0xFFEFEFEF)
+    )
 
     if (visiblePopup) {
         LaunchedEffect(Unit) {

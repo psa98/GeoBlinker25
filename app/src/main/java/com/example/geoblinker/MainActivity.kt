@@ -8,7 +8,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Repository
-import com.example.geoblinker.ui.GeoBlinkerViewModel
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -36,8 +35,7 @@ class MainActivity : ComponentActivity() {
                         AppDatabase.getInstance(application).typeSignalDao(),
                         AppDatabase.getInstance(application).signalDao(),
                         AppDatabase.getInstance(application).newsDao()
-                    ),
-                    GeoBlinkerViewModel()
+                    )
                 )
             }
         }

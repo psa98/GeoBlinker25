@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.main
+package com.example.geoblinker.ui.main.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

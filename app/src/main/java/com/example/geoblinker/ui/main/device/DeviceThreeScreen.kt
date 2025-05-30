@@ -29,7 +29,7 @@ import com.example.geoblinker.R
 import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlueButton
-import com.example.geoblinker.ui.main.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -185,5 +185,7 @@ fun DeviceThreeScreen(
         )
     }
 
-    BackButton { toBack() }
+    BackButton(
+        onClick = toBack
+    )
 }

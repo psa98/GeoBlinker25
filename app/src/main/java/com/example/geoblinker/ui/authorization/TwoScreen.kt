@@ -92,7 +92,8 @@ fun TwoScreen(
     }
 
     BackButton(
-        onClick = toBack
+        onClick = toBack,
+        color = Color(0xFFEFEFEF)
     )
 
     if (isPhoneNumberIncorrect) {
