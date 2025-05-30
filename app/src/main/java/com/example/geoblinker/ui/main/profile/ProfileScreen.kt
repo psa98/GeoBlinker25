@@ -40,30 +40,37 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.window.Popup
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.example.geoblinker.R
+import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlackMediumButton
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.WhiteMediumButton
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun ProfileScreen(
     viewModel: AvatarViewModel,
+    profileViewModel: ProfileViewModel,
     toSubscription: () -> Unit,
     toBack: () -> Unit
 ) {
     var isShow by remember { mutableStateOf(false) }
     val avatarUri by viewModel.avatarUri.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val subscription by profileViewModel.subscription.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -105,19 +112,23 @@ fun ProfileScreen(
             )
         }
         Spacer(Modifier.height(10.sdp()))
-        Row {
-            Text(
-                "Подписка активна до: ",
-                color = Color(0xFF737373),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Text(
-                "28.05.2025",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.SemiBold
-                )
-            )
-        }
+        Text(
+            buildAnnotatedString {
+                append("Подписка активна до: ")
+                withStyle(
+                    style = SpanStyle(
+                        color = MaterialTheme.typography.bodyMedium.color,
+                        fontFamily = MaterialTheme.typography.bodyMedium.fontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize
+                    )
+                ) {
+                    append(TimeUtils.formatToLocalTimeDate(subscription))
+                }
+            },
+            color = Color(0xFF737373),
+            style = MaterialTheme.typography.bodyMedium
+        )
         Spacer(Modifier.height(28.sdp()))
         GreenMediumButton(
             text = "Купить подписку",
@@ -229,7 +240,7 @@ fun ProfileScreen(
         val pickImageLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.GetContent()
         ) { uri ->
-            uri?.let { viewModel.handleSelectedImage(context, it) }
+            uri?.let { viewModel.handleSelectedImage(it) }
         }
 
         val permissionLauncher = rememberLauncherForActivityResult(

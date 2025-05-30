@@ -60,8 +60,8 @@ import com.example.geoblinker.ui.FullScreenBox
 import com.example.geoblinker.ui.GreenMediumRightIconButton
 import com.example.geoblinker.ui.OkButton
 import com.example.geoblinker.ui.WhiteRedMediumButton
-import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.LocationHelper
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay

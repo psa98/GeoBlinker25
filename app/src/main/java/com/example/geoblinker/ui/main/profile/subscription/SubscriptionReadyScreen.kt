@@ -1,6 +1,5 @@
 package com.example.geoblinker.ui.main.profile.subscription
 
-import android.graphics.Paint.Align
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +9,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,15 +22,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import com.example.geoblinker.R
+import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.theme.Manrope
-import com.example.geoblinker.ui.theme.black
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun SubscriptionReadyScreen(
+    profileViewModel: ProfileViewModel,
     toBack: () -> Unit
 ) {
+    val subscription by profileViewModel.subscription.collectAsState()
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -60,7 +64,7 @@ fun SubscriptionReadyScreen(
                         fontSize = MaterialTheme.typography.titleMedium.fontSize
                     )
                 ) {
-                    append("12.10.26")
+                    append(TimeUtils.formatToLocalTimeDate(subscription))
                 }
             },
             textAlign = TextAlign.Center,

@@ -1,7 +1,6 @@
 package com.example.geoblinker.ui.main.viewmodel
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -15,10 +14,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-class AvatarViewModel(application: Application): ViewModel() {
-    // Используем application для доступа к ресурсам, SharedPreferences и т.д.
+class AvatarViewModel(context: Context): ViewModel() {
     @SuppressLint("StaticFieldLeak")
-    private val context = application.applicationContext
+    private val _context = context
+    private val _prefs = context.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
     private val _avatarUri = MutableStateFlow<Uri?>(null)
     private val _errorMessage = MutableStateFlow<String?>(null)
     val avatarUri: StateFlow<Uri?> = _avatarUri.asStateFlow()
@@ -32,8 +31,7 @@ class AvatarViewModel(application: Application): ViewModel() {
         viewModelScope.launch {
             // Используем Dispatchers.IO для работы с файлами
             withContext(Dispatchers.IO) {
-                val prefs = context.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
-                val uriString = prefs.getString("avatar_uri", null)
+                val uriString = _prefs.getString("avatar_uri", null)
 
                 // Обновляем значение в основном потоке
                 withContext(Dispatchers.Main) {
@@ -43,24 +41,24 @@ class AvatarViewModel(application: Application): ViewModel() {
         }
     }
 
-    fun handleSelectedImage(context: Context, uri: Uri) {
+    fun handleSelectedImage(uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                if (!isValidImageFormat(context, uri)) {
+                if (!isValidImageFormat(uri)) {
                     withContext(Dispatchers.Main) {
                         _errorMessage.value = "Только JPG/PNG форматы"
                     }
                     return@launch
                 }
 
-                if (!isValidImageSize(context, uri, maxSizeMb = 5)) {
+                if (!isValidImageSize(uri, maxSizeMb = 5)) {
                     withContext(Dispatchers.Main) {
                         _errorMessage.value = "Файл слишком большой (макс. 5 МБ)"
                     }
                     return@launch
                 }
 
-                saveAvatar(context, uri)
+                saveAvatar(uri)
                 withContext(Dispatchers.Main) {
                     _errorMessage.value = null
                 }
@@ -76,24 +74,24 @@ class AvatarViewModel(application: Application): ViewModel() {
         _errorMessage.value = text
     }
 
-    private fun isValidImageFormat(context: Context, uri: Uri): Boolean {
-        val mimeType = context.contentResolver.getType(uri) ?: return false
+    private fun isValidImageFormat(uri: Uri): Boolean {
+        val mimeType = _context.contentResolver.getType(uri) ?: return false
         return mimeType in listOf("image/jpeg", "image/png", "image/jpg")
     }
 
-    private fun isValidImageSize(context: Context, uri: Uri, maxSizeMb: Int): Boolean {
-        val sizeBytes = context.contentResolver.openAssetFileDescriptor(uri, "r")?.use {
+    private fun isValidImageSize(uri: Uri, maxSizeMb: Int): Boolean {
+        val sizeBytes = _context.contentResolver.openAssetFileDescriptor(uri, "r")?.use {
             it.length
         } ?: 0
 
         return sizeBytes <= maxSizeMb * 1024 * 1024
     }
 
-    private fun saveAvatar(context: Context, sourceUri: Uri) {
+    private fun saveAvatar(sourceUri: Uri) {
         val fileName = "avatar_${System.currentTimeMillis()}.jpg"
-        val outputFile = File(context.filesDir, fileName)
+        val outputFile = File(_context.filesDir, fileName)
 
-        context.contentResolver.openInputStream(sourceUri)?.use { input ->
+        _context.contentResolver.openInputStream(sourceUri)?.use { input ->
             FileOutputStream(outputFile).use { output ->
                 input.copyTo(output)
             }
@@ -102,14 +100,14 @@ class AvatarViewModel(application: Application): ViewModel() {
         val newUri = Uri.fromFile(outputFile)
 
         // Сохраняем URI в SharedPreferences
-        saveAvatarUriToPrefs(context, newUri)
+        saveAvatarUriToPrefs(newUri)
 
         // Обновляем состояние в основном потоке
         _avatarUri.value = newUri
     }
 
-    private fun saveAvatarUriToPrefs(context: Context, uri: Uri) {
-        context.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
+    private fun saveAvatarUriToPrefs(uri: Uri) {
+        _prefs
             .edit()
             .putString("avatar_uri", uri.toString())
             .apply()
@@ -119,10 +117,10 @@ class AvatarViewModel(application: Application): ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 // 1. Удаляем файл аватарки
-                deleteAvatarFile(context)
+                deleteAvatarFile()
 
                 // 2. Удаляем URI из SharedPreferences
-                clearAvatarPrefs(context)
+                clearAvatarPrefs()
 
                 // 3. Обновляем состояние UI
                 withContext(Dispatchers.Main) {
@@ -137,9 +135,8 @@ class AvatarViewModel(application: Application): ViewModel() {
         }
     }
 
-    private fun deleteAvatarFile(context: Context) {
-        val prefs = context.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
-        val uriString = prefs.getString("avatar_uri", null)
+    private fun deleteAvatarFile() {
+        val uriString = _prefs.getString("avatar_uri", null)
         uriString?.let { uriString ->
             val uri = Uri.parse(uriString)
             uri.path?.let { filePath ->
@@ -148,8 +145,8 @@ class AvatarViewModel(application: Application): ViewModel() {
         }
     }
 
-    private fun clearAvatarPrefs(context: Context) {
-        context.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
+    private fun clearAvatarPrefs() {
+        _prefs
             .edit()
             .remove("avatar_uri")
             .apply()

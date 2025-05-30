@@ -1,15 +1,16 @@
 package com.example.geoblinker.ui.main
 
 import android.annotation.SuppressLint
-import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,9 +36,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -48,6 +51,7 @@ import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.example.geoblinker.R
 import com.example.geoblinker.data.Device
+import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.GreenSmallButton
 import com.example.geoblinker.ui.WhiteSmallButton
 import com.example.geoblinker.ui.main.binding.BindingOneScreen
@@ -63,10 +67,12 @@ import com.example.geoblinker.ui.main.profile.ProfileScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
-import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
+import org.threeten.bp.Instant
 
 enum class MainScreen {
     Map,
@@ -227,16 +233,20 @@ fun MainScreen(
     viewModel: DeviceViewModel,
     avatarViewModel: AvatarViewModel,
     subscriptionViewModel: SubscriptionViewModel,
+    profileViewModel: ProfileViewModel,
     navController: NavHostController = rememberNavController(),
 ) {
     val device by viewModel.device.collectAsState()
     val signals by viewModel.signals.collectAsState()
     val news by viewModel.news.collectAsState()
+    val pickSubscription by subscriptionViewModel.pickSubscription.collectAsState()
+    val subscription by profileViewModel.subscription.collectAsState()
     var currentRoute by remember { mutableStateOf(MainScreen.Map.name) }
     var bindingImei by remember { mutableStateOf("") }
     var previousScreen by remember { mutableStateOf(MainScreen.Map.name) }
     var countNotifications by remember { mutableIntStateOf(0) }
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
+    var isShow by remember { mutableStateOf(false) }
 
     fun BackgroundColor(): Color {
         return when(currentRoute) {
@@ -251,6 +261,13 @@ fun MainScreen(
 
     LaunchedEffect(signals, news) {
         countNotifications = signals.size + news.size - (signals.count { it.isSeen } + news.count { it.isSeen })
+    }
+
+    LaunchedEffect(Instant.now().toEpochMilli()) {
+        if (Instant.now().toEpochMilli() > subscription)
+            isShow = true
+        else
+            isShow = false
     }
 
     NavHost(
@@ -415,11 +432,10 @@ fun MainScreen(
             startDestination = MainScreen.ProfileOne.name
         ) {
             currentRoute = MainScreen.Profile.name
-            composable(
-                route = MainScreen.ProfileOne.name
-            ) {
+            composable(route = MainScreen.ProfileOne.name) {
                 ProfileScreen(
                     avatarViewModel,
+                    profileViewModel,
                     toSubscription = { navController.navigate("${MainScreen.Subscription.name}/${MainScreen.Profile.name}") },
                     toBack = { navController.navigateUp() }
                 )
@@ -445,8 +461,10 @@ fun MainScreen(
                 SubscriptionTwoScreen(
                     subscriptionViewModel,
                     {
-                        if (subscriptionViewModel.paySubscription())
+                        if (subscriptionViewModel.paySubscription()) {
+                            profileViewModel.addMonthsSubscription(pickSubscription.period.toLong())
                             navController.navigate(MainScreen.SubscriptionReady.name)
+                        }
                         else {
                             // TODO: добавить экран об ошибке оплаты
                         }
@@ -456,6 +474,7 @@ fun MainScreen(
             }
             composable(route = MainScreen.SubscriptionReady.name) {
                 SubscriptionReadyScreen(
+                    profileViewModel,
                     toBack = { navController.navigate(previousScreen) }
                 )
             }
@@ -476,4 +495,48 @@ fun MainScreen(
         countNotifications,
         avatarViewModel
     )
+
+    if (isShow && currentRoute != MainScreen.Subscription.name) {
+        Dialog(
+            {},
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Surface(
+                    modifier = Modifier.width(310.sdp()),
+                    shape = RoundedCornerShape(16.sdp()),
+                    color = Color.White
+                ) {
+                    Column(
+                        modifier = Modifier.padding(
+                            horizontal = 25.sdp(),
+                            vertical = 30.sdp()
+                        ),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(R.drawable.wallet),
+                            contentDescription = null,
+                            modifier = Modifier.size(28.sdp()),
+                            tint = Color.Unspecified
+                        )
+                        Spacer(Modifier.height(20.sdp()))
+                        Text(
+                            "Бесплатный пробный период закончился. Оплатите подписку, чтобы пользоваться функциями приложения GeoBlinker.",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Spacer(Modifier.height(28.sdp()))
+                        GreenMediumButton(
+                            text = "Перейти к оплате",
+                            onClick = { navController.navigate("${MainScreen.Subscription.name}/${currentRoute}") }
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
