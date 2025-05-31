@@ -280,7 +280,8 @@ fun BlackMediumButton(
     @DrawableRes icon: Int? = null,
     text: String,
     onClick: () -> Unit,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    height: Int = 55
 ) {
     Surface(
         shape = RoundedCornerShape(10.sdp()),
@@ -289,7 +290,7 @@ fun BlackMediumButton(
         Button(
             onClick = onClick,
             modifier = modifier
-                .height(55.sdp())
+                .height(height.sdp())
                 .background(
                     brush = if (enabled) blackGradient else grayGradient,
                     shape = RoundedCornerShape(10.sdp()))
@@ -570,7 +571,7 @@ fun BackButton(
     else {
         Column {
             Surface(
-                modifier = Modifier.shadow(
+                modifier = Modifier.size(65.sdp()).shadow(
                     4.sdp(),
                     RoundedCornerShape(100.sdp()),
                     clip = false,
@@ -583,9 +584,6 @@ fun BackButton(
             ) {
                 IconButton(
                     onClick = onClick,
-                    modifier = Modifier
-                        .size(65.sdp(), 65.sdp())
-                        .padding(1.sdp()),
                     colors = IconButtonDefaults.iconButtonColors(containerColor = color)
                 ) {
                     Icon(

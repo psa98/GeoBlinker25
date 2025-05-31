@@ -1,6 +1,6 @@
 package com.example.geoblinker.ui.main.viewmodel
 
-import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
@@ -14,10 +14,10 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-class AvatarViewModel(context: Context): ViewModel() {
-    @SuppressLint("StaticFieldLeak")
-    private val _context = context
-    private val _prefs = context.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
+class AvatarViewModel(
+    private val application: Application
+): ViewModel() {
+    private val _prefs = application.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
     private val _avatarUri = MutableStateFlow<Uri?>(null)
     private val _errorMessage = MutableStateFlow<String?>(null)
     val avatarUri: StateFlow<Uri?> = _avatarUri.asStateFlow()
@@ -75,12 +75,12 @@ class AvatarViewModel(context: Context): ViewModel() {
     }
 
     private fun isValidImageFormat(uri: Uri): Boolean {
-        val mimeType = _context.contentResolver.getType(uri) ?: return false
+        val mimeType = application.contentResolver.getType(uri) ?: return false
         return mimeType in listOf("image/jpeg", "image/png", "image/jpg")
     }
 
     private fun isValidImageSize(uri: Uri, maxSizeMb: Int): Boolean {
-        val sizeBytes = _context.contentResolver.openAssetFileDescriptor(uri, "r")?.use {
+        val sizeBytes = application.contentResolver.openAssetFileDescriptor(uri, "r")?.use {
             it.length
         } ?: 0
 
@@ -89,9 +89,9 @@ class AvatarViewModel(context: Context): ViewModel() {
 
     private fun saveAvatar(sourceUri: Uri) {
         val fileName = "avatar_${System.currentTimeMillis()}.jpg"
-        val outputFile = File(_context.filesDir, fileName)
+        val outputFile = File(application.filesDir, fileName)
 
-        _context.contentResolver.openInputStream(sourceUri)?.use { input ->
+        application.contentResolver.openInputStream(sourceUri)?.use { input ->
             FileOutputStream(outputFile).use { output ->
                 input.copyTo(output)
             }

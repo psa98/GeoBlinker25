@@ -1,5 +1,6 @@
 package com.example.geoblinker.ui.main.viewmodel
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,8 +13,10 @@ import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
 import org.threeten.bp.ZoneId
 
-class ProfileViewModel(context: Context): ViewModel() {
-    private val _prefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+class ProfileViewModel(
+    private val application: Application
+): ViewModel() {
+    private val _prefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     private val _subscription = MutableStateFlow<Long>(0)
     val subscription: StateFlow<Long> = _subscription.asStateFlow()
 

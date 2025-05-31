@@ -63,12 +63,14 @@ import com.example.geoblinker.ui.main.device.DeviceThreeScreen
 import com.example.geoblinker.ui.main.device.DeviceTwoScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
+import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
@@ -92,6 +94,7 @@ enum class MainScreen {
     Notifications,
     Profile,
     ProfileOne,
+    JournalSignals,
     Subscription,
     SubscriptionOne,
     SubscriptionTwo,
@@ -234,6 +237,7 @@ fun MainScreen(
     avatarViewModel: AvatarViewModel,
     subscriptionViewModel: SubscriptionViewModel,
     profileViewModel: ProfileViewModel,
+    journalViewModel: JournalViewModel,
     navController: NavHostController = rememberNavController(),
 ) {
     val device by viewModel.device.collectAsState()
@@ -437,6 +441,15 @@ fun MainScreen(
                     avatarViewModel,
                     profileViewModel,
                     toSubscription = { navController.navigate("${MainScreen.Subscription.name}/${MainScreen.Profile.name}") },
+                    toListDevices = { navController.navigate(MainScreen.List.name) },
+                    toJournalSignals = { navController.navigate(MainScreen.JournalSignals.name) },
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.JournalSignals.name) {
+                JournalSignalsScreen(
+                    viewModel,
+                    journalViewModel,
                     toBack = { navController.navigateUp() }
                 )
             }

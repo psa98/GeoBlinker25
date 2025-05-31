@@ -65,6 +65,8 @@ fun ProfileScreen(
     viewModel: AvatarViewModel,
     profileViewModel: ProfileViewModel,
     toSubscription: () -> Unit,
+    toListDevices: () -> Unit,
+    toJournalSignals: () -> Unit,
     toBack: () -> Unit
 ) {
     var isShow by remember { mutableStateOf(false) }
@@ -140,13 +142,13 @@ fun ProfileScreen(
             BlackMediumButton(
                 modifier = Modifier.width(160.sdp()),
                 text = "Мои устройства",
-                onClick = {}
+                onClick = toListDevices
             )
             Spacer(Modifier.width(10.sdp()))
             BlackMediumButton(
                 modifier = Modifier.width(160.sdp()),
                 text = "Журнал сигналов",
-                onClick = {}
+                onClick = toJournalSignals
             )
         }
         Spacer(Modifier.height(10.sdp()))
