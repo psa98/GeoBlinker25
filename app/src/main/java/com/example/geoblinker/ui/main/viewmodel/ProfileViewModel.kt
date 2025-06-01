@@ -18,7 +18,9 @@ class ProfileViewModel(
 ): ViewModel() {
     private val _prefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     private val _subscription = MutableStateFlow<Long>(0)
+    private val _name = MutableStateFlow("")
     val subscription: StateFlow<Long> = _subscription.asStateFlow()
+    val name: StateFlow<String> = _name.asStateFlow()
 
     init {
         loadData()
@@ -42,6 +44,8 @@ class ProfileViewModel(
                     _subscription.value = time
                 }
             }
+
+            _name.value = _prefs.getString("name", "") ?: ""
         }
     }
 
@@ -58,6 +62,16 @@ class ProfileViewModel(
 
             withContext(Dispatchers.Main) {
                 _subscription.value = newTime
+            }
+        }
+    }
+
+    fun setName(name: String) {
+        viewModelScope.launch {
+            _prefs.edit().putString("name", name).apply()
+
+            withContext(Dispatchers.Main) {
+                _name.value = name
             }
         }
     }

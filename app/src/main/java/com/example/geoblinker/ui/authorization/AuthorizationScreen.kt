@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 enum class AuthorizationScreen {
@@ -24,10 +27,13 @@ enum class AuthorizationScreen {
 @Composable
 fun AuthorizationScreen(
     viewModel: AuthorizationViewModel,
+    profileViewModel: ProfileViewModel,
     navController: NavHostController = rememberNavController(),
     registrationScreen: () -> Unit,
     mainScreen: () -> Unit
 ) {
+    val name by profileViewModel.name.collectAsState()
+
     Scaffold { innerPadding ->
         Row(
             modifier = Modifier
@@ -59,6 +65,7 @@ fun AuthorizationScreen(
                 }
                 composable(route = AuthorizationScreen.Four.name) {
                     FourScreen(
+                        name,
                         mainScreen
                     )
                 }

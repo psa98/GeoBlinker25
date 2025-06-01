@@ -65,6 +65,8 @@ import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
+import com.example.geoblinker.ui.main.profile.settings.NameSettingsScreen
+import com.example.geoblinker.ui.main.profile.settings.SettingsScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
@@ -98,7 +100,10 @@ enum class MainScreen {
     Subscription,
     SubscriptionOne,
     SubscriptionTwo,
-    SubscriptionReady
+    SubscriptionReady,
+    Settings,
+    SettingsOne,
+    NameSettings
 }
 
 @Composable
@@ -443,6 +448,8 @@ fun MainScreen(
                     toSubscription = { navController.navigate("${MainScreen.Subscription.name}/${MainScreen.Profile.name}") },
                     toListDevices = { navController.navigate(MainScreen.List.name) },
                     toJournalSignals = { navController.navigate(MainScreen.JournalSignals.name) },
+                    toSettings = { navController.navigate("${MainScreen.Settings.name}/${MainScreen.Profile.name}") },
+                    toNameSettings = { navController.navigate(MainScreen.NameSettings.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -489,6 +496,28 @@ fun MainScreen(
                 SubscriptionReadyScreen(
                     profileViewModel,
                     toBack = { navController.navigate(previousScreen) }
+                )
+            }
+        }
+
+        navigation(
+            route = "${MainScreen.Settings.name}/{previousScreen}",
+            startDestination = MainScreen.SettingsOne.name
+        ) {
+            currentRoute = MainScreen.Settings.name
+            composable(route = MainScreen.SettingsOne.name) { backStackEntry ->
+                backStackEntry.arguments?.getString("previousScreen")?.let {
+                    previousScreen = it
+                }
+                SettingsScreen(
+                    toName = { navController.navigate(MainScreen.NameSettings.name) },
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.NameSettings.name) {
+                NameSettingsScreen(
+                    profileViewModel,
+                    toBack = { navController.navigateUp() }
                 )
             }
         }

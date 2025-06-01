@@ -40,19 +40,18 @@ fun GeoBlinkerScreen(
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
+    val profileViewModel = ProfileViewModel(application)
 
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = GeoBlinkerScreen.Main.name, // TODO: При дебаге Main
+            startDestination = GeoBlinkerScreen.Authorization.name, // TODO: При дебаге Main
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
-                BoxWithConstraints(Modifier.fillMaxSize()) {
-                    Log.i("Height1", maxHeight.toString())
-                }
                 AuthorizationScreen(
                     AuthorizationViewModel(),
+                    profileViewModel,
                     registrationScreen = { navController.navigate(GeoBlinkerScreen.Registration.name) },
                     mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
                 )
@@ -60,6 +59,7 @@ fun GeoBlinkerScreen(
             composable(route = GeoBlinkerScreen.Registration.name) {
                 RegistrationScreen(
                     RegistrationViewModel(),
+                    profileViewModel,
                     authorizationScreen = { navController.navigate(GeoBlinkerScreen.Authorization.name) },
                     mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
                 )
@@ -74,7 +74,7 @@ fun GeoBlinkerScreen(
                     )),
                     AvatarViewModel(application),
                     SubscriptionViewModel(),
-                    ProfileViewModel(application),
+                    profileViewModel,
                     JournalViewModel(application)
                 )
             }

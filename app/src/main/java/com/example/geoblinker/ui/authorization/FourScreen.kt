@@ -25,6 +25,7 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun FourScreen(
+    name: String,
     main: () -> Unit
 ) {
     LaunchedEffect(Unit) {
@@ -49,18 +50,10 @@ fun FourScreen(
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
-            text = "Константин Гусевский!",
+            text = name,
             lineHeight = 40.sp,
             style = MaterialTheme.typography.headlineLarge
         )
         Spacer(Modifier.height(100.sdp()))
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewFourScreen() {
-    GeoBlinkerTheme {
-        FourScreen({})
     }
 }

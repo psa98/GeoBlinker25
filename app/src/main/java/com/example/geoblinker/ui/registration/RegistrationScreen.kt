@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 enum class RegistrationScreen {
@@ -25,6 +26,7 @@ enum class RegistrationScreen {
 @Composable
 fun RegistrationScreen(
     viewModel: RegistrationViewModel,
+    profileViewModel: ProfileViewModel,
     navController: NavHostController = rememberNavController(),
     authorizationScreen: () -> Unit,
     mainScreen: () -> Unit
@@ -55,7 +57,10 @@ fun RegistrationScreen(
                 }
                 composable(route = RegistrationScreen.Two.name) {
                     TwoScreen(
-                        { navController.navigate(RegistrationScreen.Three.name) },
+                        {
+                            profileViewModel.setName(viewModel.name.value)
+                            navController.navigate(RegistrationScreen.Three.name)
+                        },
                         { navController.navigate(RegistrationScreen.One.name) },
                         viewModel
                     )

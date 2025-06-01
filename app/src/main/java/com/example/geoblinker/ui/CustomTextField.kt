@@ -193,22 +193,24 @@ fun NameTextField(
     placeholder: String,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
-    isError: Boolean = false
+    isError: Boolean = false,
+    radius: Int = 24,
+    height: Int = 81
 ) {
     var value by remember { mutableStateOf("") }
 
     Surface(
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(radius.sdp()),
         border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = value,
             onValueChange = {
-                value = it
+                value = it.filter { it.isLetterOrDigit() || it == ' ' }.take(64)
                 onValueChange(value)
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(height.sdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
@@ -231,7 +233,7 @@ fun NameTextField(
                 onDone =  { onDone() }
             ),
             singleLine = true,
-            shape = MaterialTheme.shapes.large,
+            shape = RoundedCornerShape(radius.sdp()),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
                 focusedContainerColor = Color.White,

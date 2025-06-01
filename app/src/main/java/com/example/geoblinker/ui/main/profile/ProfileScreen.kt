@@ -67,12 +67,15 @@ fun ProfileScreen(
     toSubscription: () -> Unit,
     toListDevices: () -> Unit,
     toJournalSignals: () -> Unit,
+    toSettings: () -> Unit,
+    toNameSettings: () -> Unit,
     toBack: () -> Unit
 ) {
     var isShow by remember { mutableStateOf(false) }
     val avatarUri by viewModel.avatarUri.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val subscription by profileViewModel.subscription.collectAsState()
+    val name by profileViewModel.name.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -98,10 +101,11 @@ fun ProfileScreen(
         }
         Spacer(Modifier.height(10.sdp()))
         Row(
+            modifier = Modifier.clickable { toNameSettings() },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                "Константин Гусевский",
+                name,
                 color = Color(0xFF212120),
                 style = MaterialTheme.typography.titleMedium
             )
@@ -154,7 +158,7 @@ fun ProfileScreen(
         Spacer(Modifier.height(10.sdp()))
         BlackMediumButton(
             text = "Настройки",
-            onClick = {},
+            onClick = toSettings,
             icon = R.drawable.settings
         )
         Spacer(Modifier.height(20.sdp()))

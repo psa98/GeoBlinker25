@@ -157,7 +157,7 @@ fun GeoBlinkerTheme(
     val shapes = Shapes(
         small = RoundedCornerShape(100.sdp()),
         medium = RoundedCornerShape(16.sdp()),
-        large = RoundedCornerShape(30.sdp())
+        large = RoundedCornerShape(24.sdp())
     )
 
     val colorScheme = LightColorScheme
