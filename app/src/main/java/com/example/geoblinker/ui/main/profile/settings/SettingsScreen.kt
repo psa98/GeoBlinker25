@@ -38,11 +38,12 @@ import com.example.geoblinker.ui.theme.sdp
 @Composable
 fun SettingsScreen(
     toName: () -> Unit,
+    toPhone: () -> Unit,
     toBack: () -> Unit
 ) {
     val settings = listOf(
         Pair("Сменить имя", { toName() }),
-        Pair("Номер телефона", {}),
+        Pair("Номер телефона", { toPhone() }),
         Pair("Email аккаунта", {}),
         Pair("Настройка уведомлений", {}),
         Pair("Единицы расстояния", {}),

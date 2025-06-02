@@ -3,6 +3,7 @@ package com.example.geoblinker.ui
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +39,13 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.theme.sdp
+
+enum class TypeColor {
+    Green,
+    Black,
+    White,
+    Blue
+}
 
 val greenGradient = Brush.verticalGradient(
     colors = listOf(Color(0xFF92FFDF), Color(0xFF21E3A5))
@@ -92,7 +100,9 @@ fun GreenButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(it),
                         contentDescription = null,
-                        modifier = Modifier.width(23.sdp()).height(23.sdp())
+                        modifier = Modifier
+                            .width(23.sdp())
+                            .height(23.sdp())
                     )
                     Spacer(Modifier.width(17.sdp()))
                 }
@@ -143,7 +153,9 @@ fun GreenMediumButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(it),
                         contentDescription = null,
-                        modifier = Modifier.width(13.sdp()).height(13.sdp())
+                        modifier = Modifier
+                            .width(13.sdp())
+                            .height(13.sdp())
                     )
                     Spacer(Modifier.width(17.sdp()))
                 }
@@ -198,7 +210,9 @@ fun GreenMediumRightIconButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(it),
                         contentDescription = null,
-                        modifier = Modifier.width(18.sdp()).height(18.sdp())
+                        modifier = Modifier
+                            .width(18.sdp())
+                            .height(18.sdp())
                     )
                 }
             }
@@ -242,9 +256,11 @@ fun BlackButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = modifier.background(
-                brush = if (enabled) blackGradient else grayGradient,
-                shape = MaterialTheme.shapes.large)
+            modifier = modifier
+                .background(
+                    brush = if (enabled) blackGradient else grayGradient,
+                    shape = MaterialTheme.shapes.large
+                )
                 .size(310.sdp(), height.sdp())
             ,
             enabled = enabled,
@@ -260,7 +276,9 @@ fun BlackButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(it),
                         contentDescription = null,
-                        modifier = Modifier.width(23.sdp()).height(23.sdp())
+                        modifier = Modifier
+                            .width(23.sdp())
+                            .height(23.sdp())
                     )
                     Spacer(Modifier.width(17.sdp()))
                 }
@@ -293,7 +311,8 @@ fun BlackMediumButton(
                 .height(height.sdp())
                 .background(
                     brush = if (enabled) blackGradient else grayGradient,
-                    shape = RoundedCornerShape(10.sdp()))
+                    shape = RoundedCornerShape(10.sdp())
+                )
             ,
             enabled = enabled,
             shape = RoundedCornerShape(10.sdp()),
@@ -316,7 +335,9 @@ fun BlackMediumButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(it),
                         contentDescription = null,
-                        modifier = Modifier.width(19.sdp()).height(19.sdp())
+                        modifier = Modifier
+                            .width(19.sdp())
+                            .height(19.sdp())
                     )
                 }
             }
@@ -359,7 +380,9 @@ fun WhiteButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(icon),
                         contentDescription = null,
-                        modifier = Modifier.width(23.sdp()).height(23.sdp())
+                        modifier = Modifier
+                            .width(23.sdp())
+                            .height(23.sdp())
                     )
                     Spacer(Modifier.width(17.sdp()))
                 }
@@ -376,19 +399,21 @@ fun WhiteButton(
 fun WhiteMediumButton(
     modifier: Modifier = Modifier.fillMaxWidth(),
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    radius: Int = 10,
+    height: Int = 55
 ) {
     Surface(
-        shape = RoundedCornerShape(10.sdp()),
+        shape = RoundedCornerShape(radius.sdp()),
         border = BorderStroke(1.sdp(), Color(0xFF999696))
     ) {
         Button(
             onClick,
             modifier = modifier
-                .height(55.sdp())
+                .height(height.sdp())
                 .background(
                     brush = whiteGradient,
-                    shape = RoundedCornerShape(10.sdp())
+                    shape = RoundedCornerShape(radius.sdp())
                 ),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent
@@ -416,9 +441,9 @@ fun WhiteSmallButton(
             modifier = Modifier
                 .size(105.sdp(), 50.sdp())
                 .background(
-                brush = whiteGradient,
-                shape = MaterialTheme.shapes.small
-            ),
+                    brush = whiteGradient,
+                    shape = MaterialTheme.shapes.small
+                ),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent
             )
@@ -474,7 +499,8 @@ fun RedButton(
     ) {
         Button(
             onClick = onClick,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .height(55.sdp()),
             shape = RoundedCornerShape(10.sdp()),
             colors = ButtonDefaults.buttonColors(
@@ -518,9 +544,93 @@ fun BlueButton(
         ) {
             Text(
                 text,
-                color = if (enabled) Color.White else Color(0xFF878787),
+                color = if (enabled) Color.White else gray,
                 style = MaterialTheme.typography.bodyLarge
             )
+        }
+    }
+}
+
+@Composable
+fun CustomButton(
+    modifier: Modifier = Modifier.fillMaxWidth(),
+    text: String,
+    onClick: () -> Unit,
+    typeColor: TypeColor,
+    @DrawableRes leftIcon: Int? = null,
+    @DrawableRes rightIcon: Int? = null,
+    enabled: Boolean = true,
+    height: Int = 65,
+    radius: Int = 16,
+    style: TextStyle = MaterialTheme.typography.bodyLarge
+) {
+    val border = when(typeColor) {
+        TypeColor.White -> Color(0xFFDFDFDF)
+        else -> Color.White
+    }
+    val brush = if (enabled) when(typeColor) {
+        TypeColor.Green -> greenGradient
+        TypeColor.Black -> blackGradient
+        TypeColor.White -> whiteGradient
+        TypeColor.Blue -> blueGradient
+    }
+    else
+        grayGradient
+    val textColor = if (enabled) when(typeColor) {
+        TypeColor.Green -> blackBorder
+        TypeColor.Black -> Color.White
+        TypeColor.White -> Color.Unspecified
+        TypeColor.Blue -> Color.White
+    }
+    else
+        gray
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .height(height.sdp())
+            .background(
+                brush = brush,
+                shape = RoundedCornerShape(radius.sdp())
+            )
+            .border(
+                1.sdp(),
+                border,
+                RoundedCornerShape(radius.sdp())
+            ),
+        enabled = enabled,
+        shape = RoundedCornerShape(radius.sdp()),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            leftIcon?.let {
+                Icon(
+                    imageVector = ImageVector.vectorResource(it),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(13.sdp())
+                        .height(13.sdp())
+                )
+                Spacer(Modifier.width(17.sdp()))
+            }
+            Text(
+                text,
+                color = textColor,
+                style = style
+            )
+            rightIcon?.let {
+                Spacer(Modifier.width(17.sdp()))
+                Icon(
+                    imageVector = ImageVector.vectorResource(it),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .width(13.sdp())
+                        .height(13.sdp())
+                )
+            }
         }
     }
 }
@@ -571,13 +681,15 @@ fun BackButton(
     else {
         Column {
             Surface(
-                modifier = Modifier.size(65.sdp()).shadow(
-                    4.sdp(),
-                    RoundedCornerShape(100.sdp()),
-                    clip = false,
-                    ambientColor = Color.Black,
-                    spotColor = Color.Black.copy(0.25f)
-                ),
+                modifier = Modifier
+                    .size(65.sdp())
+                    .shadow(
+                        4.sdp(),
+                        RoundedCornerShape(100.sdp()),
+                        clip = false,
+                        ambientColor = Color.Black,
+                        spotColor = Color.Black.copy(0.25f)
+                    ),
                 shape = RoundedCornerShape(100.sdp()),
                 color = Color.White,
                 border = BorderStroke(1.sdp(), Color.White)
@@ -608,9 +720,9 @@ fun OkButton(
         modifier = Modifier
             .size(65.sdp())
             .background(
-            brush = if (enabled) greenGradient else whiteGradient,
-            shape = MaterialTheme.shapes.small
-        ),
+                brush = if (enabled) greenGradient else whiteGradient,
+                shape = MaterialTheme.shapes.small
+            ),
         enabled = enabled,
         colors = IconButtonDefaults.iconButtonColors(
             containerColor = Color.Transparent

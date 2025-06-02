@@ -85,4 +85,7 @@
     <string name="available">В доступе</string>
     <string name="ready">Готов к работе</string>
     <string name="requires_repair">Требуется ремонт</string>
+    <string name="link_new_phone">Привязать новый номер</string>
+    <string name="active_phone">Активный номер телефона</string>
+    <string name="phone_updated">Номер телефона обновлен</string>
 </resources>

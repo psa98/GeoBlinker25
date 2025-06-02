@@ -129,6 +129,7 @@ fun TwoScreen(
             sendCode = {
                 visiblePopup = false
                 viewModel.setWays(it)
+                viewModel.setPhone(value)
                 threeScreen(value)
             }
         )

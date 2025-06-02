@@ -66,6 +66,7 @@ import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
 import com.example.geoblinker.ui.main.profile.settings.NameSettingsScreen
+import com.example.geoblinker.ui.main.profile.settings.PhoneSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.SettingsScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
@@ -103,7 +104,8 @@ enum class MainScreen {
     SubscriptionReady,
     Settings,
     SettingsOne,
-    NameSettings
+    NameSettings,
+    PhoneSettings
 }
 
 @Composable
@@ -511,11 +513,18 @@ fun MainScreen(
                 }
                 SettingsScreen(
                     toName = { navController.navigate(MainScreen.NameSettings.name) },
+                    toPhone = { navController.navigate(MainScreen.PhoneSettings.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
             composable(route = MainScreen.NameSettings.name) {
                 NameSettingsScreen(
+                    profileViewModel,
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.PhoneSettings.name) {
+                PhoneSettingsScreen(
                     profileViewModel,
                     toBack = { navController.navigateUp() }
                 )

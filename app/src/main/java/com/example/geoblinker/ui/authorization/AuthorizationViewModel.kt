@@ -3,6 +3,8 @@ package com.example.geoblinker.ui.authorization
 import androidx.lifecycle.ViewModel
 import com.example.geoblinker.R
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class AuthorizationViewModel : ViewModel() {
     private val _wayCodes = mapOf("Telegram" to "1234", "WhatsApp" to "6940", "SMS" to "2233", "Email" to "1111")
@@ -14,6 +16,8 @@ class AuthorizationViewModel : ViewModel() {
         )
     private val _waysGetCode = MutableStateFlow<List<String>>(emptyList())
     private val _nowWay = MutableStateFlow(0)
+    private val _phone = MutableStateFlow("")
+    val phone: StateFlow<String> = _phone.asStateFlow()
 
     fun setWays(ways: List<String>) {
         _waysGetCode.value = ways
@@ -35,5 +39,9 @@ class AuthorizationViewModel : ViewModel() {
 
     fun checkWay(code: String): Boolean {
         return code == _wayCodes[_waysGetCode.value[_nowWay.value]]
+    }
+
+    fun setPhone(phone: String) {
+        _phone.value = phone
     }
 }

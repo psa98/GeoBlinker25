@@ -58,7 +58,8 @@ fun RegistrationScreen(
                 composable(route = RegistrationScreen.Two.name) {
                     TwoScreen(
                         {
-                            profileViewModel.setName(viewModel.name.value)
+                            profileViewModel.setName(name)
+                            profileViewModel.setPhone(viewModel.phone.value)
                             navController.navigate(RegistrationScreen.Three.name)
                         },
                         { navController.navigate(RegistrationScreen.One.name) },

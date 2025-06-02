@@ -20,6 +20,7 @@ class RegistrationViewModel : ViewModel() {
     private val _name = MutableStateFlow("")
 
     val name: StateFlow<String> = _name.asStateFlow()
+    val phone: StateFlow<String> = _phone.asStateFlow()
 
     fun updateState(phone: String, name: String) {
         _phone.value = phone

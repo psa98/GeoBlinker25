@@ -56,12 +56,14 @@ fun CodeTextField(
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
     @StringRes placeholder: Int,
-    isError: Boolean = false
+    isError: Boolean = false,
+    height: Int = 81,
+    radius: Int = 24
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
     Surface(
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(radius.sdp()),
         border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
@@ -73,7 +75,7 @@ fun CodeTextField(
                 onValueChange(it.text.take(4))
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(height.sdp())
                 .fillMaxWidth()
                 .padding(1.sdp())
                 .onFocusChanged { focusState ->
@@ -98,7 +100,7 @@ fun CodeTextField(
                 onDone = { onDone() }
             ),
             singleLine = true,
-            shape = MaterialTheme.shapes.large,
+            shape = RoundedCornerShape(radius.sdp()),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
                 focusedContainerColor = Color.White,
@@ -125,13 +127,16 @@ fun formatPhoneNumber(phoneNumber: String): String {
 fun PhoneNumberTextField(
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
-    isError: Boolean = false
+    isError: Boolean = false,
+    placeholder: String = "  ${stringResource(R.string.enter_the_number)}",
+    radius: Int = 24,
+    height: Int = 81
 ) {
     var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = "")) }
     var isFocused by remember { mutableStateOf(false) }
 
     Surface(
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(radius.sdp()),
         border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
@@ -146,7 +151,7 @@ fun PhoneNumberTextField(
                 )
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(height.sdp())
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
@@ -157,7 +162,7 @@ fun PhoneNumberTextField(
             placeholder = {
                 if (!isFocused)
                     Text(
-                        text = "  ${stringResource(R.string.enter_the_number)}",
+                        text = placeholder,
                         style = MaterialTheme.typography.headlineMedium
                     )
             },

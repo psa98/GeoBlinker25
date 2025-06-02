@@ -58,7 +58,10 @@ fun AuthorizationScreen(
                 }
                 composable(route = AuthorizationScreen.Three.name) {
                     ThreeScreen(
-                        { navController.navigate(AuthorizationScreen.Four.name) },
+                        {
+                            profileViewModel.setPhone(viewModel.phone.value)
+                            navController.navigate(AuthorizationScreen.Four.name)
+                        },
                         { navController.navigate(AuthorizationScreen.Two.name) },
                         viewModel
                     )

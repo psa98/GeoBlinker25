@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -41,11 +43,12 @@ fun GeoBlinkerScreen(
     val context = LocalContext.current
     val application = context.applicationContext as Application
     val profileViewModel = ProfileViewModel(application)
+    val login by profileViewModel.login.collectAsState()
 
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = GeoBlinkerScreen.Authorization.name, // TODO: При дебаге Main
+            startDestination = if (login) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
@@ -65,6 +68,7 @@ fun GeoBlinkerScreen(
                 )
             }
             composable(route = GeoBlinkerScreen.Main.name) {
+                profileViewModel.setLogin(true)
                 MainScreen(
                     DeviceViewModel(Repository(
                         AppDatabase.getInstance(application).deviceDao(),
