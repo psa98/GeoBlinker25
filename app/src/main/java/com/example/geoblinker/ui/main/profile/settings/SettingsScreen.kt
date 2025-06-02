@@ -39,12 +39,13 @@ import com.example.geoblinker.ui.theme.sdp
 fun SettingsScreen(
     toName: () -> Unit,
     toPhone: () -> Unit,
+    toEmail: () -> Unit,
     toBack: () -> Unit
 ) {
     val settings = listOf(
         Pair("Сменить имя", { toName() }),
         Pair("Номер телефона", { toPhone() }),
-        Pair("Email аккаунта", {}),
+        Pair("Email аккаунта", { toEmail() }),
         Pair("Настройка уведомлений", {}),
         Pair("Единицы расстояния", {}),
         Pair("Код подтверждения", {})

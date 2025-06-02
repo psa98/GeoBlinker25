@@ -65,6 +65,7 @@ import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
+import com.example.geoblinker.ui.main.profile.settings.EmailSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.NameSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.PhoneSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.SettingsScreen
@@ -105,7 +106,8 @@ enum class MainScreen {
     Settings,
     SettingsOne,
     NameSettings,
-    PhoneSettings
+    PhoneSettings,
+    EmailSettings
 }
 
 @Composable
@@ -388,6 +390,10 @@ fun MainScreen(
             composable(route = MainScreen.DeviceThree.name) {
                 DeviceThreeScreen(
                     viewModel,
+                    profileViewModel,
+                    {
+                        navController.navigate("${MainScreen.EmailSettings.name}?show=true")
+                    },
                     { navController.navigateUp() }
                 )
             }
@@ -514,6 +520,7 @@ fun MainScreen(
                 SettingsScreen(
                     toName = { navController.navigate(MainScreen.NameSettings.name) },
                     toPhone = { navController.navigate(MainScreen.PhoneSettings.name) },
+                    toEmail = { navController.navigate(MainScreen.EmailSettings.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -526,6 +533,23 @@ fun MainScreen(
             composable(route = MainScreen.PhoneSettings.name) {
                 PhoneSettingsScreen(
                     profileViewModel,
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(
+                route = "${MainScreen.EmailSettings.name}?show={show}",
+                arguments = listOf(
+                    navArgument("show") {
+                        type = NavType.BoolType
+                        nullable = false
+                        defaultValue = false
+                    }
+                )
+            ) { backStackEntry ->
+                val isShowLocal = backStackEntry.arguments?.getBoolean("show", false)!!
+                EmailSettingsScreen(
+                    profileViewModel,
+                    isShowLocal,
                     toBack = { navController.navigateUp() }
                 )
             }

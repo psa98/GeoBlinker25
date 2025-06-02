@@ -74,6 +74,7 @@ import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
+import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
 
@@ -123,7 +124,10 @@ fun CustomPopup(
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Box(
-            modifier = Modifier.padding(0.sdp()).fillMaxSize().background(Color.Black.copy(alpha = 0.2f)),
+            modifier = Modifier
+                .padding(0.sdp())
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f)),
             contentAlignment = Alignment.Center
         ) {
             Surface(
@@ -514,7 +518,10 @@ fun CustomDiagnosisPopup(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(Modifier.size(330.sdp(), 160.sdp()).clickable { onChangeVisible(false) })
+                Spacer(
+                    Modifier
+                        .size(330.sdp(), 160.sdp())
+                        .clickable { onChangeVisible(false) })
                 Surface(
                     modifier = Modifier.width(330.sdp()),
                     shape = RoundedCornerShape(10.sdp()),
@@ -535,7 +542,9 @@ fun CustomDiagnosisPopup(
                             )
                         }
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 15.sdp()),
                             1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
@@ -551,7 +560,9 @@ fun CustomDiagnosisPopup(
                             )
                         }
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 15.sdp()),
                             1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
@@ -567,7 +578,9 @@ fun CustomDiagnosisPopup(
                             )
                         }
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 15.sdp()),
                             1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
@@ -631,7 +644,10 @@ fun CustomDiagnosisPopup(
                         )
                     }
                 }
-                Spacer(Modifier.size(330.sdp(), 60.sdp()).clickable { onChangeVisible(false) })
+                Spacer(
+                    Modifier
+                        .size(330.sdp(), 60.sdp())
+                        .clickable { onChangeVisible(false) })
             }
 
             items(breakdowns) { item ->
@@ -648,7 +664,9 @@ fun CustomDiagnosisPopup(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 12.sdp()),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.sdp()),
                             1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
@@ -668,11 +686,17 @@ fun CustomDiagnosisPopup(
                         }
                     }
                 }
-                Spacer(Modifier.size(330.sdp(), 12.sdp()).clickable { onChangeVisible(false) })
+                Spacer(
+                    Modifier
+                        .size(330.sdp(), 12.sdp())
+                        .clickable { onChangeVisible(false) })
             }
 
             item {
-                Spacer(Modifier.size(330.sdp(), 100.sdp()).clickable { onChangeVisible(false) })
+                Spacer(
+                    Modifier
+                        .size(330.sdp(), 100.sdp())
+                        .clickable { onChangeVisible(false) })
             }
         }
     }
@@ -695,7 +719,10 @@ fun CustomCommentsPopup(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             item {
-                Spacer(Modifier.size(330.sdp(), 200.sdp()).clickable { onChangeVisible(false) })
+                Spacer(
+                    Modifier
+                        .size(330.sdp(), 200.sdp())
+                        .clickable { onChangeVisible(false) })
             }
             items(8) {
                 Surface(
@@ -719,7 +746,9 @@ fun CustomCommentsPopup(
                             }
                         }
                         HorizontalDivider(
-                            Modifier.fillMaxWidth().padding(vertical = 15.sdp()),
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 15.sdp()),
                             1.sdp(),
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
@@ -729,11 +758,77 @@ fun CustomCommentsPopup(
                         )
                     }
                 }
-                Spacer(Modifier.size(330.sdp(), 15.sdp()).clickable { onChangeVisible(false) })
+                Spacer(
+                    Modifier
+                        .size(330.sdp(), 15.sdp())
+                        .clickable { onChangeVisible(false) })
             }
 
             item {
-                Spacer(Modifier.size(330.sdp(), 100.sdp()).clickable { onChangeVisible(false) })
+                Spacer(
+                    Modifier
+                        .size(330.sdp(), 100.sdp())
+                        .clickable { onChangeVisible(false) })
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomLinkEmailPopup(
+    toLinkEmail: () -> Unit,
+    cancellation: () -> Unit
+) {
+    Dialog(
+        {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f))
+                .clickable { cancellation() },
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                modifier = Modifier.width(310.sdp()),
+                shape = RoundedCornerShape(16.sdp()),
+                color = Color.White
+            ) {
+                Column(
+                    modifier = Modifier.padding(
+                        horizontal = 25.sdp(),
+                        vertical = 30.sdp()
+                    ),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.envelope),
+                        contentDescription = null,
+                        modifier = Modifier.size(28.sdp()),
+                        tint = Color.Unspecified
+                    )
+                    Spacer(Modifier.height(20.sdp()))
+                    Text(
+                        stringResource(R.string.set_up_email_description),
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(Modifier.height(28.sdp()))
+                    CustomButton(
+                        text = stringResource(R.string.set_up_email),
+                        onClick = toLinkEmail,
+                        typeColor = TypeColor.Green,
+                        height = 55
+                    )
+                    Spacer(Modifier.height(10.sdp()))
+                    CustomButton(
+                        text = stringResource(R.string.cancellation),
+                        onClick = cancellation,
+                        typeColor = TypeColor.White,
+                        height = 55
+                    )
+                }
             }
         }
     }

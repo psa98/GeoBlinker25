@@ -307,19 +307,21 @@ fun EmailTextField(
     placeholder: String,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
-    isError: Boolean = false
+    isError: Boolean = false,
+    height: Int = 81,
+    radius: Int = 24
 ) {
     Surface(
-        shape = MaterialTheme.shapes.large,
+        shape = RoundedCornerShape(radius.sdp()),
         border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = email,
             onValueChange = { newValue ->
-                onValueChange(newValue.filter { it != ' ' })
+                onValueChange(newValue.filter { it.isLetterOrDigit() || it == '@' || it == '.' }.take(64))
             },
             modifier = Modifier
-                .height(81.sdp())
+                .height(height.sdp())
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
@@ -342,7 +344,7 @@ fun EmailTextField(
                 onDone =  { onDone() }
             ),
             singleLine = true,
-            shape = MaterialTheme.shapes.large,
+            shape = RoundedCornerShape(radius.sdp()),
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = Color.White,
                 focusedContainerColor = Color.White,

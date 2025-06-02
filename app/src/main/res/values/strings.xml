@@ -14,7 +14,7 @@
     <string name="is_the_code_not_coming">Не приходит код?</string>
     <string name="invalid_code">Неверный код</string>
     <string name="resend">Отправить повторно</string>
-    <string name="invalid_number">Номер указан неверно</string>
+    <string name="invalid_number">Номер указан неверно!</string>
     <string name="welcome">Добро пожаловать,</string>
     <string name="your_name">Ваше имя</string>
     <string name="enter_the_user_name">Введите имя пользователя</string>
@@ -86,6 +86,20 @@
     <string name="ready">Готов к работе</string>
     <string name="requires_repair">Требуется ремонт</string>
     <string name="link_new_phone">Привязать новый номер</string>
-    <string name="active_phone">Активный номер телефона</string>
-    <string name="phone_updated">Номер телефона обновлен</string>
+    <string name="active_phone">Активный номер телефона:</string>
+    <string name="phone_updated">Номер телефона обновлен!</string>
+    <string name="account_email">Email аккаунта</string>
+    <string name="no_email_1">В данный момент электронная почта</string>
+    <string name="no_email_span">не подключена.</string>
+    <string name="no_email_2">Подключить Email, чтобы вы могли получать сигналы устройств и уведомления на почту?</string>
+    <string name="enter_email">Введите свой Email</string>
+    <string name="link_email">Подключить Email</string>
+    <string name="activation_link_email">На ваш Email отправлена ссылка активации</string>
+    <string name="no_activation_link_email">Срок действия ссылки активации истек. Пожалуйста укажите свой Email заново.</string>
+    <string name="email_not_coming">не приходит письмо?</string>
+    <string name="email_connected">Email успешно подключен!</string>
+    <string name="change_email">Сменить Email</string>
+    <string name="enter_new_email">Введите новый Email</string>
+    <string name="set_up_email_description">Настройте email для своего аккаунта, чтобы получать уведомления по электронной почте</string>
+    <string name="set_up_email">Настроить Email</string>
 </resources>

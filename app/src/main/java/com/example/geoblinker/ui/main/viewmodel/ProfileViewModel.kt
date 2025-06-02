@@ -21,10 +21,12 @@ class ProfileViewModel(
     private val _name = MutableStateFlow("Константин Гусевский")
     private val _phone = MutableStateFlow("")
     private val _login = MutableStateFlow(false)
+    private val _email = MutableStateFlow("")
     val subscription: StateFlow<Long> = _subscription.asStateFlow()
     val name: StateFlow<String> = _name.asStateFlow()
     val phone: StateFlow<String> = _phone.asStateFlow()
     val login: StateFlow<Boolean> = _login.asStateFlow()
+    val email: StateFlow<String> = _email.asStateFlow()
 
     init {
         loadData()
@@ -52,6 +54,7 @@ class ProfileViewModel(
             _name.value = _prefs.getString("name", "") ?: ""
             _phone.value = _prefs.getString("phone", "") ?: ""
             _login.value = _prefs.getBoolean("login", false)
+            _email.value = _prefs.getString("email", "") ?: ""
         }
     }
 
@@ -102,6 +105,16 @@ class ProfileViewModel(
 
             withContext(Dispatchers.Main) {
                 _login.value = it
+            }
+        }
+    }
+
+    fun setEmail(email: String) {
+        viewModelScope.launch {
+            _prefs.edit().putString("email", email).apply()
+
+            withContext(Dispatchers.Main) {
+                _email.value = email
             }
         }
     }

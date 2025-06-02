@@ -110,7 +110,7 @@ private fun PhoneScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            stringResource(R.string.active_phone) + ":",
+            stringResource(R.string.active_phone),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold
@@ -152,7 +152,7 @@ private fun PhoneScreen(
     ) {
         if (isError) {
             Text(
-                stringResource(R.string.invalid_number) + '!',
+                stringResource(R.string.invalid_number),
                 color = Color(0xFFC4162D),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge
@@ -160,7 +160,7 @@ private fun PhoneScreen(
         }
         if (isCheck) {
             Text(
-                stringResource(R.string.phone_updated) + '!',
+                stringResource(R.string.phone_updated),
                 color = Color(0xFF12CD4A),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge

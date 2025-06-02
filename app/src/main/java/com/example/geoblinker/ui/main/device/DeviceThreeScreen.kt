@@ -19,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,16 +32,22 @@ import com.example.geoblinker.R
 import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlueButton
+import com.example.geoblinker.ui.CustomLinkEmailPopup
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun DeviceThreeScreen(
     viewModel: DeviceViewModel,
+    profileViewModel: ProfileViewModel,
+    toLinkEmail: () -> Unit,
     toBack: () -> Unit
 ) {
     val device by viewModel.device.collectAsState()
     val typeSignal by viewModel.typeSignal.collectAsState()
+    val email by profileViewModel.email.collectAsState()
+    var isShow by remember { mutableStateOf(false) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -119,17 +128,22 @@ fun DeviceThreeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        stringResource(R.string.email).capitalize(),
+                        "Email",
                         style = MaterialTheme.typography.labelMedium
                     )
                     Switch(
                         checked = typeSignal.checkedEmail,
                         onCheckedChange = {
-                            viewModel.updateTypeSignal(
-                                typeSignal.copy(
-                                    checkedEmail = it
+                            if (email.isEmpty()) {
+                                isShow = true
+                            }
+                            else {
+                                viewModel.updateTypeSignal(
+                                    typeSignal.copy(
+                                        checkedEmail = it
+                                    )
                                 )
-                            )
+                            }
                         },
                         modifier = Modifier.size(40.sdp(), 20.sdp()),
                         colors = SwitchDefaults.colors(
@@ -188,4 +202,11 @@ fun DeviceThreeScreen(
     BackButton(
         onClick = toBack
     )
+
+    if (isShow) {
+        CustomLinkEmailPopup(
+            toLinkEmail,
+            { isShow = false }
+        )
+    }
 }
