@@ -123,4 +123,7 @@
     <string name="receive_notifications">Получать уведомления:</string>
     <string name="from">с</string>
     <string name="to">до</string>
+    <string name="units_distance_map">Единицы расстояния на карте</string>
+    <string name="kilometers_meters">Километры / Метры</string>
+    <string name="miles_feet">Мили / Футы</string>
 </resources>

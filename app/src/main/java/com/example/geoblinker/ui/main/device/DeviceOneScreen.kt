@@ -76,6 +76,7 @@ fun DeviceOneScreen(
     toBack: () -> Unit
 ) {
     val device by viewModel.device.collectAsState()
+    val unitsDistance by viewModel.unitsDistance.collectAsState()
     var isShow by remember { mutableStateOf(false) }
     var isShowDiagnosis by remember { mutableStateOf(false) }
     var isShowComments by remember { mutableStateOf(false) }
@@ -208,7 +209,7 @@ fun DeviceOneScreen(
                                 style = MaterialTheme.typography.labelMedium
                             )
                             Text(
-                                formatDistance(LatLng(device.lat, device.lng), currentLocation),
+                                formatDistance(LatLng(device.lat, device.lng), currentLocation, unitsDistance),
                                 style = MaterialTheme.typography.labelMedium
                             )
                         }
@@ -272,7 +273,7 @@ fun DeviceOneScreen(
                                 )
                                 Spacer(Modifier.width(12.sdp()))
                                 Text(
-                                    "0 км/ч",
+                                    formatSpeed(10.0, unitsDistance),
                                     style = MaterialTheme.typography.labelMedium
                                 )
                             }
@@ -440,14 +441,20 @@ fun DeviceOneScreen(
     }
 }
 
-fun formatDistance(point1: LatLng, point2: LatLng?): String {
+fun formatDistance(point1: LatLng, point2: LatLng?, unitsDistance: Boolean = true): String {
     if (point2 == null)
         return "Unknown"
 
-    val distance = calculateDistance(point1, point2)
+    var distance = calculateDistance(point1, point2)
+    if (unitsDistance)
+        return when {
+            distance > 1000 -> "${"%.1f".format(distance/1000)} км"
+            else -> "${"%.0f".format(distance)} м"
+        }
+    distance *= 3.28
     return when {
-        distance > 1000 -> "${"%.1f".format(distance/1000)} км"
-        else -> "${"%.0f".format(distance)} м"
+        distance > 5280 -> "${"%.1f".format(distance/5280)} мили"
+        else -> "${"%.0f".format(distance)} футы"
     }
 }
 
@@ -461,4 +468,10 @@ fun calculateDistance(point1: LatLng, point2: LatLng): Double {
         results
     )
     return results[0].toDouble()
+}
+
+fun formatSpeed(value: Double, unitsDistance: Boolean = true): String {
+    if (unitsDistance)
+        return "${"%.1f".format(value * 3.6)} км/ч"
+    return "${"%.1f".format(value * 2.24)} мили/ч"
 }

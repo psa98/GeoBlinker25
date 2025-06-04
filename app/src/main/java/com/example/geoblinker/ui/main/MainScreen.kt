@@ -70,6 +70,7 @@ import com.example.geoblinker.ui.main.profile.settings.NameSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.NotificationSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.PhoneSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.SettingsScreen
+import com.example.geoblinker.ui.main.profile.settings.UnitDistanceSettingsScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
@@ -110,7 +111,8 @@ enum class MainScreen {
     NameSettings,
     PhoneSettings,
     EmailSettings,
-    NotificationSettings
+    NotificationSettings,
+    UnitsDistanceSettings
 }
 
 @Composable
@@ -526,6 +528,7 @@ fun MainScreen(
                     toPhone = { navController.navigate(MainScreen.PhoneSettings.name) },
                     toEmail = { navController.navigate(MainScreen.EmailSettings.name) },
                     toNotification = { navController.navigate(MainScreen.NotificationSettings.name) },
+                    toUnitsDistance = { navController.navigate(MainScreen.UnitsDistanceSettings.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -563,6 +566,12 @@ fun MainScreen(
                     notificationViewModel,
                     profileViewModel,
                     toLinkEmail = { navController.navigate("${MainScreen.EmailSettings.name}?show=true") },
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.UnitsDistanceSettings.name) {
+                UnitDistanceSettingsScreen(
+                    viewModel,
                     toBack = { navController.navigateUp() }
                 )
             }

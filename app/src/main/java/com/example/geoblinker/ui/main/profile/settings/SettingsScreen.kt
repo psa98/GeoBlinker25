@@ -41,6 +41,7 @@ fun SettingsScreen(
     toPhone: () -> Unit,
     toEmail: () -> Unit,
     toNotification: () -> Unit,
+    toUnitsDistance: () -> Unit,
     toBack: () -> Unit
 ) {
     val settings = listOf(
@@ -48,7 +49,7 @@ fun SettingsScreen(
         Pair("Номер телефона", { toPhone() }),
         Pair("Email аккаунта", { toEmail() }),
         Pair("Настройка уведомлений", { toNotification() }),
-        Pair("Единицы расстояния", {}),
+        Pair("Единицы расстояния", { toUnitsDistance() }),
         Pair("Код подтверждения", {})
     )
     LazyColumn(

@@ -71,12 +71,13 @@ fun GeoBlinkerScreen(
             composable(route = GeoBlinkerScreen.Main.name) {
                 profileViewModel.setLogin(true)
                 MainScreen(
-                    DeviceViewModel(Repository(
-                        AppDatabase.getInstance(application).deviceDao(),
-                        AppDatabase.getInstance(application).typeSignalDao(),
-                        AppDatabase.getInstance(application).signalDao(),
-                        AppDatabase.getInstance(application).newsDao()
-                    )),
+                    DeviceViewModel(
+                        Repository(
+                            AppDatabase.getInstance(application).deviceDao(),
+                            AppDatabase.getInstance(application).typeSignalDao(),
+                            AppDatabase.getInstance(application).signalDao(),
+                            AppDatabase.getInstance(application).newsDao()),
+                        application),
                     AvatarViewModel(application),
                     SubscriptionViewModel(),
                     profileViewModel,

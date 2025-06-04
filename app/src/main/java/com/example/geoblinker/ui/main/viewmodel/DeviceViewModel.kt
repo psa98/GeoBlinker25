@@ -1,5 +1,7 @@
 package com.example.geoblinker.ui.main.viewmodel
 
+import android.app.Application
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.data.Device
@@ -8,14 +10,20 @@ import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.Signal
 import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.data.TypeSignal
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
 
-class DeviceViewModel(private val repository: Repository): ViewModel() {
+class DeviceViewModel(
+    private val repository: Repository,
+    private val application: Application
+): ViewModel() {
+    private val _prefs = application.getSharedPreferences("device", Context.MODE_PRIVATE)
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
     private val _device = MutableStateFlow(Device("", "", false, 0))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
@@ -24,6 +32,7 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     private val _signals = MutableStateFlow<List<Signal>>(emptyList())
     private val _news = MutableStateFlow<List<News>>(emptyList())
     private val _countNotifications = MutableStateFlow(0)
+    private val _unitsDistance = MutableStateFlow(true) // true - км / м, false - мили / футы
     val devices: StateFlow<List<Device>> = _devices.asStateFlow()
     val device: StateFlow<Device> = _device.asStateFlow()
     val typesSignals: StateFlow<List<TypeSignal>> = _typesSignals.asStateFlow()
@@ -31,11 +40,12 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     val signalsDevice: StateFlow<List<Signal>> = _signalsDevice.asStateFlow()
     val signals: StateFlow<List<Signal>> = _signals.asStateFlow()
     val news: StateFlow<List<News>> = _news.asStateFlow()
-    val countNotifications: StateFlow<Int> = _countNotifications.asStateFlow()
+    val unitsDistance = _unitsDistance.asStateFlow()
 
     init {
         // Запускаем подписку на изменения
         viewModelScope.launch {
+            _unitsDistance.value = _prefs.getBoolean("unitsDistance", true)
             launch {
                 repository.getDevices()
                     .collect { devicesList ->
@@ -169,6 +179,16 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     fun updateNews(news: News) {
         viewModelScope.launch {
             repository.updateNews(news)
+        }
+    }
+
+    fun setUnitsDistance(it: Boolean) {
+        viewModelScope.launch {
+            _prefs.edit().putBoolean("unitsDistance", it).apply()
+
+            withContext(Dispatchers.Main) {
+                _unitsDistance.value = it
+            }
         }
     }
 }

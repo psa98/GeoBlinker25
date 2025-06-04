@@ -68,6 +68,7 @@ import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomEmptyDevicesPopup
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
+import com.example.geoblinker.ui.main.device.formatSpeed
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
@@ -412,6 +413,8 @@ fun CustomDevicePopup(
     onChangeValueToNull: () -> Unit,
     toDeviceScreen: (Device) -> Unit
 ) {
+    val unitsDistance by viewModel.unitsDistance.collectAsState()
+
     selectedMarker?.let { item ->
         var isShowAdd by remember { mutableStateOf(false) }
         var isShowDiagnosis by remember { mutableStateOf(false) }
@@ -562,7 +565,7 @@ fun CustomDevicePopup(
                                     )
                                     Spacer(Modifier.width(12.sdp()))
                                     Text(
-                                        "0 км/ч",
+                                        formatSpeed(10.0, unitsDistance),
                                         style = MaterialTheme.typography.labelMedium
                                     )
                                 }

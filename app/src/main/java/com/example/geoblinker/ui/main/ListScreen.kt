@@ -56,6 +56,7 @@ import com.example.geoblinker.ui.CustomListPopup
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
 import com.example.geoblinker.ui.main.device.calculateDistance
+import com.example.geoblinker.ui.main.device.formatSpeed
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 import com.google.android.gms.maps.model.LatLng
@@ -74,6 +75,7 @@ fun ListScreen(
     val context = LocalContext.current
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
     val device by viewModel.device.collectAsState()
+    val unitsDistance by viewModel.unitsDistance.collectAsState()
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -296,7 +298,7 @@ fun ListScreen(
                                                     )
                                                     Spacer(Modifier.width(12.sdp()))
                                                     Text(
-                                                        "0 км/ч",
+                                                        formatSpeed(10.0, unitsDistance),
                                                         style = MaterialTheme.typography.labelMedium
                                                     )
                                                 }
