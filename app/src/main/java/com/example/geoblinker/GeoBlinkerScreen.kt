@@ -39,17 +39,18 @@ enum class GeoBlinkerScreen {
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun GeoBlinkerScreen(
+    profileViewModel: ProfileViewModel,
     navController: NavHostController = rememberNavController()
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
-    val profileViewModel = ProfileViewModel(application)
     val isLogin by profileViewModel.isLogin.collectAsState()
+    val startDestination = if (isLogin) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name
 
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (isLogin) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name,
+            startDestination = startDestination,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
@@ -57,7 +58,11 @@ fun GeoBlinkerScreen(
                     AuthorizationViewModel(),
                     profileViewModel,
                     registrationScreen = { navController.navigate(GeoBlinkerScreen.Registration.name) },
-                    mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
+                    mainScreen = {
+                        profileViewModel.setInitialSubscription()
+                        profileViewModel.setIsLogin(true)
+                        navController.navigate(GeoBlinkerScreen.Main.name)
+                    }
                 )
             }
             composable(route = GeoBlinkerScreen.Registration.name) {
@@ -65,11 +70,14 @@ fun GeoBlinkerScreen(
                     RegistrationViewModel(),
                     profileViewModel,
                     authorizationScreen = { navController.navigate(GeoBlinkerScreen.Authorization.name) },
-                    mainScreen = { navController.navigate(GeoBlinkerScreen.Main.name) }
+                    mainScreen = {
+                        profileViewModel.setInitialSubscription()
+                        profileViewModel.setIsLogin(true)
+                        navController.navigate(GeoBlinkerScreen.Main.name)
+                    }
                 )
             }
             composable(route = GeoBlinkerScreen.Main.name) {
-                profileViewModel.setIsLogin(true)
                 MainScreen(
                     DeviceViewModel(
                         Repository(
@@ -82,7 +90,8 @@ fun GeoBlinkerScreen(
                     SubscriptionViewModel(),
                     profileViewModel,
                     JournalViewModel(application),
-                    NotificationViewModel(application)
+                    NotificationViewModel(application),
+                    toBeginning = { navController.navigate(GeoBlinkerScreen.Authorization.name) }
                 )
             }
         }

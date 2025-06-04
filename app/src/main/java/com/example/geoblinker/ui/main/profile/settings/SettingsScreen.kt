@@ -49,6 +49,7 @@ fun SettingsScreen(
     toUnitsDistance: () -> Unit,
     toConfirmationCode: () -> Unit,
     toLogout: () -> Unit,
+    toDelete: () -> Unit,
     toBack: () -> Unit
 ) {
     val settings = listOf(
@@ -156,7 +157,7 @@ fun SettingsScreen(
                 contentAlignment = Alignment.CenterStart
             ) {
                 ConstraintLayout(
-                    modifier = Modifier.wrapContentWidth()
+                    modifier = Modifier.wrapContentWidth().clickable { toDelete() }
                 ) {
                     val (text, line) = createRefs()
 

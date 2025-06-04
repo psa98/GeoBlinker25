@@ -329,7 +329,8 @@ fun CustomPopup(
                                 }
                             }
                             if (ways.isNotEmpty()) {
-                                viewModel.setWaysConfirmationCode(items)
+                                if (checkedChoice)
+                                    viewModel.setWaysConfirmationCode(items)
                                 sendCode(ways)
                             }
                         }

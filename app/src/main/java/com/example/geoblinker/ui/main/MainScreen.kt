@@ -71,6 +71,7 @@ import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
 import com.example.geoblinker.ui.main.profile.settings.ConfirmationCodeSettingsScreen
+import com.example.geoblinker.ui.main.profile.settings.DeleteAccountSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.EmailSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.NameSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.NotificationSettingsScreen
@@ -122,7 +123,8 @@ enum class MainScreen {
     EmailSettings,
     NotificationSettings,
     UnitsDistanceSettings,
-    ConfirmationCodeSettings
+    ConfirmationCodeSettings,
+    DeleteAccountSettings
 }
 
 @Composable
@@ -263,6 +265,7 @@ fun MainScreen(
     profileViewModel: ProfileViewModel,
     journalViewModel: JournalViewModel,
     notificationViewModel: NotificationViewModel,
+    toBeginning: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
     val context = LocalContext.current
@@ -551,7 +554,9 @@ fun MainScreen(
                         avatarViewModel.removeAvatar()
                         notificationViewModel.logout()
                         profileViewModel.logout()
+                        toBeginning()
                     },
+                    toDelete = { navController.navigate(MainScreen.DeleteAccountSettings.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -602,6 +607,21 @@ fun MainScreen(
                 ConfirmationCodeSettingsScreen(
                     profileViewModel,
                     toLinkEmail = { navController.navigate("${MainScreen.EmailSettings.name}?show=true") },
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.DeleteAccountSettings.name) {
+                DeleteAccountSettingsScreen(
+                    deleteAccount = {
+                        // TODO: Доработать функцию удалеия аккаунта
+                        scope.launch(Dispatchers.IO) {
+                            AppDatabase.getInstance(application).clearAllTables()
+                        }
+                        avatarViewModel.removeAvatar()
+                        notificationViewModel.logout()
+                        profileViewModel.logout()
+                        toBeginning()
+                    },
                     toBack = { navController.navigateUp() }
                 )
             }

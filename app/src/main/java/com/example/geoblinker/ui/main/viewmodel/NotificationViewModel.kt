@@ -179,5 +179,14 @@ class NotificationViewModel(
 
     fun logout() {
         _prefs.edit().clear().apply()
+        _quietMode.value = false
+        _getAllNotification.value = true
+        _emailNotification.value = false
+        _getNotificationAroundClock.value = true
+        _startTime.value = DEFAULT_START // В минутах
+        _endTime.value = DEFAULT_END
+        _allNotification.value = true
+        _news.value = false
+        _typesSignals.value = emptyList()
     }
 }

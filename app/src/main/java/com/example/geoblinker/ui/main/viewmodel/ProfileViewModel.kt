@@ -58,22 +58,6 @@ class ProfileViewModel(
     private fun loadData() {
         viewModelScope.launch {
             _subscription.value = _prefs.getLong("subscription", 0)
-
-            if (_subscription.value == 0L) {
-                val time = Instant
-                    .now()
-                    .atZone(ZoneId.systemDefault())
-                    .plusMinutes(2)
-                    .toInstant()
-                    .toEpochMilli()
-
-                _prefs.edit().putLong("subscription", time).apply()
-
-                withContext(Dispatchers.Main) {
-                    _subscription.value = time
-                }
-            }
-
             _name.value = _prefs.getString("name", "") ?: ""
             _phone.value = _prefs.getString("phone", "") ?: ""
             _isLogin.value = _prefs.getBoolean("isLogin", false)
@@ -98,6 +82,23 @@ class ProfileViewModel(
 
             withContext(Dispatchers.Main) {
                 _subscription.value = newTime
+            }
+        }
+    }
+
+    fun setInitialSubscription() {
+        viewModelScope.launch {
+            val time = Instant
+                .now()
+                .atZone(ZoneId.systemDefault())
+                .plusMinutes(2)
+                .toInstant()
+                .toEpochMilli()
+
+            _prefs.edit().putLong("subscription", time).apply()
+
+            withContext(Dispatchers.Main) {
+                _subscription.value = time
             }
         }
     }
@@ -196,7 +197,18 @@ class ProfileViewModel(
     }
 
     fun logout() {
-        _isLogin.value = false
         _prefs.edit().clear().apply()
+        _subscription.value = 0
+        _name.value = ""
+        _phone.value = ""
+        _isLogin.value = false
+        _email.value = ""
+        _orderWays.value = ""
+        _waysConfirmationCode.value = listOf(
+            WayConfirmationCode("Telegram"),
+            WayConfirmationCode("WhatsApp"),
+            WayConfirmationCode("SMS"),
+            WayConfirmationCode("Email")
+        )
     }
 }
