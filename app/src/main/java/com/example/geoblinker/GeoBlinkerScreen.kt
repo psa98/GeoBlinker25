@@ -44,12 +44,12 @@ fun GeoBlinkerScreen(
     val context = LocalContext.current
     val application = context.applicationContext as Application
     val profileViewModel = ProfileViewModel(application)
-    val login by profileViewModel.login.collectAsState()
+    val isLogin by profileViewModel.isLogin.collectAsState()
 
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (login) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name,
+            startDestination = if (isLogin) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name,
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
@@ -69,7 +69,7 @@ fun GeoBlinkerScreen(
                 )
             }
             composable(route = GeoBlinkerScreen.Main.name) {
-                profileViewModel.setLogin(true)
+                profileViewModel.setIsLogin(true)
                 MainScreen(
                     DeviceViewModel(
                         Repository(

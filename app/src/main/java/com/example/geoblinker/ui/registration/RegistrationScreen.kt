@@ -47,6 +47,7 @@ fun RegistrationScreen(
             ) {
                 composable(route = RegistrationScreen.One.name) {
                     OneScreen(
+                        profileViewModel,
                         { phone, name ->
                             viewModel.updateState(phone, name)
                             navController.navigate(RegistrationScreen.Two.name)

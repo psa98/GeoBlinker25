@@ -1,6 +1,8 @@
 package com.example.geoblinker.ui.main
 
 import android.annotation.SuppressLint
+import android.app.Application
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +39,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -50,6 +54,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.example.geoblinker.R
+import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.GreenSmallButton
@@ -65,6 +70,7 @@ import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
+import com.example.geoblinker.ui.main.profile.settings.ConfirmationCodeSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.EmailSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.NameSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.NotificationSettingsScreen
@@ -81,6 +87,9 @@ import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
 
 enum class MainScreen {
@@ -112,7 +121,8 @@ enum class MainScreen {
     PhoneSettings,
     EmailSettings,
     NotificationSettings,
-    UnitsDistanceSettings
+    UnitsDistanceSettings,
+    ConfirmationCodeSettings
 }
 
 @Composable
@@ -255,6 +265,10 @@ fun MainScreen(
     notificationViewModel: NotificationViewModel,
     navController: NavHostController = rememberNavController(),
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+    val scope = rememberCoroutineScope()
+
     val device by viewModel.device.collectAsState()
     val signals by viewModel.signals.collectAsState()
     val news by viewModel.news.collectAsState()
@@ -329,8 +343,8 @@ fun MainScreen(
             route = "${MainScreen.Binding.name}/{previousScreen}",
             startDestination = MainScreen.BindingOne.name
         ) {
-            currentRoute = MainScreen.Binding.name
             composable(route = MainScreen.BindingOne.name) { backStackEntry ->
+                currentRoute = MainScreen.Binding.name
                 backStackEntry.arguments?.getString("previousScreen")?.let {
                     previousScreen = it
                 }
@@ -369,8 +383,8 @@ fun MainScreen(
             route = "${MainScreen.Device.name}/{previousScreen}",
             startDestination = MainScreen.DeviceOne.name
         ) {
-            currentRoute = MainScreen.Device.name
             composable(route = MainScreen.DeviceOne.name) { backStackEntry ->
+                currentRoute = MainScreen.Device.name
                 backStackEntry.arguments?.getString("previousScreen")?.let {
                     previousScreen = it
                 }
@@ -454,8 +468,8 @@ fun MainScreen(
             route = MainScreen.Profile.name,
             startDestination = MainScreen.ProfileOne.name
         ) {
-            currentRoute = MainScreen.Profile.name
             composable(route = MainScreen.ProfileOne.name) {
+                currentRoute = MainScreen.Profile.name
                 ProfileScreen(
                     avatarViewModel,
                     profileViewModel,
@@ -480,8 +494,8 @@ fun MainScreen(
             route = "${MainScreen.Subscription.name}/{previousScreen}",
             startDestination = MainScreen.SubscriptionOne.name
         ) {
-            currentRoute = MainScreen.Subscription.name
             composable(route = MainScreen.SubscriptionOne.name) { backStackEntry ->
+                currentRoute = MainScreen.Subscription.name
                 backStackEntry.arguments?.getString("previousScreen")?.let {
                     previousScreen = it
                 }
@@ -518,8 +532,8 @@ fun MainScreen(
             route = "${MainScreen.Settings.name}/{previousScreen}",
             startDestination = MainScreen.SettingsOne.name
         ) {
-            currentRoute = MainScreen.Settings.name
             composable(route = MainScreen.SettingsOne.name) { backStackEntry ->
+                currentRoute = MainScreen.Settings.name
                 backStackEntry.arguments?.getString("previousScreen")?.let {
                     previousScreen = it
                 }
@@ -529,6 +543,15 @@ fun MainScreen(
                     toEmail = { navController.navigate(MainScreen.EmailSettings.name) },
                     toNotification = { navController.navigate(MainScreen.NotificationSettings.name) },
                     toUnitsDistance = { navController.navigate(MainScreen.UnitsDistanceSettings.name) },
+                    toConfirmationCode = { navController.navigate(MainScreen.ConfirmationCodeSettings.name) },
+                    toLogout = {
+                        scope.launch(Dispatchers.IO) {
+                            AppDatabase.getInstance(application).clearAllTables()
+                        }
+                        avatarViewModel.removeAvatar()
+                        notificationViewModel.logout()
+                        profileViewModel.logout()
+                    },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -575,6 +598,13 @@ fun MainScreen(
                     toBack = { navController.navigateUp() }
                 )
             }
+            composable(route = MainScreen.ConfirmationCodeSettings.name) {
+                ConfirmationCodeSettingsScreen(
+                    profileViewModel,
+                    toLinkEmail = { navController.navigate("${MainScreen.EmailSettings.name}?show=true") },
+                    toBack = { navController.navigateUp() }
+                )
+            }
         }
 
         composable(route = MainScreen.Notifications.name) {
@@ -594,6 +624,7 @@ fun MainScreen(
     )
 
     if (isShow && currentRoute != MainScreen.Subscription.name) {
+        Log.d("CurrentRoute", currentRoute)
         Dialog(
             {},
             properties = DialogProperties(usePlatformDefaultWidth = false)

@@ -32,10 +32,12 @@ import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.NameTextField
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.formatPhoneNumber
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun OneScreen(
+    profileViewModel: ProfileViewModel,
     twoScreen: (String, String) -> Unit,
     toBack: () -> Unit,
     viewModel: RegistrationViewModel
@@ -131,6 +133,7 @@ fun OneScreen(
         }
 
         CustomPopup(
+            profileViewModel,
             phone = "+ 7 ${formatPhoneNumber(phone)}",
             onChangeVisible = { visiblePopup = it },
             sendCode = {

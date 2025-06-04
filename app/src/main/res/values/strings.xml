@@ -126,4 +126,6 @@
     <string name="units_distance_map">Единицы расстояния на карте</string>
     <string name="kilometers_meters">Километры / Метры</string>
     <string name="miles_feet">Мили / Футы</string>
+    <string name="ways_confirmation_code">Укажите удобные способы получения кода подтверждения</string>
+    <string name="procedure_confirmation_code">Процедура выполняется при подтверждении номера телефона, к которому привязан ваш аккаунт</string>
 </resources>

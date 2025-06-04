@@ -1,5 +1,6 @@
 package com.example.geoblinker.ui.main.profile.settings
 
+import android.app.Application
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,12 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.stylusHoverIcon
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.room.Database
 import com.example.geoblinker.R
+import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.ui.BackButton
+import com.example.geoblinker.ui.WayConfirmationCode
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
 
@@ -42,6 +47,8 @@ fun SettingsScreen(
     toEmail: () -> Unit,
     toNotification: () -> Unit,
     toUnitsDistance: () -> Unit,
+    toConfirmationCode: () -> Unit,
+    toLogout: () -> Unit,
     toBack: () -> Unit
 ) {
     val settings = listOf(
@@ -50,7 +57,7 @@ fun SettingsScreen(
         Pair("Email аккаунта", { toEmail() }),
         Pair("Настройка уведомлений", { toNotification() }),
         Pair("Единицы расстояния", { toUnitsDistance() }),
-        Pair("Код подтверждения", {})
+        Pair("Код подтверждения", { toConfirmationCode() })
     )
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -90,7 +97,7 @@ fun SettingsScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {}
+                    .clickable { toLogout() }
                     .padding(vertical = 15.sdp()),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

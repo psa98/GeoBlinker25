@@ -176,4 +176,8 @@ class NotificationViewModel(
             _typesSignals.value = SignalType.entries.map { TypeSignal(it, _prefs.getBoolean(it.name, true)) }
         }
     }
+
+    fun logout() {
+        _prefs.edit().clear().apply()
+    }
 }

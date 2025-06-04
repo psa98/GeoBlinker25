@@ -14,7 +14,7 @@ class SubscriptionViewModel: ViewModel() {
         Subscription(2800, 12, "12 месяцев", R.drawable.twelve_months)
     )
 
-    private val _pickSubscription = MutableStateFlow<Subscription>(subscriptionOptions[0])
+    private val _pickSubscription = MutableStateFlow(subscriptionOptions[0])
     val pickSubscription: StateFlow<Subscription> = _pickSubscription.asStateFlow()
 
     fun setPickSubscription(index: Int) {

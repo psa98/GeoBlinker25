@@ -75,49 +75,33 @@ import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.main.MainScreen
+import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
 
-data class DraggableItem(
-    val text: String,
-    val isEmail: Boolean = false
-)
-
 @Composable
 fun CustomPopup(
+    viewModel: ProfileViewModel,
     phone: String,
     onChangeVisible: (Boolean) -> Unit,
     sendCode: (List<String>) -> Unit
 ) {
-    val stringTelegram = stringResource(R.string.telegram)
-    val stringWhatsApp = stringResource(R.string.whatsapp)
-    val stringSMS = stringResource(R.string.sms)
-    val stringEmail = stringResource(R.string.email).capitalize()
     var isEnterEmail by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var checkedChoice by remember { mutableStateOf(false) }
 
     val items = remember { mutableStateListOf(
-        DraggableItem(stringTelegram),
-        DraggableItem(stringWhatsApp),
-        DraggableItem(stringSMS),
-        DraggableItem(stringEmail, true)
+        WayConfirmationCode("Telegram"),
+        WayConfirmationCode("WhatsApp"),
+        WayConfirmationCode("SMS"),
+        WayConfirmationCode("Email")
     ) }
-    val switchStates = remember {
-        mutableStateMapOf(
-            stringTelegram to false,
-            stringWhatsApp to false,
-            stringSMS to false,
-            stringEmail to false
-        )
-    }
+    val stateWays = remember { mutableStateListOf<Boolean>().apply {
+        addAll(items.map { it.checked })
+    } }
     var draggedIndex by remember { mutableIntStateOf(-1) }
     // Смещение для анимации
     var draggedOffset by remember { mutableStateOf(Offset.Zero) }
-
-    LaunchedEffect(draggedIndex) {
-        Log.d("DraggedIndex", draggedIndex.toString())
-    }
 
     Dialog(
         {},
@@ -204,7 +188,7 @@ fun CustomPopup(
                                 color = Color.Unspecified,
                                 border = BorderStroke(1.sdp(), Color(0xFFBEBEBE))
                             ) {
-                                if (draggableItem.isEmail) {
+                                if (draggableItem.text == "Email") {
                                     Row(
                                         modifier = Modifier
                                             .padding(10.sdp())
@@ -260,13 +244,11 @@ fun CustomPopup(
 
                                                         val targetIndex =
                                                             (draggedIndex + round(draggedOffset.y / 100))
-                                                        Log.d(
-                                                            "DragItem",
-                                                            "${draggedOffset.y} ${draggedOffset.y / 100} $targetIndex $draggedIndex ${draggableItem.text}"
-                                                        )
                                                         if (targetIndex in 0 until 4 && targetIndex != draggedIndex) {
                                                             val item = items.removeAt(draggedIndex)
                                                             items.add(targetIndex, item)
+                                                            stateWays[draggedIndex] = stateWays[targetIndex]
+                                                            stateWays[targetIndex] = item.checked
                                                             draggedIndex = targetIndex
                                                             draggedOffset = Offset.Zero
                                                         }
@@ -286,11 +268,12 @@ fun CustomPopup(
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                     Switch(
-                                        switchStates[currentItem]!!,
+                                        stateWays[index],
                                         {
-                                            switchStates[currentItem] = it
+                                            items[index].checked = it
+                                            stateWays[index] = it
 
-                                            if (draggableItem.isEmail) {
+                                            if (draggableItem.text == "Email") {
                                                 isEnterEmail = it
                                                 email = ""
                                             }
@@ -341,12 +324,14 @@ fun CustomPopup(
                         onClick = {
                             val ways = emptyList<String>().toMutableList()
                             items.forEach { draggableItem ->
-                                if (switchStates[draggableItem.text]!!) {
+                                if (draggableItem.checked) {
                                     ways += draggableItem.text
                                 }
                             }
-                            if (ways.isNotEmpty())
+                            if (ways.isNotEmpty()) {
+                                viewModel.setWaysConfirmationCode(items)
                                 sendCode(ways)
+                            }
                         }
                     )
                     Spacer(Modifier.height(20.sdp()))
@@ -376,13 +361,9 @@ fun CustomPopup(
             {
                 isEnterEmail = false
                 email = it
-                if (email.isEmpty())
-                    switchStates[stringEmail] = false
             },
             {
                 isEnterEmail = false
-                if (email.isEmpty())
-                    switchStates[stringEmail] = false
             }
         )
     }
