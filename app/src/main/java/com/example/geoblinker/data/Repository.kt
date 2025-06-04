@@ -26,11 +26,11 @@ class Repository(
 
     suspend fun insertAllTypeSignal(imei: String) {
         val listTypeSignal = listOf(
-            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.MovementStarted),
-            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.Stop),
-            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.LowCharge),
-            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.DoorOpen),
-            TypeSignal(deviceId = imei, type = TypeSignal.SignalType.ReachedLocation),
+            TypeSignal(deviceId = imei, type = SignalType.MovementStarted),
+            TypeSignal(deviceId = imei, type = SignalType.Stop),
+            TypeSignal(deviceId = imei, type = SignalType.LowCharge),
+            TypeSignal(deviceId = imei, type = SignalType.DoorOpen),
+            TypeSignal(deviceId = imei, type = SignalType.ReachedLocation),
         )
         typeSignalDao.insertAll(listTypeSignal)
     }

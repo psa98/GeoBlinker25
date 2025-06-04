@@ -102,4 +102,25 @@
     <string name="enter_new_email">Введите новый Email</string>
     <string name="set_up_email_description">Настройте email для своего аккаунта, чтобы получать уведомления по электронной почте</string>
     <string name="set_up_email">Настроить Email</string>
+    <string name="setting_up_notifications">Настройка уведомлений</string>
+    <string name="quiet_mode">Тихий режим</string>
+    <string name="quiet_mode_description">Звуковые уведомления будут заменены на вибрацию</string>
+    <string name="movement_started">Начато движение</string>
+    <string name="stop">Остановка</string>
+    <string name="low_charge">Низкий заряд</string>
+    <string name="door_open">Дверь открыта</string>
+    <string name="reached_location">Достиг локации</string>
+    <string name="get_all_notification">Получать все уведомления</string>
+    <string name="email_notification">Уведомления по Email</string>
+    <string name="email_notification_description">Выбрать какие уведомления будут приходить на ваш Email</string>
+    <string name="get_notification_around_clock">Получать уведомления круглосуточно</string>
+    <string name="configure_notification_type">Настроить типы уведомлений...</string>
+    <string name="configure_email_notification">Настроить Email уведомления</string>
+    <string name="configuring_notification_types">Настройка типов уведомлений</string>
+    <string name="enable_all">Включить все</string>
+    <string name="news">Новости / Акции</string>
+    <string name="configuring_notification_email">Настройка Email уведомлений</string>
+    <string name="receive_notifications">Получать уведомления:</string>
+    <string name="from">с</string>
+    <string name="to">до</string>
 </resources>

@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.coil.compose)
+    implementation(libs.threetenabp)
 
     // Room
     implementation(libs.androidx.room.runtime)

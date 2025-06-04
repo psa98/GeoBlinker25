@@ -67,6 +67,7 @@ import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
 import com.example.geoblinker.ui.main.profile.settings.EmailSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.NameSettingsScreen
+import com.example.geoblinker.ui.main.profile.settings.NotificationSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.PhoneSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.SettingsScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
@@ -75,6 +76,7 @@ import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
+import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
@@ -107,7 +109,8 @@ enum class MainScreen {
     SettingsOne,
     NameSettings,
     PhoneSettings,
-    EmailSettings
+    EmailSettings,
+    NotificationSettings
 }
 
 @Composable
@@ -247,6 +250,7 @@ fun MainScreen(
     subscriptionViewModel: SubscriptionViewModel,
     profileViewModel: ProfileViewModel,
     journalViewModel: JournalViewModel,
+    notificationViewModel: NotificationViewModel,
     navController: NavHostController = rememberNavController(),
 ) {
     val device by viewModel.device.collectAsState()
@@ -521,6 +525,7 @@ fun MainScreen(
                     toName = { navController.navigate(MainScreen.NameSettings.name) },
                     toPhone = { navController.navigate(MainScreen.PhoneSettings.name) },
                     toEmail = { navController.navigate(MainScreen.EmailSettings.name) },
+                    toNotification = { navController.navigate(MainScreen.NotificationSettings.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -550,6 +555,14 @@ fun MainScreen(
                 EmailSettingsScreen(
                     profileViewModel,
                     isShowLocal,
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.NotificationSettings.name) {
+                NotificationSettingsScreen(
+                    notificationViewModel,
+                    profileViewModel,
+                    toLinkEmail = { navController.navigate("${MainScreen.EmailSettings.name}?show=true") },
                     toBack = { navController.navigateUp() }
                 )
             }

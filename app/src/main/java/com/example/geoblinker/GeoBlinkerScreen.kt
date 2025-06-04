@@ -24,6 +24,7 @@ import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
+import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.registration.RegistrationScreen
@@ -79,7 +80,8 @@ fun GeoBlinkerScreen(
                     AvatarViewModel(application),
                     SubscriptionViewModel(),
                     profileViewModel,
-                    JournalViewModel(application)
+                    JournalViewModel(application),
+                    NotificationViewModel(application)
                 )
             }
         }

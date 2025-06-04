@@ -40,13 +40,14 @@ fun SettingsScreen(
     toName: () -> Unit,
     toPhone: () -> Unit,
     toEmail: () -> Unit,
+    toNotification: () -> Unit,
     toBack: () -> Unit
 ) {
     val settings = listOf(
         Pair("Сменить имя", { toName() }),
         Pair("Номер телефона", { toPhone() }),
         Pair("Email аккаунта", { toEmail() }),
-        Pair("Настройка уведомлений", {}),
+        Pair("Настройка уведомлений", { toNotification() }),
         Pair("Единицы расстояния", {}),
         Pair("Код подтверждения", {})
     )

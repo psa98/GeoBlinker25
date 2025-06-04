@@ -96,13 +96,7 @@ fun DeviceTwoScreen(
 
                         // Первый текст - слева
                         Text(
-                            text = when(item.type) {
-                                TypeSignal.SignalType.MovementStarted -> "Начато движение"
-                                TypeSignal.SignalType.Stop -> "Остановка"
-                                TypeSignal.SignalType.LowCharge -> "Низкий заряд"
-                                TypeSignal.SignalType.DoorOpen -> "Дверь открыта"
-                                TypeSignal.SignalType.ReachedLocation -> "Достиг локации"
-                            },
+                            text = stringResource(item.type.description),
                             modifier = Modifier.constrainAs(text1) {
                                 start.linkTo(parent.start)
                                 top.linkTo(parent.top)

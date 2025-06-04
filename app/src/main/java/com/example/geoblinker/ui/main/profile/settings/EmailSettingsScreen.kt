@@ -64,7 +64,7 @@ fun EmailSettingsScreen(
     navController: NavHostController = rememberNavController()
 ) {
     val email by viewModel.email.collectAsState()
-    val emailFirst = email
+    val emailFirst by remember { mutableStateOf(email) }
     var value by remember { mutableStateOf("") }
 
     /**

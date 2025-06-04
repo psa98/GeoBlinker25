@@ -1,8 +1,10 @@
 package com.example.geoblinker.data
 
+import androidx.annotation.StringRes
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.example.geoblinker.R
 
 @Entity(
     tableName = "type_signals",
@@ -24,12 +26,4 @@ data class TypeSignal(
     val checkedEmail: Boolean = false,
     val checkedAlarm: Boolean = false,
     val soundUri: String? = null // Для типа ALARM
-) {
-    enum class SignalType {
-        MovementStarted,
-        Stop,
-        LowCharge,
-        DoorOpen,
-        ReachedLocation
-    }
-}
+)

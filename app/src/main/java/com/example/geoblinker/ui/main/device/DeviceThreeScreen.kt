@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
+import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlueButton
@@ -72,11 +73,11 @@ fun DeviceThreeScreen(
         Spacer(Modifier.height(10.sdp()))
         Text(
             when(typeSignal.type) {
-                TypeSignal.SignalType.MovementStarted -> "Начато движение"
-                TypeSignal.SignalType.Stop -> "Остановка"
-                TypeSignal.SignalType.LowCharge -> "Низкий заряд"
-                TypeSignal.SignalType.DoorOpen -> "Дверь открыта"
-                TypeSignal.SignalType.ReachedLocation -> "Достиг локации"
+                SignalType.MovementStarted -> "Начато движение"
+                SignalType.Stop -> "Остановка"
+                SignalType.LowCharge -> "Низкий заряд"
+                SignalType.DoorOpen -> "Дверь открыта"
+                SignalType.ReachedLocation -> "Достиг локации"
             },
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyLarge

@@ -6,6 +6,7 @@ import com.example.geoblinker.data.Device
 import com.example.geoblinker.data.News
 import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.Signal
+import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.data.TypeSignal
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,7 @@ class DeviceViewModel(private val repository: Repository): ViewModel() {
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
     private val _device = MutableStateFlow(Device("", "", false, 0))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
-    private val _typeSignal = MutableStateFlow(TypeSignal(deviceId = "", type = TypeSignal.SignalType.MovementStarted))
+    private val _typeSignal = MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.MovementStarted))
     private val _signalsDevice = MutableStateFlow<List<Signal>>(emptyList())
     private val _signals = MutableStateFlow<List<Signal>>(emptyList())
     private val _news = MutableStateFlow<List<News>>(emptyList())
