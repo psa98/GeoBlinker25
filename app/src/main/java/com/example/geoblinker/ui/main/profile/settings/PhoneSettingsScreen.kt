@@ -48,6 +48,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun PhoneSettingsScreen(
     viewModel: ProfileViewModel,
+    toCodeNotComing: () -> Unit,
     toBack: () -> Unit
 ) {
     var isCheckScreen by remember { mutableStateOf(false) }
@@ -68,6 +69,7 @@ fun PhoneSettingsScreen(
         CheckScreen(
             viewModel,
             value,
+            toCodeNotComing = toCodeNotComing,
             toReady = {
                 viewModel.setPhone(value)
                 isCheck = true
@@ -168,6 +170,7 @@ private fun CheckScreen(
     viewModel: ProfileViewModel,
     phone: String,
     toReady: () -> Unit,
+    toCodeNotComing: () -> Unit,
     toBack: () -> Unit
 ) {
     var value by remember { mutableStateOf("") }
@@ -313,6 +316,7 @@ private fun CheckScreen(
         ) {
             Text(
                 text = stringResource(R.string.is_the_code_not_coming),
+                modifier = Modifier.clickable { toCodeNotComing() },
                 style = MaterialTheme.typography.bodyLarge
             )
         }

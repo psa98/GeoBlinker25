@@ -1,5 +1,6 @@
 package com.example.geoblinker.ui.main.profile.settings
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -55,6 +56,7 @@ private enum class Email {
 fun EmailSettingsScreen(
     viewModel: ProfileViewModel,
     isShow: Boolean = false,
+    toEmailNotComing: () -> Unit,
     toBack: () -> Unit,
     navController: NavHostController = rememberNavController()
 ) {
@@ -96,7 +98,8 @@ fun EmailSettingsScreen(
         composable(route = Email.IsCheck.name) {
             checkTimer = true
             IsCheck(
-                valueDefault = value
+                valueDefault = value,
+                toEmailNotComing = toEmailNotComing
             )
         }
         composable(route = Email.Ready.name) {
@@ -206,7 +209,8 @@ fun NotEmail(
 
 @Composable
 fun IsCheck(
-    valueDefault: String
+    valueDefault: String,
+    toEmailNotComing: () -> Unit
 ) {
     var remainingTime by remember { mutableIntStateOf(10) } // TODO: пок что будет 10 секунд, потом нужно будет поставить коректное время
     var checkTimer by remember { mutableStateOf(true) }
@@ -281,6 +285,7 @@ fun IsCheck(
         ) {
             Text(
                 text = stringResource(R.string.email_not_coming),
+                modifier = Modifier.clickable { toEmailNotComing() },
                 style = MaterialTheme.typography.bodyLarge
             )
         }

@@ -69,6 +69,7 @@ fun ProfileScreen(
     toJournalSignals: () -> Unit,
     toSettings: () -> Unit,
     toNameSettings: () -> Unit,
+    toTechSupport: () -> Unit,
     toBack: () -> Unit
 ) {
     var isShow by remember { mutableStateOf(false) }
@@ -166,7 +167,7 @@ fun ProfileScreen(
             WhiteMediumButton(
                 modifier = Modifier.width(160.sdp()),
                 text = "Техподдержка",
-                onClick = {}
+                onClick = toTechSupport
             )
             Spacer(Modifier.width(10.sdp()))
             WhiteMediumButton(

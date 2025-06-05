@@ -81,6 +81,10 @@ import com.example.geoblinker.ui.main.profile.settings.UnitDistanceSettingsScree
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
+import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestScreen
+import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestions
+import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestionsScreen
+import com.example.geoblinker.ui.main.profile.techsupport.TechSupport
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
@@ -123,7 +127,11 @@ enum class MainScreen {
     NotificationSettings,
     UnitsDistanceSettings,
     ConfirmationCodeSettings,
-    DeleteAccountSettings
+    DeleteAccountSettings,
+    TechSupport,
+    TechSupportMain,
+    FrequentQuestions,
+    FrequentQuest
 }
 
 @Composable
@@ -282,6 +290,7 @@ fun MainScreen(
     var countNotifications by remember { mutableIntStateOf(0) }
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
     var isShow by remember { mutableStateOf(false) }
+    var frequentQuest by remember { mutableStateOf(FrequentQuestions.CantPaySubscription) }
 
     fun BackgroundColor(): Color {
         return when(currentRoute) {
@@ -480,6 +489,7 @@ fun MainScreen(
                     toJournalSignals = { navController.navigate(MainScreen.JournalSignals.name) },
                     toSettings = { navController.navigate("${MainScreen.Settings.name}/${MainScreen.Profile.name}") },
                     toNameSettings = { navController.navigate(MainScreen.NameSettings.name) },
+                    toTechSupport = { navController.navigate(MainScreen.TechSupport.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -568,6 +578,10 @@ fun MainScreen(
             composable(route = MainScreen.PhoneSettings.name) {
                 PhoneSettingsScreen(
                     profileViewModel,
+                    toCodeNotComing = {
+                        frequentQuest = FrequentQuestions.CantChangePhone
+                        navController.navigate(MainScreen.FrequentQuest.name)
+                    },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -585,6 +599,10 @@ fun MainScreen(
                 EmailSettingsScreen(
                     profileViewModel,
                     isShowLocal,
+                    toEmailNotComing = {
+                        frequentQuest = FrequentQuestions.CantLinkEmail
+                        navController.navigate(MainScreen.FrequentQuest.name)
+                    },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -621,6 +639,35 @@ fun MainScreen(
                         profileViewModel.logout()
                         toBeginning()
                     },
+                    toBack = { navController.navigateUp() }
+                )
+            }
+        }
+
+        navigation(
+            route = MainScreen.TechSupport.name,
+            startDestination = MainScreen.TechSupportMain.name
+        ) {
+            composable(route = MainScreen.TechSupportMain.name) {
+                TechSupport(
+                    toFrequentQuestions = { navController.navigate(MainScreen.FrequentQuestions.name) },
+                    toMakeRequest = {},
+                    toChatWithTechSupport = {},
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.FrequentQuestions.name) {
+                FrequentQuestionsScreen(
+                    toDescriptionQuest = {
+                        frequentQuest = it
+                        navController.navigate(MainScreen.FrequentQuest.name)
+                    },
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.FrequentQuest.name) {
+                FrequentQuestScreen(
+                    frequentQuest,
                     toBack = { navController.navigateUp() }
                 )
             }
