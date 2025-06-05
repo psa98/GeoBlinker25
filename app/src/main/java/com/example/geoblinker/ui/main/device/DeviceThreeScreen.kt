@@ -30,7 +30,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
 import com.example.geoblinker.data.SignalType
-import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.BlueButton
 import com.example.geoblinker.ui.CustomLinkEmailPopup

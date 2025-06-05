@@ -24,7 +24,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
@@ -32,7 +31,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,10 +40,7 @@ import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.EmailTextField
 import com.example.geoblinker.ui.TypeColor
-import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
-import com.example.geoblinker.ui.theme.Manrope
-import com.example.geoblinker.ui.theme.black
 import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.delay
 

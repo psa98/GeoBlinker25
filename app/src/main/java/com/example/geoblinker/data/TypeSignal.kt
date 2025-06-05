@@ -1,10 +1,8 @@
 package com.example.geoblinker.data
 
-import androidx.annotation.StringRes
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.example.geoblinker.R
 
 @Entity(
     tableName = "type_signals",

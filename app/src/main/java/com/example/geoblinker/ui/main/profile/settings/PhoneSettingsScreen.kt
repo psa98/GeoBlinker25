@@ -1,7 +1,6 @@
 package com.example.geoblinker.ui.main.profile.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ShapeDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,7 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -38,14 +35,11 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CodeTextField
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.GreenMediumButton
-import com.example.geoblinker.ui.NameTextField
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.TypeColor
-import com.example.geoblinker.ui.WhiteMediumButton
 import com.example.geoblinker.ui.formatPhoneNumber
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp

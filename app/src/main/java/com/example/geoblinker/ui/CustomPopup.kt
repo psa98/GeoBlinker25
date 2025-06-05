@@ -1,6 +1,5 @@
 package com.example.geoblinker.ui
 
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateOffsetAsState
@@ -39,11 +38,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -74,7 +71,6 @@ import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
-import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp

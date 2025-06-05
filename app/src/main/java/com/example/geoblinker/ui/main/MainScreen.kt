@@ -90,7 +90,6 @@ import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
 
 enum class MainScreen {

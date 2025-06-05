@@ -1,7 +1,8 @@
 package com.example.geoblinker.ui.main.profile.settings
 
 import android.annotation.SuppressLint
-import android.app.Application
+import android.content.Context
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,17 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
@@ -34,7 +32,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -42,18 +39,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.stylusHoverIcon
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -63,15 +56,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomLinkEmailPopup
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
-import com.example.geoblinker.ui.theme.Manrope
-import com.example.geoblinker.ui.theme.black
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
-import kotlinx.coroutines.flow.asStateFlow
-import kotlin.math.abs
 
 private enum class Notification {
     Main,
@@ -139,6 +130,8 @@ private fun Main(
     val endTime by viewModel.endTime.collectAsState()
     val email by profileViewModel.email.collectAsState()
     var isShow by remember { mutableStateOf(false) }
+    var isShowStart by remember { mutableStateOf(false) }
+    var isShowEnd by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -336,6 +329,9 @@ private fun Main(
                     )
                     Text(
                         startTime.toTimeString(),
+                        modifier = Modifier.clickable {
+                            isShowStart = true
+                        },
                         textDecoration = TextDecoration.Underline,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
@@ -347,6 +343,9 @@ private fun Main(
                     )
                     Text(
                         endTime.toTimeString(),
+                        modifier = Modifier.clickable {
+                            isShowEnd = true
+                        },
                         textDecoration = TextDecoration.Underline,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Bold
@@ -365,6 +364,30 @@ private fun Main(
         CustomLinkEmailPopup(
             toLinkEmail = toLinkEmail,
             cancellation = { isShow = false }
+        )
+    }
+
+    if (isShowStart) {
+        CustomTimePopup(
+            startTime / 60,
+            startTime % 60,
+            confirm = {
+                viewModel.setStartTime(it)
+                isShowStart = false
+            },
+            cancellation = { isShowStart = false }
+        )
+    }
+
+    if (isShowEnd) {
+        CustomTimePopup(
+            endTime / 60,
+            endTime % 60,
+            confirm = {
+                viewModel.setEndTime(it)
+                isShowEnd = false
+            },
+            cancellation = { isShowEnd = false }
         )
     }
 }
@@ -481,6 +504,8 @@ private fun Email(
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
     val typesSignals by viewModel.typesSignals.collectAsState()
+    var isShowStart by remember { mutableStateOf(false) }
+    var isShowEnd by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -592,6 +617,9 @@ private fun Email(
                         )
                         Text(
                             startTime.toTimeString(),
+                            modifier = Modifier.clickable {
+                                isShowStart = true
+                            },
                             textDecoration = TextDecoration.Underline,
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
@@ -603,6 +631,9 @@ private fun Email(
                         )
                         Text(
                             endTime.toTimeString(),
+                            modifier = Modifier.clickable {
+                                isShowEnd = true
+                            },
                             textDecoration = TextDecoration.Underline,
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 fontWeight = FontWeight.Bold
@@ -643,6 +674,30 @@ private fun Email(
     BackButton(
         onClick = toBack
     )
+
+    if (isShowStart) {
+        CustomTimePopup(
+            startTime / 60,
+            startTime % 60,
+            confirm = {
+                viewModel.setStartTime(it)
+                isShowStart = false
+            },
+            cancellation = { isShowStart = false }
+        )
+    }
+
+    if (isShowEnd) {
+        CustomTimePopup(
+            endTime / 60,
+            endTime % 60,
+            confirm = {
+                viewModel.setEndTime(it)
+                isShowEnd = false
+            },
+            cancellation = { isShowEnd = false }
+        )
+    }
 }
 
 /**
@@ -652,7 +707,7 @@ private fun Email(
 private fun CustomTimePopup(
     initialHour: Int,
     initialMinute: Int,
-    confirm: () -> Unit,
+    confirm: (Int) -> Unit,
     cancellation: () -> Unit
 ) {
     var hour by remember { mutableIntStateOf(initialHour) }
@@ -681,13 +736,147 @@ private fun CustomTimePopup(
                     ),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row {
-
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TimePickerColumn(
+                            hour,
+                            onValueChange = { hour = it },
+                            range = 0..23
+                        )
+                        Text(
+                            ":",
+                            style = MaterialTheme.typography.headlineLarge
+                        )
+                        TimePickerColumn(
+                            minute,
+                            onValueChange = { minute = it },
+                            range = 0..60
+                        )
                     }
+                    Spacer(Modifier.height(28.sdp()))
+                    CustomButton(
+                        text = stringResource(R.string.confirm),
+                        onClick = { confirm(hour * 60 + minute) },
+                        typeColor = TypeColor.Green,
+                        height = 55
+                    )
+                    Spacer(Modifier.height(10.sdp()))
+                    CustomButton(
+                        text = stringResource(R.string.cancellation),
+                        onClick = cancellation,
+                        typeColor = TypeColor.White,
+                        height = 55
+                    )
                 }
             }
         }
     }
+}
+
+private const val VISIBLE_ITEMS_COUNT = 3
+private const val ITEM_HEIGHT = 28
+private const val LIST_HEIGHT = VISIBLE_ITEMS_COUNT * ITEM_HEIGHT
+
+@Composable
+fun TimePickerColumn(
+    initialValue: Int,
+    range: IntRange,
+    onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier.width(80.sdp())
+) {
+    val context = LocalContext.current
+    val items = remember {
+        buildList {
+            repeat(VISIBLE_ITEMS_COUNT / 2) { add("") }
+            range.forEach { add(it.formatTwoDigits()) }
+            repeat(VISIBLE_ITEMS_COUNT / 2) { add("") }
+        }
+    }
+
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = initialValue
+    )
+    val one = 1.sdp()
+    val itemHeight = ITEM_HEIGHT.sdp()
+    val brush = Brush.verticalGradient(
+        colors = listOf(Color.White, Color.White.copy(alpha = 0f), Color.White)
+    )
+
+    // Логика выравнивания при скролле
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (!listState.isScrollInProgress) {
+            val targetIndex = listState.centerItemIndex(context)
+            listState.animateScrollToItem(targetIndex)
+            onValueChange(targetIndex.coerceIn(range))
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .height(LIST_HEIGHT.sdp())
+            .border(1.sdp(), Color(0xFFDAD9D9), RoundedCornerShape(8.sdp())),
+        contentAlignment = Alignment.Center
+    ) {
+        // Рамка выбранного элемента
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawLine(
+                color = Color(0xFF5D5D5D),
+                strokeWidth = one.toPx(),
+                start = Offset(0f, size.height / 2 - itemHeight.toPx() / 2),
+                end = Offset(size.width, size.height / 2 - itemHeight.toPx() / 2)
+            )
+            drawLine(
+                color = Color(0xFF5D5D5D),
+                strokeWidth = one.toPx(),
+                start = Offset(0f, size.height / 2 + itemHeight.toPx() / 2),
+                end = Offset(size.width, size.height / 2 + itemHeight.toPx() / 2)
+            )
+        }
+
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            itemsIndexed(items) { index, item ->
+                Text(
+                    text = item,
+                    modifier = Modifier
+                        .size(width = 60.sdp(), height = ITEM_HEIGHT.sdp())
+                        .wrapContentSize(Alignment.Center),
+                    color = if (item.isNotEmpty()) Color.Black else Color.Transparent,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(brush, RoundedCornerShape(8.sdp()))
+        )
+    }
+}
+
+@SuppressLint("DefaultLocale")
+fun Int.formatTwoDigits(): String {
+    return String.format("%02d", this)
+}
+
+// Функция для вычисления центрального элемента
+private fun LazyListState.centerItemIndex(context: Context): Int {
+    val firstVisible = firstVisibleItemIndex
+    val offset = firstVisibleItemScrollOffset.toDp(context)
+    return when {
+        offset % ITEM_HEIGHT >= ITEM_HEIGHT / 2 -> firstVisible + 1
+        else -> firstVisible
+    }
+}
+
+// Конвертация пикселей в DP
+private fun Int.toDp(context: Context): Float {
+    return this / context.resources.displayMetrics.density
 }
 
 private fun Int.toTimeString(): String {

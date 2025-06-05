@@ -2,24 +2,14 @@ package com.example.geoblinker.ui.main.viewmodel
 
 import android.app.Application
 import android.content.Context
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.geoblinker.R
 import com.example.geoblinker.data.SignalType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.threeten.bp.LocalTime
-import java.lang.reflect.Type
 
 private const val DEFAULT_START = 8 * 60
 private const val DEFAULT_END = 23 * 60 + 30
@@ -110,6 +100,26 @@ class NotificationViewModel(
 
             withContext(Dispatchers.Main) {
                 _getNotificationAroundClock.value = it
+            }
+        }
+    }
+
+    fun setStartTime(time: Int) {
+        viewModelScope.launch {
+            _prefs.edit().putInt("${_prefix}startTime", time).apply()
+
+            withContext(Dispatchers.Main) {
+                _startTime.value = time
+            }
+        }
+    }
+
+    fun setEndTime(time: Int) {
+        viewModelScope.launch {
+            _prefs.edit().putInt("${_prefix}endTime", time).apply()
+
+            withContext(Dispatchers.Main) {
+                _endTime.value = time
             }
         }
     }
