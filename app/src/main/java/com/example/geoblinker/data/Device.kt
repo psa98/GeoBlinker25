@@ -13,7 +13,9 @@ data class Device(
     val bindingTime: Long,
     val lat: Double = Random.nextDouble(-90.0, 90.0),
     val lng: Double = Random.nextDouble(-180.0, 180.0),
-    val typeStatus: TypeStatus = TypeStatus.Available
+    val typeStatus: TypeStatus = TypeStatus.Available,
+    val breakdownForecast: String? = null,
+    val maintenanceRecommendations: String? = null
 ) {
     enum class TypeStatus {
         Available,
