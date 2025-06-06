@@ -84,6 +84,7 @@ import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
 import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestScreen
 import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestions
 import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestionsScreen
+import com.example.geoblinker.ui.main.profile.techsupport.MakeRequestScreen
 import com.example.geoblinker.ui.main.profile.techsupport.TechSupport
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
@@ -131,7 +132,8 @@ enum class MainScreen {
     TechSupport,
     TechSupportMain,
     FrequentQuestions,
-    FrequentQuest
+    FrequentQuest,
+    MakeRequest
 }
 
 @Composable
@@ -651,7 +653,7 @@ fun MainScreen(
             composable(route = MainScreen.TechSupportMain.name) {
                 TechSupport(
                     toFrequentQuestions = { navController.navigate(MainScreen.FrequentQuestions.name) },
-                    toMakeRequest = {},
+                    toMakeRequest = { navController.navigate(MainScreen.MakeRequest.name) },
                     toChatWithTechSupport = {},
                     toBack = { navController.navigateUp() }
                 )
@@ -668,6 +670,11 @@ fun MainScreen(
             composable(route = MainScreen.FrequentQuest.name) {
                 FrequentQuestScreen(
                     frequentQuest,
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.MakeRequest.name) {
+                MakeRequestScreen(
                     toBack = { navController.navigateUp() }
                 )
             }

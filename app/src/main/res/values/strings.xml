@@ -141,4 +141,9 @@
     <string name="no_signals_coming_from_device">Не приходят сигналы от устройства</string>
     <string name="cant_change_phone">Не получается сменить номер телефона</string>
     <string name="cant_link_email">Не получается подключить Email к своему аккаунту</string>
+    <string name="ask_specialist_question">Задайте вопрос нашему специалисту</string>
+    <string name="theme_request">Тема обращения</string>
+    <string name="your_request">Ваш вопрос / сообщение</string>
+    <string name="received_request">Ваше сообщение получено! Ожидайте ответа в ближайшее время.</string>
+    <string name="send">Отправить</string>
 </resources>
