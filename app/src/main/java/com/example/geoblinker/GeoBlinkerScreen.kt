@@ -15,10 +15,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Repository
+import com.example.geoblinker.data.techsupport.TechSupportRepository
 import com.example.geoblinker.ui.authorization.AuthorizationScreen
 import com.example.geoblinker.ui.authorization.AuthorizationViewModel
 import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
+import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
@@ -88,6 +90,13 @@ fun GeoBlinkerScreen(
                     profileViewModel,
                     JournalViewModel(application),
                     NotificationViewModel(application),
+                    ChatsViewModel(
+                        TechSupportRepository(
+                            AppDatabase.getInstance(application).ChatTechSupportDao(),
+                            AppDatabase.getInstance(application).MessageTechSupportDao()
+                        ),
+                        application
+                    ),
                     toBeginning = { navController.navigate(GeoBlinkerScreen.Authorization.name) }
                 )
             }

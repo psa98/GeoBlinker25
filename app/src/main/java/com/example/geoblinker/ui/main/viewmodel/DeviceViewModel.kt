@@ -49,7 +49,7 @@ class DeviceViewModel(
             launch {
                 repository.getDevices()
                     .collect { devicesList ->
-                        _devices.value = devicesList // Обновляем StateFlow
+                        _devices.value = devicesList
                     }
             }
             launch {

@@ -81,12 +81,14 @@ import com.example.geoblinker.ui.main.profile.settings.UnitDistanceSettingsScree
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionOneScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionReadyScreen
 import com.example.geoblinker.ui.main.profile.subscription.SubscriptionTwoScreen
+import com.example.geoblinker.ui.main.profile.techsupport.ChatsScreen
 import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestScreen
 import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestions
 import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestionsScreen
 import com.example.geoblinker.ui.main.profile.techsupport.MakeRequestScreen
 import com.example.geoblinker.ui.main.profile.techsupport.TechSupport
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
+import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
@@ -133,7 +135,8 @@ enum class MainScreen {
     TechSupportMain,
     FrequentQuestions,
     FrequentQuest,
-    MakeRequest
+    MakeRequest,
+    TechChats
 }
 
 @Composable
@@ -151,7 +154,8 @@ fun Notifications(
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.notifications),
                 contentDescription = null,
-                modifier = Modifier.size(24.sdp())
+                modifier = Modifier.size(24.sdp()),
+                tint = Color.Unspecified
             )
         }
 
@@ -169,7 +173,7 @@ fun Notifications(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        notificationsCount.toString(),
+                        if (notificationsCount > 99) "99+" else notificationsCount.toString(),
                         modifier = Modifier.padding(horizontal = 6.sdp(), vertical = 1.sdp()),
                         color = Color.White,
                         style = MaterialTheme.typography.labelLarge
@@ -274,6 +278,7 @@ fun MainScreen(
     profileViewModel: ProfileViewModel,
     journalViewModel: JournalViewModel,
     notificationViewModel: NotificationViewModel,
+    chatsViewModel: ChatsViewModel,
     toBeginning: () -> Unit,
     navController: NavHostController = rememberNavController(),
 ) {
@@ -654,7 +659,7 @@ fun MainScreen(
                 TechSupport(
                     toFrequentQuestions = { navController.navigate(MainScreen.FrequentQuestions.name) },
                     toMakeRequest = { navController.navigate(MainScreen.MakeRequest.name) },
-                    toChatWithTechSupport = {},
+                    toChatWithTechSupport = { navController.navigate(MainScreen.TechChats.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -675,6 +680,13 @@ fun MainScreen(
             }
             composable(route = MainScreen.MakeRequest.name) {
                 MakeRequestScreen(
+                    chatsViewModel,
+                    toBack = { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.TechChats.name) {
+                ChatsScreen(
+                    chatsViewModel,
                     toBack = { navController.navigateUp() }
                 )
             }

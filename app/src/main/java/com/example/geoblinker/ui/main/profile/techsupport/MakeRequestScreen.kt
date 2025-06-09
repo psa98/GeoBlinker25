@@ -40,6 +40,7 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.TypeColor
+import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 private const val MAX_THEME_REQUEST = 64
@@ -47,6 +48,7 @@ private const val MAX_REQUEST = 1000
 
 @Composable
 fun MakeRequestScreen(
+    viewModel: ChatsViewModel,
     toBack: () -> Unit
 ) {
     var themeRequest by remember { mutableStateOf("") }
@@ -158,7 +160,12 @@ fun MakeRequestScreen(
                         imeAction = ImeAction.Send
                     ),
                     keyboardActions = KeyboardActions(
-                        onSend = { isSend = true } // TODO: Добавить отправку обращения
+                        onSend = {
+                            if (themeRequest.isNotEmpty() && request.isNotEmpty()) {
+                                isSend = true
+                                viewModel.addRequest(themeRequest, request)
+                            }
+                        } // TODO: Добавить отправку обращения по апи
                     ),
                     shape = RoundedCornerShape(10.sdp()),
                     colors = TextFieldDefaults.colors(
@@ -183,9 +190,12 @@ fun MakeRequestScreen(
             Spacer(Modifier.height(10.sdp()))
             CustomButton(
                 text = stringResource(R.string.send),
-                onClick = { isSend = true },
+                onClick = {
+                    isSend = true
+                    viewModel.addRequest(themeRequest, request)
+                },
                 typeColor = TypeColor.Green,
-                enabled = themeRequest.isNotEmpty(),
+                enabled = themeRequest.isNotEmpty() && request.isNotEmpty(),
                 height = 55,
                 radius = 10,
                 style = MaterialTheme.typography.bodyMedium

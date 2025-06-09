@@ -6,19 +6,68 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.geoblinker.data.techsupport.ChatTechSupport
+import com.example.geoblinker.data.techsupport.ChatTechSupportDao
+import com.example.geoblinker.data.techsupport.MessageTechSupport
+import com.example.geoblinker.data.techsupport.MessageTechSupportDao
 
 @Database(
-    entities = [Device::class, TypeSignal::class, Signal::class, News::class], // Ваши Entity-классы
-    version = 8
+    entities = [Device::class, TypeSignal::class, Signal::class, News::class, ChatTechSupport::class, MessageTechSupport::class],
+    version = 10
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun deviceDao(): DeviceDao // Метод для доступа к DAO
+    abstract fun deviceDao(): DeviceDao
     abstract fun typeSignalDao(): TypeSignalDao
     abstract fun signalDao(): SignalDao
     abstract fun newsDao(): NewsDao
+    abstract fun ChatTechSupportDao(): ChatTechSupportDao
+    abstract fun MessageTechSupportDao(): MessageTechSupportDao
 
     companion object {
-        private val Migration_7_8 = object : Migration(7, 8) {
+        private val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        ALTER TABLE 'message_tech_support' ADD COLUMN 'typeMessage' TEXT NOT NULL DEFAULT 'Text'
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                        ALTER TABLE 'message_tech_support' ADD COLUMN 'photoUri' TEXT DEFAULT NULL
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE 'chat_tech_support' (
+                            'id' INTEGER NOT NULL PRIMARY KEY,
+                            'title' TEXT NOT NULL,
+                            'lastMessageTime' INTEGER NOT NULL,
+                            'lastChecked' INTEGER NOT NULL,
+                            'decided' INTEGER NOT NULL
+                        )
+                    """.trimIndent()
+                )
+                db.execSQL(
+                    """
+                        CREATE TABLE 'message_tech_support' (
+                            'id' INTEGER NOT NULL PRIMARY KEY,
+                            'chatId' INTEGER NOT NULL,
+                            'content' TEXT NOT NULL,
+                            'timeStamp' INTEGER NOT NULL,
+                            'isMy' INTEGER NOT NULL,
+                            FOREIGN KEY ('chatId') REFERENCES 'chat_tech_support' ('id') ON DELETE CASCADE
+                        )
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
                     """
@@ -139,7 +188,9 @@ abstract class AppDatabase : RoomDatabase() {
                     .addMigrations(MIGRATION_4_5)
                     .addMigrations(MIGRATION_5_6)
                     .addMigrations(MIGRATION_6_7)
-                    .addMigrations(Migration_7_8)
+                    .addMigrations(MIGRATION_7_8)
+                    .addMigrations(MIGRATION_8_9)
+                    .addMigrations(MIGRATION_9_10)
                     .build()
                 INSTANCE = instance
                 instance

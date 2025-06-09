@@ -146,4 +146,6 @@
     <string name="your_request">Ваш вопрос / сообщение</string>
     <string name="received_request">Ваше сообщение получено! Ожидайте ответа в ближайшее время.</string>
     <string name="send">Отправить</string>
+    <string name="null_requests_description">Ваша история обращений пока что пуста</string>
+    <string name="write_message">Напишите сообщение</string>
 </resources>
