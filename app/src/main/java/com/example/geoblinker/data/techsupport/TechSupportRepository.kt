@@ -6,10 +6,6 @@ class TechSupportRepository(
     private val chatsDao: ChatTechSupportDao,
     private val messageDao: MessageTechSupportDao
 ) {
-    suspend fun insertChat(chat: ChatTechSupport) {
-        chatsDao.insert(chat)
-    }
-
     fun getAllChats(): Flow<List<ChatTechSupport>> = chatsDao.getAll()
 
     suspend fun insertMessage(message: MessageTechSupport) {

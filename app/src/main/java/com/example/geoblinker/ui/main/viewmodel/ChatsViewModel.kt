@@ -1,12 +1,16 @@
 package com.example.geoblinker.ui.main.viewmodel
 
 import android.app.Application
+import android.content.Context
 import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.data.techsupport.ChatTechSupport
 import com.example.geoblinker.data.techsupport.MessageTechSupport
 import com.example.geoblinker.data.techsupport.TechSupportRepository
+import com.example.geoblinker.ui.main.profile.techsupport.MediaItem
+import com.example.geoblinker.ui.main.profile.techsupport.MediaType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -79,17 +83,30 @@ class ChatsViewModel(
         return ans
     }
 
-    fun addMessage(text: String, images: List<Uri>) {
+    fun addMessage(text: String, mediaItems: List<MediaItem>) {
         viewModelScope.launch {
             var time = Instant.now().toEpochMilli()
-            images.forEach {
-                repository.insertMessage(MessageTechSupport(
-                    chatId = _selectedChat.value.id,
-                    content = "",
-                    timeStamp = time++,
-                    typeMessage = MessageTechSupport.Type.Image,
-                    photoUri = saveImage(it).toString(),
-                ))
+            mediaItems.forEach { item ->
+                when(item.type) {
+                    MediaType.IMAGE -> repository.insertMessage(
+                        MessageTechSupport(
+                            chatId = _selectedChat.value.id,
+                            content = "",
+                            timeStamp = time++,
+                            typeMessage = MessageTechSupport.Type.Image,
+                            photoUri = saveImage(item.uri).toString(),
+                        )
+                    )
+                    MediaType.VIDEO -> repository.insertMessage(
+                        MessageTechSupport(
+                            chatId = _selectedChat.value.id,
+                            content = "",
+                            timeStamp = time++,
+                            typeMessage = MessageTechSupport.Type.Video,
+                            photoUri = saveVideo(item.uri).toString()
+                        )
+                    )
+                }
             }
             if (text.isNotEmpty()) {
                 repository.insertMessage(
@@ -104,12 +121,29 @@ class ChatsViewModel(
     }
 
     private fun saveImage(uri: Uri): Uri {
-        val fileName = "avatar_${System.currentTimeMillis()}.jpg"
+        val fileName = "image_${System.currentTimeMillis()}.jpg"
         val outputFile = File(application.filesDir, fileName)
 
         application.contentResolver.openInputStream(uri)?.use { input ->
             FileOutputStream(outputFile).use { output ->
                 input.copyTo(output)
+            }
+        }
+
+        return Uri.fromFile(outputFile)
+    }
+
+    private fun saveVideo(uri: Uri): Uri {
+        val fileName = "video_${System.currentTimeMillis()}.mp4"
+        val outputFile = File(application.filesDir, fileName)
+
+        application.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(outputFile).use { output ->
+                val buffer = ByteArray(4 * 1024) // 4KB buffer
+                var bytesRead: Int
+                while (input.read(buffer).also { bytesRead = it } != -1) {
+                    output.write(buffer, 0, bytesRead)
+                }
             }
         }
 

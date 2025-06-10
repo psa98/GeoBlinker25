@@ -1,15 +1,29 @@
 package com.example.geoblinker.ui.main.profile.techsupport
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.media.MediaMetadataRetriever
+import android.media.browse.MediaBrowser
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
+import android.util.Log
+import android.util.Size
 import android.view.GestureDetector
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.OptIn
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -34,6 +48,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -45,6 +60,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,11 +69,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +86,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -83,8 +102,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -92,14 +118,17 @@ import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ActivityScenario.launch
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.request.ImageRequest
 import com.example.geoblinker.R
 import com.example.geoblinker.data.techsupport.MessageTechSupport
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.min
 
 private enum class ChatsScreen {
     Chats,
@@ -268,9 +297,10 @@ private fun Chat(
     val chat by viewModel.selectedChat.collectAsState()
     val messages by viewModel.messages.collectAsState()
     var text by remember { mutableStateOf("") }
-    val images = remember { mutableStateListOf<Uri>() }
+    val images = remember { mutableStateListOf<MediaItem>() }
     var showImagePicker by remember { mutableStateOf(false) }
     var showImagePreview by remember { mutableStateOf<String?>(null) }
+    var showVideoPreview by remember { mutableStateOf<String?>(null) }
     val scrollState = rememberLazyListState()
 
     LaunchedEffect(messages.size) {
@@ -367,6 +397,70 @@ private fun Chat(
                             )
 
                             if (isLoading == 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(260.sdp(), 350.sdp())
+                                        .background(
+                                            Color(0xFFE8E8E8),
+                                            RoundedCornerShape(8.sdp())
+                                        )
+                                        .border(
+                                            4.sdp(),
+                                            if (message.isMy) Color(0xFF73FAD3) else Color(
+                                                0xFFF6F6F6
+                                            ),
+                                            RoundedCornerShape(8.sdp())
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = Color.White)
+                                }
+                            }
+                        }
+
+                        MessageTechSupport.Type.Video -> {
+                            val context = LocalContext.current
+                            val thumbnailBitmap = remember(message.photoUri) { mutableStateOf<Bitmap?>(null) }
+                            var duration by remember { mutableLongStateOf(0L) }
+                            LaunchedEffect(Unit) {
+                                withContext(Dispatchers.IO) {
+                                    thumbnailBitmap.value = createVideoThumbnail(context, Uri.parse(message.photoUri))
+                                    duration = getVideoDuration(context, Uri.parse(message.photoUri))
+                                }
+                            }
+                            thumbnailBitmap.value?.let { bitmap ->
+                                Box {
+                                    Image(
+                                        bitmap = bitmap.asImageBitmap(),
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .widthIn(max = 260.sdp())
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .border(
+                                                4.sdp(),
+                                                if (message.isMy) Color(0xFF73FAD3) else Color(
+                                                    0xFFF6F6F6
+                                                ),
+                                                RoundedCornerShape(8.sdp())
+                                            )
+                                            .clickable { showVideoPreview = message.photoUri }
+                                    )
+                                    Text(
+                                        text = duration.formatAsTime(),
+                                        color = Color.White,
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(8.dp)
+                                            .background(
+                                                Color.Black.copy(alpha = 0.5f),
+                                                RoundedCornerShape(4.dp)
+                                            )
+                                            .padding(horizontal = 4.dp, vertical = 2.dp)
+                                            .clickable { showVideoPreview = message.photoUri },
+                                        style = MaterialTheme.typography.labelSmall
+                                    )
+                                }
+                            } ?: run {
                                 Box(
                                     modifier = Modifier
                                         .size(260.sdp(), 350.sdp())
@@ -522,6 +616,13 @@ private fun Chat(
             cancel = { showImagePreview = null }
         )
     }
+
+    showVideoPreview?.let {
+        VideoPlayer(
+            Uri.parse(it),
+            cancel = { showVideoPreview = null }
+        )
+    }
 }
 
 @Composable
@@ -626,22 +727,274 @@ fun FullScreenImage(
     }
 }
 
+@OptIn(UnstableApi::class)
+@Composable
+fun VideoPlayer(
+    uri: Uri,
+    cancel: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    var isPlaying by remember { mutableStateOf(false) }
+    var isVideoEnded by remember { mutableStateOf(false) }
+    var duration by remember { mutableLongStateOf(0) }
+    var maxDuration by remember { mutableLongStateOf(0) }
+    val offset = remember { Animatable(Offset.Zero, Offset.VectorConverter) }
+    val scope = rememberCoroutineScope()
+    val swipe = with(LocalDensity.current) {
+        0.4f * LocalConfiguration.current.screenWidthDp.dp.toPx()
+    }
+
+    val dragState = Modifier.pointerInput(Unit) {
+        detectDragGestures(
+            onDrag = { change, dragAmount ->
+                change.consume()
+                val newOffset = offset.value + dragAmount
+
+                scope.launch {
+                    offset.snapTo(
+                        newOffset
+                    )
+                }
+            },
+            onDragEnd = {
+                if (offset.value.y < -swipe)
+                    cancel()
+
+                scope.launch {
+                    offset.animateTo(
+                        targetValue = Offset.Zero,
+                        animationSpec = tween(300)
+                    )
+                }
+            }
+        )
+    }
+
+    val exoPlayer = remember {
+        ExoPlayer.Builder(context).build().apply {
+            setMediaItem(androidx.media3.common.MediaItem.fromUri(uri))
+            prepare()
+
+            addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    if (playbackState == Player.STATE_ENDED) {
+                        isVideoEnded = true
+                        isPlaying = false
+                    }
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    if (isPlaying) {
+                        isVideoEnded = false
+                    }
+                }
+            })
+        }
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(isPlaying) {
+        while (isPlaying) {
+            duration = exoPlayer.currentPosition
+            maxDuration = exoPlayer.duration
+            delay(200)
+        }
+    }
+
+    LaunchedEffect(exoPlayer.isReleased) {
+        if (exoPlayer.isReleased)
+            duration = exoPlayer.duration
+    }
+
+    fun togglePlayback() {
+        if (isVideoEnded) {
+            // Если видео закончилось - перематываем в начало
+            exoPlayer.seekTo(0)
+            isVideoEnded = false
+        }
+
+        if (isPlaying) {
+            exoPlayer.pause()
+        } else {
+            exoPlayer.play()
+        }
+        isPlaying = !isPlaying
+    }
+
+    Dialog(
+        {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f))
+                .clickable { cancel() }
+                .then(dragState),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!exoPlayer.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .clickable { togglePlayback() }
+                        .graphicsLayer(
+                            translationY = minOf(0f, offset.value.y)
+                        )
+                ) {
+                    AndroidView(
+                        factory = { ctx ->
+                            PlayerView(ctx).apply {
+                                player = exoPlayer
+                                useController = false // Скрываем стандартные контролы
+                                resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                            }
+                        }
+                    )
+
+                    Text(
+                        text = "${duration.formatAsTime()}/${maxDuration.formatAsTime()}",
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp)
+                            .background(
+                                Color.Black.copy(alpha = 0.3f),
+                                RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+            else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = Color.White)
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun CustomImagePicker(
-    selectedUris: List<Uri>,
-    onSelectionChanged: (List<Uri>) -> Unit,
+    selectedUris: List<MediaItem>,
+    onSelectionChanged: (List<MediaItem>) -> Unit,
     cancellation: () -> Unit
 ) {
     val context = LocalContext.current
-    val imageUris = remember { mutableStateListOf<Uri>() }
+    val imageUris = remember { mutableStateListOf<MediaItem>() }
+    val videoUris = remember { mutableStateListOf<MediaItem>() }
+    var pickMediaItems = remember { mutableStateListOf<MediaItem>() }
+    var isLoadingImages by remember { mutableStateOf(false) }
+    var isLoadingVideos by remember { mutableStateOf(false) }
+    var imagesPermissionGranted by remember { mutableStateOf(false) }
+    var videosPermissionGranted by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
+    var pickMediaType by remember { mutableStateOf(MediaType.IMAGE) }
 
-    // Загрузка изображений из галереи
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            val uris = loadGalleryImages(context)
-            imageUris.addAll(uris)
-            isLoading = false
+    val imagesPermissions = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+    }
+
+    val videosPermissions = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.READ_MEDIA_VIDEO
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+    }
+
+    // Лаунчеры для запроса разрешений
+    val imagesPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            isLoadingImages = true
+        }
+    }
+
+    val videosPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            isLoadingVideos = true
+        }
+    }
+
+    when(pickMediaType) {
+        MediaType.IMAGE -> {
+            isLoading = isLoadingImages
+            pickMediaItems = imageUris
+        }
+        MediaType.VIDEO -> {
+            isLoading = isLoadingVideos
+            pickMediaItems = videoUris
+        }
+    }
+
+    LaunchedEffect(isLoadingImages) {
+        if (isLoadingImages) {
+            withContext(Dispatchers.IO) {
+                if (imageUris.isEmpty()) {
+                    val uris = loadMediaFromStore(
+                        context,
+                        MediaType.IMAGE
+                    )
+                    imageUris.addAll(uris)
+                }
+                isLoadingImages = false
+            }
+        }
+    }
+
+    LaunchedEffect(isLoadingVideos) {
+        if (isLoadingVideos) {
+            withContext(Dispatchers.IO) {
+                if (videoUris.isEmpty()) {
+                    val uris = loadMediaFromStore(
+                        context,
+                        MediaType.VIDEO
+                    )
+                    videoUris.addAll(uris)
+                }
+                isLoadingVideos = false
+            }
+        }
+    }
+
+    LaunchedEffect(pickMediaType) {
+        when (pickMediaType) {
+            MediaType.IMAGE -> {
+                imagesPermissionGranted = ContextCompat.checkSelfPermission(context, imagesPermissions) == PackageManager.PERMISSION_GRANTED
+
+                if (imagesPermissionGranted) {
+                    isLoadingImages = true
+                } else {
+                    imagesPermissionLauncher.launch(imagesPermissions)
+                }
+            }
+
+            MediaType.VIDEO -> {
+                videosPermissionGranted = ContextCompat.checkSelfPermission(context, videosPermissions) == PackageManager.PERMISSION_GRANTED
+
+                if (videosPermissionGranted) {
+                    isLoadingVideos = true
+                } else {
+                    videosPermissionLauncher.launch(videosPermissions)
+                }
+            }
         }
     }
 
@@ -661,33 +1014,65 @@ fun CustomImagePicker(
                 shape = RoundedCornerShape(8.sdp()),
                 color = Color.White
             ) {
-                if (isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(5.sdp())
-                    ) {
-                        items(imageUris) { uri ->
-                            GalleryImageItem(
-                                uri = uri,
-                                isSelected = selectedUris.contains(uri),
-                                onSelectToggle = { selected ->
-                                    val newSelection = selectedUris.toMutableList()
-                                    if (selected) {
-                                        newSelection.add(uri)
-                                    } else {
-                                        newSelection.remove(uri)
-                                    }
-                                    onSelectionChanged(newSelection)
-                                }
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .padding(
+                                top = 10.sdp(),
+                                bottom = 5.sdp()
                             )
+                    ) {
+                        Text(
+                            "IMAGES",
+                            modifier = Modifier.weight(1f)
+                                .clickable { pickMediaType = MediaType.IMAGE }
+                                .padding(horizontal = 10.sdp()),
+                            color = if (pickMediaType == MediaType.IMAGE) Color(0xFF73FAD3) else Color(
+                                0xFFE8E8E8
+                            ),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                        Text(
+                            "VIDEOS",
+                            modifier = Modifier.weight(1f)
+                                .clickable { pickMediaType = MediaType.VIDEO }
+                                .padding(horizontal = 10.sdp()),
+                            color = if (pickMediaType == MediaType.VIDEO) Color(0xFF73FAD3) else Color(
+                                0xFFE8E8E8
+                            ),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    }
+                    if (isLoading) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(3),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(5.sdp())
+                        ) {
+                            items(pickMediaItems) { image ->
+                                GalleryMediaItem(
+                                    media = image,
+                                    isSelected = selectedUris.contains(image),
+                                    onSelectToggle = { selected ->
+                                        val newSelection = selectedUris.toMutableList()
+                                        if (selected) {
+                                            newSelection.add(image)
+                                        } else {
+                                            newSelection.remove(image)
+                                        }
+                                        onSelectionChanged(newSelection)
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -697,29 +1082,84 @@ fun CustomImagePicker(
 }
 
 @Composable
-fun GalleryImageItem(
-    uri: Uri,
+fun GalleryMediaItem(
+    media: MediaItem,
     isSelected: Boolean,
     onSelectToggle: (Boolean) -> Unit
 ) {
+    val context = LocalContext.current
+    val thumbnailBitmap = remember(media.uri) { mutableStateOf<Bitmap?>(null) }
+
+    // Загрузка миниатюры для видео
+    if (media.type == MediaType.VIDEO && thumbnailBitmap.value == null) {
+        LaunchedEffect(media.uri) {
+            withContext(Dispatchers.IO) {
+                thumbnailBitmap.value = createVideoThumbnail(context, media.uri)
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .aspectRatio(1f)
             .padding(4.dp)
             .clickable { onSelectToggle(!isSelected) }
     ) {
-        AsyncImage(
-            model = uri,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(8.dp))
-                .border(
-                    if (isSelected) 3.sdp() else 0.sdp(),
-                    if (isSelected) Color(0xFF73FAD3) else Color.Transparent,
-                    RoundedCornerShape(8.dp))
-        )
+        // Отображение миниатюры
+        if (media.type == MediaType.IMAGE) {
+            AsyncImage(
+                model = media.uri,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(
+                        if (isSelected) 3.sdp() else 0.sdp(),
+                        if (isSelected) Color(0xFF73FAD3) else Color.Transparent,
+                        RoundedCornerShape(8.dp))
+            )
+        } else {
+            thumbnailBitmap.value?.let { bitmap ->
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(
+                            if (isSelected) 3.sdp() else 0.sdp(),
+                            if (isSelected) Color(0xFF73FAD3) else Color.Transparent,
+                            RoundedCornerShape(8.dp))
+                )
+            } ?: run {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Black.copy(alpha = 0.3f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.sdp()),
+                        strokeWidth = 2.sdp()
+                    )
+                }
+            }
+        }
+
+        if (media.type == MediaType.VIDEO) {
+            Text(
+                text = media.duration.formatAsTime(),
+                color = Color.White,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(4.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
 
         if (isSelected) {
             Icon(
@@ -734,28 +1174,78 @@ fun GalleryImageItem(
     }
 }
 
-// Функция для загрузки изображений из галереи
-private fun loadGalleryImages(context: Context): List<Uri> {
-    val imageUris = mutableListOf<Uri>()
-    val projection = arrayOf(MediaStore.Images.Media._ID)
-    val sortOrder = "${MediaStore.Images.Media.DATE_ADDED} DESC"
+// Создание миниатюры для видео
+private fun createVideoThumbnail(context: Context, uri: Uri): Bitmap? {
+    return try {
+        val retriever = MediaMetadataRetriever().apply {
+            setDataSource(context, uri)
+        }
+        retriever.frameAtTime
+    } catch (e: Exception) {
+        Log.e("Thumbnail", "Error creating video thumbnail", e)
+        null
+    }
+}
+
+fun getVideoDuration(context: Context, uri: Uri): Long {
+    return try {
+        MediaMetadataRetriever().use { retriever ->
+            retriever.setDataSource(context, uri)
+            retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
+        }
+    } catch (e: Exception) {
+        0
+    }
+}
+
+private fun loadMediaFromStore(
+    context: Context,
+    mediaType: MediaType
+): List<MediaItem> {
+    val projection = when(mediaType) {
+        MediaType.IMAGE -> arrayOf(
+            MediaStore.Images.Media._ID
+        )
+        MediaType.VIDEO -> arrayOf(
+            MediaStore.Video.Media._ID,
+            MediaStore.Video.Media.DURATION
+        )
+    }
+    val content = when(mediaType) {
+        MediaType.IMAGE -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        MediaType.VIDEO -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+    }
+    val mediaList = mutableListOf<MediaItem>()
+    val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
 
     context.contentResolver.query(
-        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+        content,
         projection,
         null,
         null,
         sortOrder
     )?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+        val durationColumn = if (mediaType == MediaType.VIDEO) {
+            cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+        } else -1
 
         while (cursor.moveToNext()) {
             val id = cursor.getLong(idColumn)
-            val contentUri = ContentUris.withAppendedId(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id
-            )
-            imageUris.add(contentUri)
+            val duration = if (durationColumn != -1) cursor.getLong(durationColumn) else 0L
+
+            val contentUri = ContentUris.withAppendedId(content, id)
+            mediaList.add(MediaItem(contentUri, mediaType, duration))
         }
     }
-    return imageUris
+    return mediaList
+}
+
+// Форматирование времени для видео
+@SuppressLint("DefaultLocale")
+private fun Long.formatAsTime(): String {
+    val seconds = this / 1000
+    val minutes = seconds / 60
+    val remainingSeconds = seconds % 60
+    return String.format("%02d:%02d", minutes, remainingSeconds)
 }

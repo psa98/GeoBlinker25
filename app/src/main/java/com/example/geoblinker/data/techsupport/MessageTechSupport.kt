@@ -26,6 +26,7 @@ data class MessageTechSupport(
 ) {
     enum class Type {
         Text,
-        Image
+        Image,
+        Video
     }
 }
