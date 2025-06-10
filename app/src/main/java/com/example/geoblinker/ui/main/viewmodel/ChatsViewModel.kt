@@ -106,6 +106,15 @@ class ChatsViewModel(
                             photoUri = saveVideo(item.uri).toString()
                         )
                     )
+                    MediaType.DOCUMENT -> repository.insertMessage(
+                        MessageTechSupport(
+                            chatId = _selectedChat.value.id,
+                            content = "",
+                            timeStamp = time++,
+                            typeMessage = MessageTechSupport.Type.Document,
+                            photoUri = saveDocument(item.uri, item.name).toString()
+                        )
+                    )
                 }
             }
             if (text.isNotEmpty()) {
@@ -148,5 +157,21 @@ class ChatsViewModel(
         }
 
         return Uri.fromFile(outputFile)
+    }
+
+    private fun saveDocument(uri: Uri, fileName: String): Uri {
+        val outputFile = File(application.filesDir, fileName)
+
+        application.contentResolver.openInputStream(uri)?.use { input ->
+            FileOutputStream(outputFile).use { output ->
+                input.copyTo(output)
+            }
+        }
+
+        return Uri.fromFile(outputFile)
+    }
+
+    fun downloadDocuments(uri: Uri) {
+
     }
 }

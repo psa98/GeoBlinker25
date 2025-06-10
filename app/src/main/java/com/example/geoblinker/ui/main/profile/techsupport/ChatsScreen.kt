@@ -4,25 +4,21 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentUris
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
-import android.media.browse.MediaBrowser
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
+import android.provider.OpenableColumns
 import android.util.Log
-import android.util.Size
-import android.view.GestureDetector
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -60,8 +56,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.PlayCircle
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -106,6 +103,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
+import androidx.documentfile.provider.DocumentFile
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -115,10 +113,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.test.core.app.ActivityScenario.launch
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
-import coil.request.ImageRequest
 import com.example.geoblinker.R
 import com.example.geoblinker.data.techsupport.MessageTechSupport
 import com.example.geoblinker.ui.BackButton
@@ -128,7 +124,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.math.min
+import java.io.File
 
 private enum class ChatsScreen {
     Chats,
@@ -370,7 +366,6 @@ private fun Chat(
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
-
                         MessageTechSupport.Type.Image -> {
                             var isLoading by remember { mutableIntStateOf(0) }
                             AsyncImage(
@@ -417,7 +412,6 @@ private fun Chat(
                                 }
                             }
                         }
-
                         MessageTechSupport.Type.Video -> {
                             val context = LocalContext.current
                             val thumbnailBitmap = remember(message.photoUri) { mutableStateOf<Bitmap?>(null) }
@@ -478,6 +472,42 @@ private fun Chat(
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator(color = Color.White)
+                                }
+                            }
+                        }
+                        MessageTechSupport.Type.Document -> {
+                            val context = LocalContext.current
+                            val name = loadDocumentsMetadata(context, listOf((Uri.parse(message.photoUri))))[0].name
+                            Box(
+                                modifier = Modifier
+                                    .widthIn(max = 260.sdp())
+                                    .background(
+                                        if (message.isMy) Color(0xFF73FAD3) else Color(
+                                            0xFFF6F6F6
+                                        ),
+                                        RoundedCornerShape(8.sdp())
+                                    )
+                                    .padding(5.sdp())
+                            ) {
+                                Column {
+                                    Row {
+                                        Text(
+                                            name.substring(0, name.indexOfLast { it == '.' }),
+                                            modifier = Modifier.weight(1f).padding(end = 5.sdp()),
+                                            overflow = TextOverflow.Ellipsis,
+                                            maxLines = 1,
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                        Text(
+                                            name.substring(name.indexOfLast { it == '.' }),
+                                            style = MaterialTheme.typography.bodyLarge
+                                        )
+                                    }
+                                    Spacer(Modifier.height(4.sdp()))
+                                    Text(
+                                        getDocumentSize(Uri.parse(message.photoUri)).formatAsSize(),
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
                                 }
                             }
                         }
@@ -598,7 +628,7 @@ private fun Chat(
     )
 
     if (showImagePicker) {
-        CustomImagePicker(
+        CustomPicker(
             selectedUris = images,
             onSelectionChanged = { newSelection ->
                 images.clear()
@@ -884,19 +914,26 @@ fun VideoPlayer(
 }
 
 @Composable
-fun CustomImagePicker(
+fun CustomPicker(
     selectedUris: List<MediaItem>,
     onSelectionChanged: (List<MediaItem>) -> Unit,
     cancellation: () -> Unit
 ) {
     val context = LocalContext.current
+
     val imageUris = remember { mutableStateListOf<MediaItem>() }
     val videoUris = remember { mutableStateListOf<MediaItem>() }
-    var pickMediaItems = remember { mutableStateListOf<MediaItem>() }
+    val documentUris = remember { mutableStateListOf<MediaItem>() }
+
     var isLoadingImages by remember { mutableStateOf(false) }
     var isLoadingVideos by remember { mutableStateOf(false) }
+    var isLoadingDocuments by remember { mutableStateOf(false) }
+
     var imagesPermissionGranted by remember { mutableStateOf(false) }
     var videosPermissionGranted by remember { mutableStateOf(false) }
+    var documentsPermissionGranted by remember { mutableStateOf(false) }
+
+    var pickMediaItems = remember { mutableStateListOf<MediaItem>() }
     var isLoading by remember { mutableStateOf(true) }
     var pickMediaType by remember { mutableStateOf(MediaType.IMAGE) }
 
@@ -907,7 +944,6 @@ fun CustomImagePicker(
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
     }
-
     val videosPermissions = remember {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Manifest.permission.READ_MEDIA_VIDEO
@@ -915,8 +951,10 @@ fun CustomImagePicker(
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
     }
+    val documentsPermissions = remember {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
 
-    // Лаунчеры для запроса разрешений
     val imagesPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -924,12 +962,26 @@ fun CustomImagePicker(
             isLoadingImages = true
         }
     }
-
     val videosPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
             isLoadingVideos = true
+        }
+    }
+
+    val documentsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenMultipleDocuments()
+    ) { uris ->
+        val now = loadDocumentsMetadata(context, uris)
+        now.forEach {
+            if (!documentUris.contains(it)) {
+                documentUris.add(it)
+
+                val newSelection = selectedUris.toMutableList()
+                newSelection.add(it)
+                onSelectionChanged(newSelection)
+            }
         }
     }
 
@@ -941,6 +993,10 @@ fun CustomImagePicker(
         MediaType.VIDEO -> {
             isLoading = isLoadingVideos
             pickMediaItems = videoUris
+        }
+        MediaType.DOCUMENT -> {
+            isLoading = isLoadingDocuments
+            pickMediaItems = documentUris
         }
     }
 
@@ -958,7 +1014,6 @@ fun CustomImagePicker(
             }
         }
     }
-
     LaunchedEffect(isLoadingVideos) {
         if (isLoadingVideos) {
             withContext(Dispatchers.IO) {
@@ -970,6 +1025,20 @@ fun CustomImagePicker(
                     videoUris.addAll(uris)
                 }
                 isLoadingVideos = false
+            }
+        }
+    }
+    LaunchedEffect(isLoadingDocuments) {
+        if (isLoadingDocuments) {
+            withContext(Dispatchers.IO) {
+                if (documentUris.isEmpty()) {
+                    val uris = loadMediaFromStore(
+                        context,
+                        MediaType.DOCUMENT
+                    )
+                    documentUris.addAll(uris)
+                }
+                isLoadingDocuments = false
             }
         }
     }
@@ -985,7 +1054,6 @@ fun CustomImagePicker(
                     imagesPermissionLauncher.launch(imagesPermissions)
                 }
             }
-
             MediaType.VIDEO -> {
                 videosPermissionGranted = ContextCompat.checkSelfPermission(context, videosPermissions) == PackageManager.PERMISSION_GRANTED
 
@@ -994,6 +1062,9 @@ fun CustomImagePicker(
                 } else {
                     videosPermissionLauncher.launch(videosPermissions)
                 }
+            }
+            MediaType.DOCUMENT -> {
+                isLoadingDocuments = true
             }
         }
     }
@@ -1015,34 +1086,66 @@ fun CustomImagePicker(
                 color = Color.White
             ) {
                 Column {
-                    Row(
+                    LazyRow(
                         modifier = Modifier
                             .padding(
                                 top = 10.sdp(),
                                 bottom = 5.sdp()
                             )
                     ) {
+                        item {
+                            Text(
+                                "IMAGES",
+                                modifier = Modifier.width(150.sdp())
+                                    .clickable { pickMediaType = MediaType.IMAGE }
+                                    .padding(horizontal = 10.sdp()),
+                                color = if (pickMediaType == MediaType.IMAGE) Color(0xFF73FAD3) else Color(
+                                    0xFFE8E8E8
+                                ),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                "VIDEOS",
+                                modifier = Modifier.width(150.sdp())
+                                    .clickable { pickMediaType = MediaType.VIDEO }
+                                    .padding(horizontal = 10.sdp()),
+                                color = if (pickMediaType == MediaType.VIDEO) Color(0xFF73FAD3) else Color(
+                                    0xFFE8E8E8
+                                ),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Text(
+                                "DOCUMENTS",
+                                modifier = Modifier.width(150.sdp())
+                                    .clickable { pickMediaType = MediaType.DOCUMENT }
+                                    .padding(horizontal = 10.sdp()),
+                                color = if (pickMediaType == MediaType.DOCUMENT) Color(0xFF73FAD3) else Color(
+                                    0xFFE8E8E8
+                                ),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                        }
+                    }
+                    if (pickMediaType == MediaType.DOCUMENT) {
                         Text(
-                            "IMAGES",
-                            modifier = Modifier.weight(1f)
-                                .clickable { pickMediaType = MediaType.IMAGE }
-                                .padding(horizontal = 10.sdp()),
-                            color = if (pickMediaType == MediaType.IMAGE) Color(0xFF73FAD3) else Color(
-                                0xFFE8E8E8
-                            ),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge
+                            "Открыть внутреннее хранилище",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 5.sdp(), vertical = 6.sdp())
+                                .clickable {
+                                    documentsPermissionLauncher.launch(arrayOf("*/*"))
+                                },
+                            color = Color(0xFF9ba69e),
+                            textAlign = TextAlign.Start,
+                            style = MaterialTheme.typography.titleMedium
                         )
-                        Text(
-                            "VIDEOS",
-                            modifier = Modifier.weight(1f)
-                                .clickable { pickMediaType = MediaType.VIDEO }
-                                .padding(horizontal = 10.sdp()),
-                            color = if (pickMediaType == MediaType.VIDEO) Color(0xFF73FAD3) else Color(
-                                0xFFE8E8E8
-                            ),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleLarge
+                        HorizontalDivider(
+                            modifier = Modifier.fillMaxWidth().padding(5.sdp()),
+                            1.sdp(),
+                            Color(0xFFDAD9D9)
                         )
                     }
                     if (isLoading) {
@@ -1054,7 +1157,7 @@ fun CustomImagePicker(
                         }
                     } else {
                         LazyVerticalGrid(
-                            columns = GridCells.Fixed(3),
+                            columns = GridCells.Fixed(if (pickMediaType == MediaType.DOCUMENT) 1 else 3),
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(5.sdp())
                         ) {
@@ -1099,16 +1202,84 @@ fun GalleryMediaItem(
         }
     }
 
+    when(media.type) {
+        MediaType.IMAGE -> {
+            ImageItem(media, isSelected, onSelectToggle)
+        }
+        MediaType.VIDEO -> {
+            VideoItem(media, isSelected, onSelectToggle)
+        }
+        MediaType.DOCUMENT -> {
+            DocumentItem(media, isSelected, onSelectToggle)
+        }
+    }
+}
+
+@Composable
+private fun ImageItem(
+    media: MediaItem,
+    isSelected: Boolean,
+    onSelectToggle: (Boolean) -> Unit
+) {
     Box(
         modifier = Modifier
             .aspectRatio(1f)
             .padding(4.dp)
             .clickable { onSelectToggle(!isSelected) }
     ) {
-        // Отображение миниатюры
-        if (media.type == MediaType.IMAGE) {
-            AsyncImage(
-                model = media.uri,
+        AsyncImage(
+            model = media.uri,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(8.dp))
+                .border(
+                    if (isSelected) 3.sdp() else 0.sdp(),
+                    if (isSelected) Color(0xFF73FAD3) else Color.Transparent,
+                    RoundedCornerShape(8.dp)
+                )
+        )
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(4.dp),
+                tint = Color(0xFF73FAD3)
+            )
+        }
+    }
+}
+
+@Composable
+private fun VideoItem(
+    media: MediaItem,
+    isSelected: Boolean,
+    onSelectToggle: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    val thumbnailBitmap = remember(media.uri) { mutableStateOf<Bitmap?>(null) }
+
+    // Загрузка миниатюры для видео
+    if (thumbnailBitmap.value == null) {
+        LaunchedEffect(media.uri) {
+            withContext(Dispatchers.IO) {
+                thumbnailBitmap.value = createVideoThumbnail(context, media.uri)
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .aspectRatio(1f)
+            .padding(4.dp)
+            .clickable { onSelectToggle(!isSelected) }
+    ) {
+        thumbnailBitmap.value?.let { bitmap ->
+            Image(
+                bitmap = bitmap.asImageBitmap(),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -1117,49 +1288,33 @@ fun GalleryMediaItem(
                     .border(
                         if (isSelected) 3.sdp() else 0.sdp(),
                         if (isSelected) Color(0xFF73FAD3) else Color.Transparent,
-                        RoundedCornerShape(8.dp))
-            )
-        } else {
-            thumbnailBitmap.value?.let { bitmap ->
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(8.dp))
-                        .border(
-                            if (isSelected) 3.sdp() else 0.sdp(),
-                            if (isSelected) Color(0xFF73FAD3) else Color.Transparent,
-                            RoundedCornerShape(8.dp))
-                )
-            } ?: run {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.3f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.sdp()),
-                        strokeWidth = 2.sdp()
+                        RoundedCornerShape(8.dp)
                     )
-                }
+            )
+        } ?: run {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.3f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.sdp()),
+                    strokeWidth = 2.sdp()
+                )
             }
         }
 
-        if (media.type == MediaType.VIDEO) {
-            Text(
-                text = media.duration.formatAsTime(),
-                color = Color.White,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(4.dp)
-                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall
-            )
-        }
+        Text(
+            text = media.duration.formatAsTime(),
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(4.dp)
+                .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(4.dp))
+                .padding(horizontal = 4.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall
+        )
 
         if (isSelected) {
             Icon(
@@ -1167,6 +1322,60 @@ fun GalleryMediaItem(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
+                    .padding(4.dp),
+                tint = Color(0xFF73FAD3)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DocumentItem(
+    media: MediaItem,
+    isSelected: Boolean,
+    onSelectToggle: (Boolean) -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .padding(start = 5.sdp(), end = 5.sdp(), bottom = 5.sdp())
+            .background(
+                Color(0xFFF6F6F6),
+                RoundedCornerShape(8.dp)
+            )
+            .border(
+                if (isSelected) 3.sdp() else 0.sdp(),
+                if (isSelected) Color(0xFF73FAD3) else Color.Transparent,
+                RoundedCornerShape(8.dp)
+            )
+            .clickable { onSelectToggle(!isSelected) }
+    ) {
+        Column(
+            modifier = Modifier.padding(4.sdp())
+        ) {
+            Row {
+                Text(
+                    media.name.substring(0, media.name.indexOfLast { it == '.' }),
+                    modifier = Modifier.weight(1f),
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    media.name.substring(media.name.indexOfLast { it == '.' }),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+            Spacer(Modifier.height(4.sdp()))
+            Text(
+                media.size.formatAsSize(),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        if (isSelected) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = null,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
                     .padding(4.dp),
                 tint = Color(0xFF73FAD3)
             )
@@ -1198,54 +1407,141 @@ fun getVideoDuration(context: Context, uri: Uri): Long {
     }
 }
 
+fun getDocumentSize(uri: Uri): Long {
+    return try {
+        val file = File(uri.path ?: return 0)
+        if (file.exists()) file.length() else 0
+    } catch (e: Exception) {
+        Log.e("DocumentSize", "Error getting document size", e)
+        0
+    }
+}
+
 private fun loadMediaFromStore(
     context: Context,
     mediaType: MediaType
 ): List<MediaItem> {
-    val projection = when(mediaType) {
-        MediaType.IMAGE -> arrayOf(
-            MediaStore.Images.Media._ID
-        )
-        MediaType.VIDEO -> arrayOf(
-            MediaStore.Video.Media._ID,
-            MediaStore.Video.Media.DURATION
-        )
-    }
-    val content = when(mediaType) {
-        MediaType.IMAGE -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
-        MediaType.VIDEO -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
-    }
-    val mediaList = mutableListOf<MediaItem>()
-    val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
+    return when (mediaType) {
+        MediaType.IMAGE, MediaType.VIDEO -> {
+            val projection = when(mediaType) {
+                MediaType.IMAGE -> arrayOf(
+                    MediaStore.Images.Media._ID,
+                    MediaStore.Images.Media.DISPLAY_NAME,
+                    MediaStore.Images.Media.SIZE
+                )
+                MediaType.VIDEO -> arrayOf(
+                    MediaStore.Video.Media._ID,
+                    MediaStore.Video.Media.DISPLAY_NAME,
+                    MediaStore.Video.Media.SIZE,
+                    MediaStore.Video.Media.DURATION
+                )
+                else -> arrayOf()
+            }
+            val content = when(mediaType) {
+                MediaType.IMAGE -> MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                MediaType.VIDEO -> MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+                else -> MediaStore.Files.getContentUri("external")
+            }
+            val mediaList = mutableListOf<MediaItem>()
+            val sortOrder = "${MediaStore.MediaColumns.DATE_ADDED} DESC"
 
-    context.contentResolver.query(
-        content,
-        projection,
-        null,
-        null,
-        sortOrder
-    )?.use { cursor ->
-        val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-        val durationColumn = if (mediaType == MediaType.VIDEO) {
-            cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
-        } else -1
+            context.contentResolver.query(
+                content,
+                projection,
+                null,
+                null,
+                sortOrder
+            )?.use { cursor ->
+                val idColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+                val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+                val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
+                val durationColumn = if (mediaType == MediaType.VIDEO) {
+                    cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION)
+                } else -1
 
-        while (cursor.moveToNext()) {
-            val id = cursor.getLong(idColumn)
-            val duration = if (durationColumn != -1) cursor.getLong(durationColumn) else 0L
+                while (cursor.moveToNext()) {
+                    val id = cursor.getLong(idColumn)
+                    val name = cursor.getString(nameColumn) ?: "Unknown"
+                    val size = cursor.getLong(sizeColumn)
+                    val duration = if (durationColumn != -1) cursor.getLong(durationColumn) else 0L
 
-            val contentUri = ContentUris.withAppendedId(content, id)
-            mediaList.add(MediaItem(contentUri, mediaType, duration))
+                    val contentUri = ContentUris.withAppendedId(content, id)
+                    mediaList.add(MediaItem(contentUri, mediaType, name, size, duration))
+                }
+            }
+            mediaList
+        }
+        MediaType.DOCUMENT -> {
+            return emptyList()
+            //loadDocuments(context)
         }
     }
-    return mediaList
 }
 
-// Форматирование времени для видео
+private fun scanDocuments(context: Context, treeUri: Uri): List<Uri> {
+    val documentTree = DocumentFile.fromTreeUri(context, treeUri)
+    val documents = mutableListOf<Uri>()
+    documentTree?.listFiles()?.forEach { file ->
+        if (file.isDirectory) {
+            documents.addAll(scanDocuments(context, file.uri))
+        } else if (file.isFile && isDocument(file)) {
+            documents.add(file.uri)
+        }
+    }
+    return documents
+}
+
+private fun isDocument(file: DocumentFile): Boolean {
+    val mime = file.type?.lowercase()
+    val extensions = listOf("pdf", "csv", "docx")
+    return mime?.let { type ->
+        extensions.any { type.contains(it) }
+    } ?: false
+}
+
+private fun loadDocumentsMetadata(
+    context: Context,
+    uris: List<Uri>
+): List<MediaItem> {
+    val resolver = context.contentResolver
+    val result = mutableListOf<MediaItem>()
+
+    uris.forEach { uri ->
+        resolver.query(uri, null, null, null, null)?.use { cursor ->
+            cursor.moveToFirst()
+            val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+            val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+
+            result.add(
+                MediaItem(
+                    uri = uri,
+                    type = MediaType.DOCUMENT,
+                    name = nameIndex.takeIf { it >= 0 }?.let { cursor.getString(it) } ?: "",
+                    size = sizeIndex.takeIf { it >= 0 }?.let { cursor.getLong(it) } ?: 0
+                )
+            )
+        } ?: run {
+            // Если запрос не удался, добавляем базовую информацию
+            result.add(MediaItem(uri, MediaType.DOCUMENT, uri.lastPathSegment ?: "", 0))
+        }
+    }
+    return result
+}
+
 @SuppressLint("DefaultLocale")
 private fun Long.formatAsTime(): String {
     val seconds = this / 1000
     val minutes = seconds / 60
     val remainingSeconds = seconds % 60
     return String.format("%02d:%02d", minutes, remainingSeconds)
+}
+
+private fun Long.formatAsSize(): String {
+    val fthis = this.toFloat()
+    return when {
+        fthis > 1024 * 1024 * 1024 -> "${"%.2f".format(fthis / 1024 / 1024 / 1024)} GB"
+        fthis > 1024 * 1024 -> "${"%.2f".format(fthis / 1024 / 1024)} MB"
+        fthis > 1024 -> "${"%.2f".format(fthis / 1024)} KB"
+        else -> "$this Byte"
+    }
 }
