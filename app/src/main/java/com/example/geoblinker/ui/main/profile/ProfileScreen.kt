@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -70,6 +71,8 @@ fun ProfileScreen(
     toSettings: () -> Unit,
     toNameSettings: () -> Unit,
     toTechSupport: () -> Unit,
+    toAboutApp: () -> Unit,
+    toAboutCompany: () -> Unit,
     toBack: () -> Unit
 ) {
     var isShow by remember { mutableStateOf(false) }
@@ -182,12 +185,12 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.SpaceAround
         ) {
             ConstraintLayout(
-                modifier = Modifier.wrapContentWidth()
+                modifier = Modifier.wrapContentWidth().clickable { toAboutApp() }
             ) {
                 val (text, line) = createRefs()
 
                 Text(
-                    "О приложении",
+                    stringResource(R.string.about_app),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.constrainAs(text) {
                         top.linkTo(parent.top)
@@ -209,12 +212,12 @@ fun ProfileScreen(
                 )
             }
             ConstraintLayout(
-                modifier = Modifier.wrapContentWidth()
+                modifier = Modifier.wrapContentWidth().clickable { toAboutCompany() }
             ) {
                 val (text, line) = createRefs()
 
                 Text(
-                    "О компании",
+                    stringResource(R.string.about_company),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.constrainAs(text) {
                         top.linkTo(parent.top)

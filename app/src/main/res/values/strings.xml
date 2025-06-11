@@ -150,4 +150,8 @@
     <string name="write_message">Напишите сообщение</string>
     <string name="open_internal_storage">Открыть внутреннее хранилище</string>
     <string name="camera_access_required">Требуется доступ к камере</string>
+    <string name="about_company">О компании</string>
+    <string name="about_app">О приложении</string>
+    <string name="public_offer">Публичная оферта</string>
+    <string name="privacy_policy">Политика конфиденциальности</string>
 </resources>

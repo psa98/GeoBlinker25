@@ -70,6 +70,10 @@ import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
 import com.example.geoblinker.ui.main.profile.ProfileScreen
+import com.example.geoblinker.ui.main.profile.about.AboutAppScreen
+import com.example.geoblinker.ui.main.profile.about.AboutCompany
+import com.example.geoblinker.ui.main.profile.about.AboutCompanyItemScreen
+import com.example.geoblinker.ui.main.profile.about.AboutCompanyScreen
 import com.example.geoblinker.ui.main.profile.settings.ConfirmationCodeSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.DeleteAccountSettingsScreen
 import com.example.geoblinker.ui.main.profile.settings.EmailSettingsScreen
@@ -136,7 +140,11 @@ enum class MainScreen {
     FrequentQuestions,
     FrequentQuest,
     MakeRequest,
-    TechChats
+    TechChats,
+    About,
+    AboutApp,
+    AboutCompany,
+    AboutCompanyItem
 }
 
 @Composable
@@ -298,6 +306,7 @@ fun MainScreen(
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
     var isShow by remember { mutableStateOf(false) }
     var frequentQuest by remember { mutableStateOf(FrequentQuestions.CantPaySubscription) }
+    var aboutItem by remember { mutableStateOf(AboutCompany.PublicOffer) }
 
     fun BackgroundColor(): Color {
         return when(currentRoute) {
@@ -497,6 +506,8 @@ fun MainScreen(
                     toSettings = { navController.navigate("${MainScreen.Settings.name}/${MainScreen.Profile.name}") },
                     toNameSettings = { navController.navigate(MainScreen.NameSettings.name) },
                     toTechSupport = { navController.navigate(MainScreen.TechSupport.name) },
+                    toAboutApp = { navController.navigate(MainScreen.AboutApp.name) },
+                    toAboutCompany = { navController.navigate(MainScreen.About.name) },
                     toBack = { navController.navigateUp() }
                 )
             }
@@ -687,6 +698,34 @@ fun MainScreen(
             composable(route = MainScreen.TechChats.name) {
                 ChatsScreen(
                     chatsViewModel,
+                    toBack = { navController.navigateUp() }
+                )
+            }
+        }
+
+        composable(route = MainScreen.AboutApp.name) {
+            AboutAppScreen(
+                toBack = { navController.navigateUp() }
+            )
+        }
+
+        navigation(
+            route = MainScreen.About.name,
+            startDestination = MainScreen.AboutCompany.name
+        ) {
+            composable(route = MainScreen.AboutCompany.name) {
+                AboutCompanyScreen(
+                    toDescriptionScreen = {
+                        aboutItem = it
+                        navController.navigate(MainScreen.AboutCompanyItem.name)
+                    },
+                    toBack = { navController.navigateUp() }
+                )
+            }
+
+            composable(route = MainScreen.AboutCompanyItem.name) {
+                AboutCompanyItemScreen(
+                    aboutCompany = aboutItem,
                     toBack = { navController.navigateUp() }
                 )
             }
