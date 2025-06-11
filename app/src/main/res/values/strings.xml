@@ -148,4 +148,6 @@
     <string name="send">Отправить</string>
     <string name="null_requests_description">Ваша история обращений пока что пуста</string>
     <string name="write_message">Напишите сообщение</string>
+    <string name="open_internal_storage">Открыть внутреннее хранилище</string>
+    <string name="camera_access_required">Требуется доступ к камере</string>
 </resources>

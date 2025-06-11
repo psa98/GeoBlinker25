@@ -3,19 +3,27 @@ package com.example.geoblinker.ui.main.profile.techsupport
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import android.provider.OpenableColumns
 import android.util.Log
+import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
-import androidx.annotation.RequiresApi
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.tween
@@ -55,8 +63,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -103,7 +112,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
-import androidx.documentfile.provider.DocumentFile
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -120,11 +129,18 @@ import com.example.geoblinker.data.techsupport.MessageTechSupport
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.theme.sdp
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 private enum class ChatsScreen {
     Chats,
@@ -920,6 +936,7 @@ fun CustomPicker(
     cancellation: () -> Unit
 ) {
     val context = LocalContext.current
+    var isTakePhoto by remember { mutableStateOf(false) }
 
     val imageUris = remember { mutableStateListOf<MediaItem>() }
     val videoUris = remember { mutableStateListOf<MediaItem>() }
@@ -931,7 +948,6 @@ fun CustomPicker(
 
     var imagesPermissionGranted by remember { mutableStateOf(false) }
     var videosPermissionGranted by remember { mutableStateOf(false) }
-    var documentsPermissionGranted by remember { mutableStateOf(false) }
 
     var pickMediaItems = remember { mutableStateListOf<MediaItem>() }
     var isLoading by remember { mutableStateOf(true) }
@@ -950,9 +966,6 @@ fun CustomPicker(
         } else {
             Manifest.permission.READ_EXTERNAL_STORAGE
         }
-    }
-    val documentsPermissions = remember {
-        Manifest.permission.READ_EXTERNAL_STORAGE
     }
 
     val imagesPermissionLauncher = rememberLauncherForActivityResult(
@@ -1131,7 +1144,7 @@ fun CustomPicker(
                     }
                     if (pickMediaType == MediaType.DOCUMENT) {
                         Text(
-                            "Открыть внутреннее хранилище",
+                            stringResource(R.string.open_internal_storage),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 5.sdp(), vertical = 6.sdp())
@@ -1161,6 +1174,25 @@ fun CustomPicker(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(5.sdp())
                         ) {
+                            if (pickMediaType == MediaType.IMAGE) {
+                                item {
+                                    Icon(
+                                        imageVector = Icons.Filled.PhotoCamera,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .aspectRatio(1f)
+                                            .padding(4.sdp())
+                                            .fillMaxSize()
+                                            .clickable { isTakePhoto = true }
+                                            .background(
+                                                Color(0xFF9ba69e),
+                                                RoundedCornerShape(8.sdp())
+                                            )
+                                            .padding(16.sdp()),
+                                        tint = Color.White
+                                    )
+                                }
+                            }
                             items(pickMediaItems) { image ->
                                 GalleryMediaItem(
                                     media = image,
@@ -1179,6 +1211,157 @@ fun CustomPicker(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    if (isTakePhoto) {
+        TakePhoto(
+            {
+                val item = MediaItem(
+                    uri = it,
+                    type = MediaType.IMAGE,
+                    name = "",
+                    size = 0
+                )
+
+                val newImageUris = listOf(item).toMutableList()
+                newImageUris.addAll(imageUris)
+                imageUris.clear()
+                imageUris.addAll(newImageUris)
+
+                val newSelection = selectedUris.toMutableList()
+                newSelection.add(item)
+                onSelectionChanged(newSelection)
+            },
+            { isTakePhoto = false }
+        )
+    }
+}
+
+@kotlin.OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun TakePhoto(
+    onPhotoTaken: (Uri) -> Unit,
+    toBack: () -> Unit
+) {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // Состояние разрешений
+    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
+
+    // Управление камерой
+    val imageCapture = remember { ImageCapture.Builder().build() }
+    var cameraProvider: ProcessCameraProvider? by remember { mutableStateOf(null) }
+
+    // Создание временного файла
+    var currentTempFile by remember { mutableStateOf<File?>(null) }
+
+    LaunchedEffect(Unit) {
+        cameraPermissionState.launchPermissionRequest()
+    }
+
+    Dialog(
+        {},
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            if (cameraPermissionState.status.isGranted) {
+                AndroidView(
+                    factory = { ctx ->
+                        val previewView = PreviewView(ctx).apply {
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                            )
+                        }
+
+                        val cameraExecutor = ContextCompat.getMainExecutor(ctx)
+                        ProcessCameraProvider.getInstance(ctx).addListener({
+                            cameraProvider = ProcessCameraProvider.getInstance(ctx).get().apply {
+                                unbindAll()
+                                bindToLifecycle(
+                                    lifecycleOwner,
+                                    CameraSelector.DEFAULT_BACK_CAMERA,
+                                    imageCapture,
+                                    Preview.Builder().build().apply {
+                                        setSurfaceProvider(previewView.surfaceProvider)
+                                    }
+                                )
+                            }
+                        }, cameraExecutor)
+
+                        previewView
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(bottom = 48.dp),
+                    contentAlignment = Alignment.BottomCenter
+                ) {
+                    Box(
+                        modifier = Modifier.size(72.sdp())
+                            .background(
+                                Color.White.copy(alpha = 0.7f),
+                                CircleShape
+                            )
+                            .clickable {
+                                currentTempFile?.delete() // Удаляем предыдущий временный файл
+
+                                val file = createTempImageFile(context).apply {
+                                    currentTempFile = this
+                                }
+
+                                imageCapture.takePicture(
+                                    ImageCapture.OutputFileOptions.Builder(file).build(),
+                                    ContextCompat.getMainExecutor(context),
+                                    object : ImageCapture.OnImageSavedCallback {
+                                        override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                            saveImageToGallery(context, file)?.let {
+                                                onPhotoTaken(it)
+                                            }
+                                            toBack()
+                                        }
+
+                                        override fun onError(ex: ImageCaptureException) {
+                                            currentTempFile?.delete()
+                                            Log.e("Photo", "NoSaved")
+                                        }
+                                    }
+                                )
+                            }
+                    )
+                }
+
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.TopStart
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back),
+                        modifier = Modifier
+                            .padding(start = 16.dp, top = 16.dp)
+                            .size(36.dp)
+                            .clickable { toBack() },
+                        tint = Color.White
+                    )
+                }
+            } else {
+                Text(
+                    stringResource(R.string.camera_access_required),
+                    color = Color.White,
+                    style = MaterialTheme.typography.titleMedium
+                )
             }
         }
     }
@@ -1383,6 +1566,13 @@ private fun DocumentItem(
     }
 }
 
+private fun createTempImageFile(context: Context): File {
+    return File(
+        context.getExternalFilesDir(Environment.DIRECTORY_PICTURES),
+        "temp_${System.currentTimeMillis()}.jpg"
+    ).apply { createNewFile() }
+}
+
 // Создание миниатюры для видео
 private fun createVideoThumbnail(context: Context, uri: Uri): Bitmap? {
     return try {
@@ -1473,30 +1663,8 @@ private fun loadMediaFromStore(
         }
         MediaType.DOCUMENT -> {
             return emptyList()
-            //loadDocuments(context)
         }
     }
-}
-
-private fun scanDocuments(context: Context, treeUri: Uri): List<Uri> {
-    val documentTree = DocumentFile.fromTreeUri(context, treeUri)
-    val documents = mutableListOf<Uri>()
-    documentTree?.listFiles()?.forEach { file ->
-        if (file.isDirectory) {
-            documents.addAll(scanDocuments(context, file.uri))
-        } else if (file.isFile && isDocument(file)) {
-            documents.add(file.uri)
-        }
-    }
-    return documents
-}
-
-private fun isDocument(file: DocumentFile): Boolean {
-    val mime = file.type?.lowercase()
-    val extensions = listOf("pdf", "csv", "docx")
-    return mime?.let { type ->
-        extensions.any { type.contains(it) }
-    } ?: false
 }
 
 private fun loadDocumentsMetadata(
@@ -1526,6 +1694,57 @@ private fun loadDocumentsMetadata(
         }
     }
     return result
+}
+
+private fun saveImageToGallery(context: Context, sourceFile: File): Uri? {
+    val contentResolver = context.contentResolver
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val imageFileName = "IMG_$timeStamp.jpg"
+
+    val imageDetails = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, imageFileName)
+        put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+            put(MediaStore.MediaColumns.IS_PENDING, 1)
+        } else {
+            put(
+                MediaStore.MediaColumns.DATA,
+                "${Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)}/$imageFileName"
+            )
+        }
+    }
+
+    return try {
+        val imageUri = contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            imageDetails
+        )
+
+        imageUri?.let { uri ->
+            contentResolver.openOutputStream(uri)?.use { outputStream ->
+                FileInputStream(sourceFile).use { inputStream ->
+                    inputStream.copyTo(outputStream)
+                }
+            }
+
+            // Для Android Q+ снимаем флаг pending
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                imageDetails.clear()
+                imageDetails.put(MediaStore.MediaColumns.IS_PENDING, 0)
+                contentResolver.update(uri, imageDetails, null, null)
+            }
+
+            // Удаляем временный файл после копирования
+            sourceFile.delete()
+
+            uri
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }
 
 @SuppressLint("DefaultLocale")

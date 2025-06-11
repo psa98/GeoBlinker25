@@ -1,9 +1,7 @@
 package com.example.geoblinker.ui.main.viewmodel
 
 import android.app.Application
-import android.content.Context
 import android.net.Uri
-import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.data.techsupport.ChatTechSupport
@@ -169,9 +167,5 @@ class ChatsViewModel(
         }
 
         return Uri.fromFile(outputFile)
-    }
-
-    fun downloadDocuments(uri: Uri) {
-
     }
 }
