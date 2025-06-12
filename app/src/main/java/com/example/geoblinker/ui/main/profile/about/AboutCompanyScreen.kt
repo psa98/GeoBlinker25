@@ -18,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.main.profile.techsupport.FrequentQuestions
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable

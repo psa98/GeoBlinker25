@@ -154,4 +154,9 @@
     <string name="about_app">О приложении</string>
     <string name="public_offer">Публичная оферта</string>
     <string name="privacy_policy">Политика конфиденциальности</string>
+    <string name="completion_registration">Завершение регистрации</string>
+    <string name="confirmation_public_offer">Регистрируясь, я подтверждаю, что ознакомился и даю своё согласие с </string>
+    <string name="confirmation_public_offer_2">публичной офертой</string>
+    <string name="confirmation_privacy_policy">Регистрируясь, я даю разрешение на обработку своих персональных данных в соответствие с действующей </string>
+    <string name="confirmation_privacy_policy_2">политикой конфиденциальности</string>
 </resources>
