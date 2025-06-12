@@ -114,7 +114,7 @@
     <string name="email_notification">Уведомления по Email</string>
     <string name="email_notification_description">Выбрать какие уведомления будут приходить на ваш Email</string>
     <string name="get_notification_around_clock">Получать уведомления круглосуточно</string>
-    <string name="configure_notification_type">Настроить типы уведомлений...</string>
+    <string name="configure_notification_type">Настроить типы уведомлений…</string>
     <string name="configure_email_notification">Настроить Email уведомления</string>
     <string name="configuring_notification_types">Настройка типов уведомлений</string>
     <string name="enable_all">Включить все</string>
