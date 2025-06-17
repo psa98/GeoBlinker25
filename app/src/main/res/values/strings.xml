@@ -159,4 +159,6 @@
     <string name="confirmation_public_offer_2">публичной офертой</string>
     <string name="confirmation_privacy_policy">Регистрируясь, я даю разрешение на обработку своих персональных данных в соответствие с действующей </string>
     <string name="confirmation_privacy_policy_2">политикой конфиденциальности</string>
+    <string name="invalid_double_phone">Номер телефона уже занят</string>
+    <string name="invalid_register">Произошла ошибка при регистрации</string>
 </resources>

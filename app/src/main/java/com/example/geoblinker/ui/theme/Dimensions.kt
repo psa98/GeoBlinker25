@@ -32,12 +32,12 @@ fun hsc(
 fun Int.sdp(): Dp {
     return (this * sc()).dp
 }
-/*
+
 @Composable
 fun Int.hdp(): Dp {
     return (this * hsc()).dp
 }
-*/
+
 @Composable
 fun Int.wdp(baseWidth: Int = 360): Dp {
     val width = LocalConfiguration.current.screenWidthDp

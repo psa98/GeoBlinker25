@@ -1,21 +1,14 @@
-package com.example.geoblinker.ui.registration
+package com.example.geoblinker.ui.auth.registration
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,98 +20,101 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.BlackButton
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomPopup
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.NameTextField
 import com.example.geoblinker.ui.PhoneNumberTextField
+import com.example.geoblinker.ui.TypeColor
+import com.example.geoblinker.ui.auth.RegisterUiState
 import com.example.geoblinker.ui.formatPhoneNumber
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun OneScreen(
+    viewModel: RegistrationViewModel,
     profileViewModel: ProfileViewModel,
-    twoScreen: (String, String) -> Unit,
-    toBack: () -> Unit,
-    viewModel: RegistrationViewModel
+    twoScreen: () -> Unit,
+    toBack: () -> Unit
 ) {
-    var phone by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var isErrorPhone by remember { mutableStateOf(false) }
-    var isErrorName by remember { mutableStateOf(false) }
-    var visiblePopup by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val uiState = viewModel.registerUiState
+    val phone = viewModel.phone
+    val name = viewModel.name
 
     fun onClick() {
-        if (phone.length < 10)
-            isErrorPhone = true
-        if (name.isEmpty())
-            isErrorName = true
-        if (!isErrorPhone && !isErrorName)
-            visiblePopup = true
+        viewModel.register(phone, name)
     }
 
     Column(
         modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        HSpacer(60)
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
             modifier = Modifier.width(200.sdp()).height(135.sdp())
         )
-        Spacer(Modifier.height(15.sdp()))
+        HSpacer(15)
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(33.sdp()))
-        if (isErrorPhone) {
-            Text(
-                stringResource(R.string.invalid_number),
-                color = Color(0xFFC4162D),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(Modifier.height(15.sdp()))
-        }
-        else if (isErrorName) {
-            Text(
-                stringResource(R.string.enter_the_user_name),
-                color = Color(0xFFC4162D),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(Modifier.height(15.sdp()))
-        }
+        HSpacer(33)
         PhoneNumberTextField(
+            initial = phone,
             onValueChange = {
-                phone = it
-                isErrorPhone = false
-                isErrorName = false
+                viewModel.updatePhone(it)
+                viewModel.resetRegisterUiState()
             },
             onDone = { onClick() },
-            isError = isErrorPhone
+            isError = uiState is RegisterUiState.Error.ErrorPhone
         )
-        Spacer(Modifier.height(20.sdp()))
+        HSpacer(20)
         NameTextField(
+            value = name,
             placeholder = stringResource(R.string.your_name),
             onValueChange = {
-                name = it
-                isErrorPhone = false
-                isErrorName = false
+                viewModel.updateName(it)
+                viewModel.resetRegisterUiState()
             },
             onDone = { onClick() },
-            isError = isErrorName
+            isError = uiState is RegisterUiState.Error.ErrorName
         )
-        Spacer(Modifier.height(20.sdp()))
-        BlackButton(
-            modifier = Modifier.fillMaxWidth(),
+        HSpacer(20)
+        CustomButton(
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
+            typeColor = TypeColor.Black,
+            height = 81,
+            radius = 24,
+            style = MaterialTheme.typography.headlineMedium
         )
-        Spacer(Modifier.height(56.sdp()))
+    }
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        HSpacer(230)
+        if (uiState is RegisterUiState.Error) {
+            Text(
+                stringResource(
+                    when(uiState) {
+                        is RegisterUiState.Error.ErrorPhone -> R.string.invalid_number
+                        is RegisterUiState.Error.ErrorName -> R.string.enter_the_user_name
+                        is RegisterUiState.Error.ErrorDoublePhone -> R.string.invalid_double_phone
+                        is RegisterUiState.Error.ErrorRegister -> R.string.invalid_register
+                    }
+                ),
+                color = Color(0xFFC4162D),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
     }
 
     BackButton(
@@ -126,7 +122,7 @@ fun OneScreen(
         color = Color(0xFFEFEFEF)
     )
 
-    if (visiblePopup) {
+    if (uiState is RegisterUiState.Success) {
         LaunchedEffect(Unit) {
             focusManager.clearFocus()
             keyboardController?.hide()
@@ -135,11 +131,10 @@ fun OneScreen(
         CustomPopup(
             profileViewModel,
             phone = "+ 7 ${formatPhoneNumber(phone)}",
-            onChangeVisible = { visiblePopup = it },
+            onChangeVisible = { viewModel.resetRegisterUiState() },
             sendCode = {
-                visiblePopup = false
                 viewModel.setWays(it)
-                twoScreen(phone, name)
+                twoScreen()
             }
         )
     }

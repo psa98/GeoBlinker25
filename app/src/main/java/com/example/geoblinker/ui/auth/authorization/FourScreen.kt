@@ -1,11 +1,9 @@
-package com.example.geoblinker.ui.authorization
+package com.example.geoblinker.ui.auth.authorization
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,9 +14,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.sp
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.theme.sdp
+import com.example.geoblinker.ui.theme.ssp
 import kotlinx.coroutines.delay
 
 @Composable
@@ -41,17 +40,17 @@ fun FourScreen(
             contentDescription = null,
             modifier = Modifier.size(240.sdp(), 162.sdp())
         )
-        Spacer(Modifier.height(65.sdp()))
+        HSpacer(65)
         Text(
             text = stringResource(R.string.welcome),
-            lineHeight = 40.sp,
+            lineHeight = 40.ssp(),
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
             text = name,
-            lineHeight = 40.sp,
+            lineHeight = 40.ssp(),
             style = MaterialTheme.typography.headlineLarge
         )
-        Spacer(Modifier.height(100.sdp()))
+        HSpacer(100)
     }
 }

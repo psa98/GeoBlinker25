@@ -63,6 +63,7 @@ fun NameSettingsScreen(
         verticalArrangement = Arrangement.Center
     ) {
         NameTextField(
+            value = name,
             placeholder = "Введите новое имя",
             onValueChange = {
                 isShow = false

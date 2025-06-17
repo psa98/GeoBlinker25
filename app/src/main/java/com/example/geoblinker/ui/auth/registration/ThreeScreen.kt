@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.registration
+package com.example.geoblinker.ui.auth.registration
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,9 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,6 +42,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.profile.about.AboutCompany
 import com.example.geoblinker.ui.theme.sdp
@@ -94,12 +93,13 @@ fun ThreeScreen(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        HSpacer(60)
         Text(
             stringResource(R.string.completion_registration),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.displaySmall
         )
-        Spacer(Modifier.height(58.sdp()))
+        HSpacer(58)
         Row {
             Box(
                 modifier = Modifier
@@ -115,7 +115,7 @@ fun ThreeScreen(
             ) {
                 if (selectPublicOffer) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.green_tick),
+                        imageVector = ImageVector.vectorResource(R.drawable.tick),
                         contentDescription = null,
                         modifier = Modifier.padding(start = 4.sdp()).size(23.sdp(), 17.sdp()),
                         tint = Color.Unspecified
@@ -143,7 +143,7 @@ fun ThreeScreen(
                 }
             )
         }
-        Spacer(Modifier.height(20.sdp()))
+        HSpacer(20)
         Row {
             Box(
                 modifier = Modifier
@@ -159,7 +159,7 @@ fun ThreeScreen(
             ) {
                 if (selectPrivacyPolicy) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.green_tick),
+                        imageVector = ImageVector.vectorResource(R.drawable.tick),
                         contentDescription = null,
                         modifier = Modifier.padding(start = 4.sdp()).size(23.sdp(), 17.sdp()),
                         tint = Color.Unspecified
@@ -187,7 +187,7 @@ fun ThreeScreen(
                 }
             )
         }
-        Spacer(Modifier.height(95.sdp()))
+        HSpacer(95)
         CustomButton(
             text = stringResource(R.string.confirm),
             onClick = toFourScreen,
@@ -198,7 +198,8 @@ fun ThreeScreen(
     }
 
     BackButton(
-        onClick = toBack
+        onClick = toBack,
+        color = Color(0xFFEFEFEF)
     )
 
     selectAbout?.let {
@@ -227,7 +228,7 @@ fun ThreeScreen(
                                 stringResource(it.title),
                                 style = MaterialTheme.typography.titleMedium
                             )
-                            Spacer(Modifier.height(20.sdp()))
+                            HSpacer(20)
                             Text(
                                 stringResource(it.description),
                                 style = MaterialTheme.typography.bodyLarge

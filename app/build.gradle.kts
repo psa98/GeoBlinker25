@@ -12,6 +12,9 @@ android {
     namespace = "com.example.geoblinker"
     compileSdk = 35
 
+    lint {
+        disable.add("NullSafeMutableLiveData")
+    }
     defaultConfig {
         applicationId = "com.example.geoblinker"
         minSdk = 24
@@ -80,14 +83,13 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.material.icons.core)
     implementation(libs.coil.compose)
-    implementation(libs.threetenabp)
 
     // Room
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
-    implementation (libs.androidx.runtime.livedata)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     annotationProcessor(libs.androidx.room.room.compiler)
+    //noinspection KaptUsageInsteadOfKsp
     kapt(libs.androidx.room.room.compiler)
 
     // CameraX
@@ -98,4 +100,8 @@ dependencies {
 
     // ML Kit Barcode Scanning
     implementation(libs.barcode.scanning)
+
+    // Retrofit + GSON
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 }

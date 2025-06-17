@@ -1,12 +1,11 @@
-package com.example.geoblinker.ui.registration
+package com.example.geoblinker.ui.auth.registration
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.theme.sdp
 import com.example.geoblinker.ui.theme.ssp
 import kotlinx.coroutines.delay
@@ -34,17 +34,19 @@ fun FourScreen(
         main()
     }
 
-    // Фоновое изображение
-    Image(
-        painter = painterResource(R.drawable.background_registration),
-        contentDescription = "Background",
+    Box(
         modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop
-    )
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Image(
+            painter = painterResource(R.drawable.background_registration),
+            contentDescription = null,
+            contentScale = ContentScale.Fit
+        )
+    }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.width(310.sdp()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -52,13 +54,13 @@ fun FourScreen(
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge
         )
-        Spacer(Modifier.height(48.sdp()))
+        HSpacer(48)
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
             modifier = Modifier.size(240.sdp(), 162.sdp())
         )
-        Spacer(Modifier.height(65.sdp()))
+        HSpacer(65)
         Text(
             text = stringResource(R.string.welcome),
             lineHeight = 40.ssp(),
@@ -69,6 +71,6 @@ fun FourScreen(
             lineHeight = 40.ssp(),
             style = MaterialTheme.typography.headlineLarge
         )
-        Spacer(Modifier.height(202.sdp()))
+        HSpacer(172)
     }
 }

@@ -1,4 +1,4 @@
-package com.example.geoblinker.ui.authorization
+package com.example.geoblinker.ui.auth.authorization
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.geoblinker.ui.auth.CodeScreen
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
@@ -58,9 +59,11 @@ fun AuthorizationScreen(
                     )
                 }
                 composable(route = AuthorizationScreen.Three.name) {
-                    ThreeScreen(
+                    CodeScreen(
                         {
-                            profileViewModel.setPhone(viewModel.phone.value)
+                            profileViewModel.setPhone(viewModel.phone)
+                            profileViewModel.setName(viewModel.name)
+                            profileViewModel.setEmail(viewModel.email)
                             navController.navigate(AuthorizationScreen.Four.name)
                         },
                         { navController.navigate(AuthorizationScreen.Two.name) },

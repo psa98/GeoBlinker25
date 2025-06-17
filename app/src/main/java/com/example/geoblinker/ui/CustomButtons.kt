@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -38,12 +39,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 
 enum class TypeColor {
     Green,
     Black,
     White,
+    White1,
     Blue
 }
 
@@ -559,6 +562,7 @@ fun CustomButton(
     typeColor: TypeColor,
     @DrawableRes leftIcon: Int? = null,
     @DrawableRes rightIcon: Int? = null,
+    iconSize: Int = 13,
     enabled: Boolean = true,
     height: Int = 65,
     radius: Int = 16,
@@ -572,6 +576,7 @@ fun CustomButton(
         TypeColor.Green -> greenGradient
         TypeColor.Black -> blackGradient
         TypeColor.White -> whiteGradient
+        TypeColor.White1 -> whiteGradient
         TypeColor.Blue -> blueGradient
     }
     else
@@ -580,6 +585,7 @@ fun CustomButton(
         TypeColor.Green -> blackBorder
         TypeColor.Black -> Color.White
         TypeColor.White -> Color.Unspecified
+        TypeColor.White1 -> Color.White
         TypeColor.Blue -> Color.White
     }
     else
@@ -587,18 +593,18 @@ fun CustomButton(
     Button(
         onClick = onClick,
         modifier = modifier
-            .height(height.sdp())
+            .height(height.hdp())
             .background(
                 brush = brush,
-                shape = RoundedCornerShape(radius.sdp())
+                shape = RoundedCornerShape(radius.hdp())
             )
             .border(
-                1.sdp(),
+                1.hdp(),
                 border,
-                RoundedCornerShape(radius.sdp())
+                RoundedCornerShape(radius.hdp())
             ),
         enabled = enabled,
-        shape = RoundedCornerShape(radius.sdp()),
+        shape = RoundedCornerShape(radius.hdp()),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent
         )
@@ -611,10 +617,11 @@ fun CustomButton(
                     imageVector = ImageVector.vectorResource(it),
                     contentDescription = null,
                     modifier = Modifier
-                        .width(13.sdp())
-                        .height(13.sdp())
+                        .width(iconSize.hdp())
+                        .height(iconSize.hdp()),
+                    tint = Color.Unspecified
                 )
-                Spacer(Modifier.width(17.sdp()))
+                Spacer(Modifier.width(17.hdp()))
             }
             Text(
                 text,
@@ -622,13 +629,14 @@ fun CustomButton(
                 style = style
             )
             rightIcon?.let {
-                Spacer(Modifier.width(17.sdp()))
+                Spacer(Modifier.width(17.hdp()))
                 Icon(
                     imageVector = ImageVector.vectorResource(it),
                     contentDescription = null,
                     modifier = Modifier
-                        .width(13.sdp())
-                        .height(13.sdp())
+                        .width(iconSize.hdp())
+                        .height(iconSize.hdp()),
+                    tint = Color.Unspecified
                 )
             }
         }
@@ -647,31 +655,31 @@ fun BackButton(
             contentAlignment = Alignment.BottomCenter
         ) {
             Box(
-                modifier = Modifier.offset(y = (-28).sdp())
+                modifier = Modifier.offset(y = (-28).hdp())
             ) {
                 Surface(
                     modifier = Modifier.shadow(
-                        4.sdp(),
-                        RoundedCornerShape(100.sdp()),
+                        4.hdp(),
+                        CircleShape,
                         clip = false,
                         ambientColor = Color.Black,
                         spotColor = Color.Black.copy(0.25f)
                     ),
-                    shape = RoundedCornerShape(100.sdp()),
+                    shape = RoundedCornerShape(100.hdp()),
                     color = Color.White,
-                    border = BorderStroke(1.sdp(), Color.White)
+                    border = BorderStroke(1.hdp(), Color.White)
                 ) {
                     IconButton(
                         onClick = onClick,
                         modifier = Modifier
-                            .size(65.sdp(), 65.sdp())
-                            .padding(1.sdp()),
+                            .size(65.hdp(), 65.hdp())
+                            .padding(1.hdp()),
                         colors = IconButtonDefaults.iconButtonColors(containerColor = color)
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(R.drawable.back),
                             contentDescription = stringResource(R.string.back),
-                            modifier = Modifier.size(24.sdp())
+                            modifier = Modifier.size(24.hdp())
                         )
                     }
                 }
@@ -682,17 +690,17 @@ fun BackButton(
         Column {
             Surface(
                 modifier = Modifier
-                    .size(65.sdp())
+                    .size(65.hdp())
                     .shadow(
-                        4.sdp(),
-                        RoundedCornerShape(100.sdp()),
+                        4.hdp(),
+                        CircleShape,
                         clip = false,
                         ambientColor = Color.Black,
                         spotColor = Color.Black.copy(0.25f)
                     ),
-                shape = RoundedCornerShape(100.sdp()),
+                shape = RoundedCornerShape(100.hdp()),
                 color = Color.White,
-                border = BorderStroke(1.sdp(), Color.White)
+                border = BorderStroke(1.hdp(), Color.White)
             ) {
                 IconButton(
                     onClick = onClick,
@@ -701,11 +709,11 @@ fun BackButton(
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.back),
                         contentDescription = stringResource(R.string.back),
-                        modifier = Modifier.size(24.sdp())
+                        modifier = Modifier.size(24.hdp())
                     )
                 }
             }
-            Spacer(Modifier.height(28.sdp()))
+            HSpacer(28)
         }
     }
 }

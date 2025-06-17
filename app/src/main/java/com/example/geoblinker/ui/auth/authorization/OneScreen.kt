@@ -1,8 +1,7 @@
-package com.example.geoblinker.ui.authorization
+package com.example.geoblinker.ui.auth.authorization
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -15,11 +14,10 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.geoblinker.R
-import com.example.geoblinker.ui.BlackButton
-import com.example.geoblinker.ui.GreenButton
-import com.example.geoblinker.ui.theme.GeoBlinkerTheme
+import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.HSpacer
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -31,42 +29,44 @@ fun OneScreen(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(Modifier.height(88.sdp()))
+        HSpacer(60)
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.title_logo),
             contentDescription = null,
             modifier = Modifier.width(200.sdp()).height(135.sdp())
         )
-        Spacer(Modifier.height(15.sdp()))
+        HSpacer(15)
         Text(
             stringResource(R.string.version),
             modifier = Modifier.alpha(0.7f),
             style = MaterialTheme.typography.titleSmall
         )
-        Spacer(Modifier.height(134.sdp()))
-        GreenButton(
-            icon = R.drawable.phone,
+        HSpacer(134)
+        CustomButton(
             text = stringResource(R.string.log_in_by_number),
-            onClick = twoScreen
+            onClick = twoScreen,
+            typeColor = TypeColor.Green,
+            leftIcon = R.drawable.phone,
+            iconSize = 23,
+            height = 81,
+            radius = 24,
+            style = MaterialTheme.typography.headlineMedium
         )
-        Spacer(Modifier.height(20.sdp()))
-        BlackButton(
-            icon = R.drawable.user_add,
+        HSpacer(20)
+        CustomButton(
             text = stringResource(R.string.new_user),
-            onClick = registrationScreen
+            onClick = registrationScreen,
+            typeColor = TypeColor.Black,
+            leftIcon = R.drawable.user_add,
+            iconSize = 23,
+            height = 81,
+            radius = 24,
+            style = MaterialTheme.typography.headlineMedium
         )
-        Spacer(Modifier.height(50.sdp()))
+        HSpacer(50)
         Text(
             stringResource(R.string.problems_logging),
             style = MaterialTheme.typography.bodyLarge
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewOne() {
-    GeoBlinkerTheme {
-        OneScreen({}, {})
     }
 }

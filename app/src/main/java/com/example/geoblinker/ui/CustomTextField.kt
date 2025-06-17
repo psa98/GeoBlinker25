@@ -43,6 +43,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -125,6 +126,7 @@ fun formatPhoneNumber(phoneNumber: String): String {
 
 @Composable
 fun PhoneNumberTextField(
+    initial: String,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
     isError: Boolean = false,
@@ -132,12 +134,12 @@ fun PhoneNumberTextField(
     radius: Int = 24,
     height: Int = 81
 ) {
-    var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = "")) }
+    var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = formatPhoneNumber(initial))) }
     var isFocused by remember { mutableStateOf(false) }
 
     Surface(
-        shape = RoundedCornerShape(radius.sdp()),
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        shape = RoundedCornerShape(radius.hdp()),
+        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = textFieldValueState,
@@ -151,7 +153,7 @@ fun PhoneNumberTextField(
                 )
             },
             modifier = Modifier
-                .height(height.sdp())
+                .height(height.hdp())
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
                     isFocused = focusState.isFocused
@@ -195,6 +197,7 @@ fun PhoneNumberTextField(
 
 @Composable
 fun NameTextField(
+    value: String,
     placeholder: String,
     onValueChange: (String) -> Unit,
     onDone: () -> Unit,
@@ -202,8 +205,6 @@ fun NameTextField(
     radius: Int = 24,
     height: Int = 81
 ) {
-    var value by remember { mutableStateOf("") }
-
     Surface(
         shape = RoundedCornerShape(radius.sdp()),
         border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
@@ -211,8 +212,7 @@ fun NameTextField(
         TextField(
             value = value,
             onValueChange = {
-                value = it.filter { it.isLetterOrDigit() || it == ' ' }.take(64)
-                onValueChange(value)
+                onValueChange(it.filter { it.isLetterOrDigit() || it == ' ' }.take(64))
             },
             modifier = Modifier
                 .height(height.sdp())

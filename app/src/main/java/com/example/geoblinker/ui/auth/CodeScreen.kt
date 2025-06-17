@@ -1,12 +1,9 @@
-package com.example.geoblinker.ui.registration
+package com.example.geoblinker.ui.auth
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -18,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,25 +26,27 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.BlackButton
 import com.example.geoblinker.ui.CodeTextField
+import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.HSpacer
+import com.example.geoblinker.ui.TypeColor
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.delay
 
 @Composable
-fun TwoScreen(
-    threeScreen: () -> Unit,
+fun CodeScreen(
+    nextScreen: () -> Unit,
     toBack: () -> Unit,
-    viewModel: RegistrationViewModel
+    viewModel: AuthViewModel
 ) {
-    var value by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-    var changeMode by remember { mutableStateOf(false) }
-    var remainingTime by remember { mutableIntStateOf(30) }
-    var checkTimer by remember { mutableStateOf(true) }
+    val uiState = viewModel.codeUiState
+    var value by rememberSaveable { mutableStateOf("") }
+    var changeMode by rememberSaveable { mutableStateOf(false) }
+    var remainingTime by rememberSaveable { mutableIntStateOf(30) }
+    var checkTimer by rememberSaveable { mutableStateOf(true) }
     var textTitle by remember { mutableStateOf(viewModel.getNowWay()) }
 
-    // Запускаем таймер
     LaunchedEffect(checkTimer) {
         while (remainingTime > 0) {
             delay(1000) // Ждем 1 секунду
@@ -54,84 +54,55 @@ fun TwoScreen(
         }
     }
 
-    fun onClick() {
-        if (viewModel.checkWay(value))
-            threeScreen()
-        else {
-            isError = true
+    LaunchedEffect(uiState) {
+        if (uiState is CodeUiState.Error)
             changeMode = true
-        }
+        else if (uiState is CodeUiState.Success)
+            nextScreen()
+    }
+
+    fun onClick() {
+        viewModel.checkWay(value)
     }
 
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(51.sdp()))
-        if (!changeMode) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.comment_alt_dots_1),
-                contentDescription = null,
-                modifier = Modifier.size(28.sdp())
-            )
-            Spacer(Modifier.height(20.sdp()))
-            Text(
-                stringResource(textTitle ?: R.string.error),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge
-            )
-            Spacer(Modifier.height(57.sdp()))
-        }
-        else {
-            if (isError) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.attention),
-                    contentDescription = null,
-                    modifier = Modifier.size(28.sdp()),
-                    tint = Color(0xFFC4162D)
-                )
-                Spacer(Modifier.height(5.sdp()))
-                Text(
-                    stringResource(R.string.invalid_code),
-                    modifier = Modifier.height(22.sdp()),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Spacer(Modifier.height(57.sdp()))
-            }
-            else
-                Spacer(Modifier.height(112.sdp()))
-        }
+        HSpacer(156)
         CodeTextField(
             value = value,
             onValueChange = {
                 value = it
-                isError = false
+                viewModel.resetCodeUiState()
             },
             onDone = { onClick() },
             placeholder = R.string.enter_the_code,
-            isError = isError
+            isError = uiState is CodeUiState.Error
         )
-        Spacer(Modifier.height(20.sdp()))
-        BlackButton(
-            modifier = Modifier.fillMaxWidth(),
+        HSpacer(20)
+        CustomButton(
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
-            enabled = !isError && value.length == 4
+            typeColor = TypeColor.Black,
+            enabled = uiState !is CodeUiState.Error && value.length == 4,
+            height = 81,
+            radius = 24,
+            style = MaterialTheme.typography.headlineMedium
         )
-        Spacer(Modifier.height(45.sdp()))
+        HSpacer(45)
         Text(
             text = stringResource(R.string.send_to_another_number),
             modifier = Modifier.clickable { toBack() },
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(Modifier.height(15.sdp()))
+        HSpacer(15)
         Text(
             text = stringResource(R.string.get_the_code_in_another_way),
             modifier = Modifier.clickable {
                 if (changeMode) {
                     changeMode = false
-                    isError = false
+                    viewModel.resetCodeUiState()
                 }
                 checkTimer = !checkTimer
                 remainingTime = 30
@@ -142,7 +113,7 @@ fun TwoScreen(
         )
 
         if (!changeMode) {
-            Spacer(Modifier.height(15.sdp()))
+            HSpacer(15)
             Text(
                 text = if (remainingTime > 0)
                     "${stringResource(R.string.resend)} ... $remainingTime c"
@@ -150,9 +121,9 @@ fun TwoScreen(
                     stringResource(R.string.resend),
                 modifier = Modifier.clickable {
                     if (remainingTime == 0) {
+                        viewModel.sendCode()
                         checkTimer = !checkTimer
                         remainingTime = 30
-                        //textTitle = viewModel.getNextWay()
                     }
                 },
                 color = if (remainingTime > 0)
@@ -164,12 +135,46 @@ fun TwoScreen(
         }
     }
 
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        HSpacer(10)
+        if (!changeMode) {
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.comment_alt_dots_1),
+                contentDescription = null,
+                modifier = Modifier.size(28.sdp())
+            )
+            HSpacer(20)
+            Text(
+                stringResource(textTitle ?: R.string.error),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
+        } else if (uiState is CodeUiState.Error) {
+            HSpacer(20)
+            Icon(
+                imageVector = ImageVector.vectorResource(R.drawable.attention),
+                contentDescription = null,
+                modifier = Modifier.size(28.sdp()),
+                tint = Color(0xFFC4162D)
+            )
+            HSpacer(5)
+            Text(
+                stringResource(R.string.invalid_code),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
         Box(
-            modifier = Modifier.offset(y = (-112).sdp())
+            modifier = Modifier.offset(y = (-112).hdp())
         ) {
             Text(
                 text = stringResource(R.string.is_the_code_not_coming),
@@ -183,7 +188,7 @@ fun TwoScreen(
         onClick = {
             if (changeMode) {
                 changeMode = false
-                isError = false
+                viewModel.resetCodeUiState()
             } else
                 toBack()
         },

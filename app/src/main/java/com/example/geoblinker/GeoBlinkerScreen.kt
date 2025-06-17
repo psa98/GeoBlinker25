@@ -9,6 +9,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,8 +17,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.techsupport.TechSupportRepository
-import com.example.geoblinker.ui.authorization.AuthorizationScreen
-import com.example.geoblinker.ui.authorization.AuthorizationViewModel
+import com.example.geoblinker.ui.auth.authorization.AuthorizationScreen
+import com.example.geoblinker.ui.auth.authorization.AuthorizationViewModel
+import com.example.geoblinker.ui.auth.registration.RegistrationScreen
+import com.example.geoblinker.ui.auth.registration.RegistrationViewModel
 import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
@@ -26,8 +29,6 @@ import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
-import com.example.geoblinker.ui.registration.RegistrationScreen
-import com.example.geoblinker.ui.registration.RegistrationViewModel
 
 enum class GeoBlinkerScreen {
     Authorization,
@@ -46,6 +47,9 @@ fun GeoBlinkerScreen(
     val isLogin by profileViewModel.isLogin.collectAsState()
     val startDestination = if (isLogin) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name
 
+    val registrationViewModel: RegistrationViewModel = viewModel()
+    val authorizationViewModel: AuthorizationViewModel = viewModel()
+
     Scaffold { innerPadding ->
         NavHost(
             navController = navController,
@@ -54,7 +58,7 @@ fun GeoBlinkerScreen(
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
                 AuthorizationScreen(
-                    AuthorizationViewModel(),
+                    authorizationViewModel,
                     profileViewModel,
                     registrationScreen = { navController.navigate(GeoBlinkerScreen.Registration.name) },
                     mainScreen = {
@@ -66,7 +70,7 @@ fun GeoBlinkerScreen(
             }
             composable(route = GeoBlinkerScreen.Registration.name) {
                 RegistrationScreen(
-                    RegistrationViewModel(),
+                    registrationViewModel,
                     profileViewModel,
                     authorizationScreen = { navController.navigate(GeoBlinkerScreen.Authorization.name) },
                     mainScreen = {

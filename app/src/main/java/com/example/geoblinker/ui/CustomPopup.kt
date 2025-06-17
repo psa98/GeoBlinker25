@@ -77,7 +77,7 @@ import com.example.geoblinker.ui.theme.sdp
 fun CustomPopup(
     viewModel: ProfileViewModel,
     phone: String,
-    onChangeVisible: (Boolean) -> Unit,
+    onChangeVisible: () -> Unit,
     sendCode: (List<String>) -> Unit
 ) {
     var isEnterEmail by remember { mutableStateOf(false) }
@@ -118,10 +118,7 @@ fun CustomPopup(
                 border = BorderStroke(1.sdp(), Color(0xFFBEBEBE))
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(30.sdp())
-                    //.verticalScroll(rememberScrollState()),
-                    ,
+                    modifier = Modifier.padding(30.sdp()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
@@ -130,21 +127,19 @@ fun CustomPopup(
                         modifier = Modifier.size(28.sdp()),
                         tint = Color.Unspecified
                     )
-                    Spacer(Modifier.height(20.sdp()))
+                    HSpacer(20)
                     Text(
                         stringResource(R.string.get_the_confirmation_code),
                         style = MaterialTheme.typography.titleMedium
                     )
-                    Spacer(Modifier.height(12.sdp()))
+                    HSpacer(12)
                     Text(
                         phone,
                         color = Color(0xFF999696),
                         style = MaterialTheme.typography.labelMedium
                     )
-                    Spacer(Modifier.height(25.sdp()))
-                    //Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    HSpacer(25)
                     items.forEachIndexed { index, draggableItem ->
-                        val currentItem = draggableItem.text
                         val offsetY by animateOffsetAsState(
                             if (draggedIndex == index) draggedOffset else Offset.Zero,
                             animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -190,7 +185,7 @@ fun CustomPopup(
                                             .fillMaxWidth(),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Spacer(Modifier.width(72.sdp()))
+                                        HSpacer(72)
                                         Text(
                                             email,
                                             modifier = Modifier
@@ -200,7 +195,7 @@ fun CustomPopup(
                                             textDecoration = TextDecoration.Underline,
                                             style = MaterialTheme.typography.bodyLarge
                                         )
-                                        Spacer(Modifier.width(52.sdp()))
+                                        HSpacer(52)
                                     }
                                 }
 
@@ -286,8 +281,7 @@ fun CustomPopup(
                             }
                         }
                     }
-                    //}
-                    Spacer(Modifier.height(20.sdp()))
+                    HSpacer(20)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -312,7 +306,7 @@ fun CustomPopup(
                             )
                         )
                     }
-                    Spacer(Modifier.height(25.sdp()))
+                    HSpacer(25)
                     GreenButton(
                         text = stringResource(R.string.send_the_code),
                         onClick = {
@@ -329,10 +323,10 @@ fun CustomPopup(
                             }
                         }
                     )
-                    Spacer(Modifier.height(20.sdp()))
+                    HSpacer(20)
                     Text(
                         stringResource(R.string.send_to_another_number),
-                        modifier = Modifier.clickable { onChangeVisible(false) },
+                        modifier = Modifier.clickable { onChangeVisible() },
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -772,20 +766,20 @@ fun CustomLinkEmailPopup(
                         modifier = Modifier.size(28.sdp()),
                         tint = Color.Unspecified
                     )
-                    Spacer(Modifier.height(20.sdp()))
+                    HSpacer(20)
                     Text(
                         stringResource(R.string.set_up_email_description),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge
                     )
-                    Spacer(Modifier.height(28.sdp()))
+                    HSpacer(28)
                     CustomButton(
                         text = stringResource(R.string.set_up_email),
                         onClick = toLinkEmail,
                         typeColor = TypeColor.Green,
                         height = 55
                     )
-                    Spacer(Modifier.height(10.sdp()))
+                    HSpacer(10)
                     CustomButton(
                         text = stringResource(R.string.cancellation),
                         onClick = cancellation,
