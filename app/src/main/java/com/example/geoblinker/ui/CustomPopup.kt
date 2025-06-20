@@ -1,5 +1,7 @@
 package com.example.geoblinker.ui
 
+import android.app.Application
+import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateOffsetAsState
@@ -41,6 +43,8 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +57,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -69,20 +74,22 @@ import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
-import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
+import kotlinx.coroutines.launch
 
 @Composable
 fun CustomPopup(
-    viewModel: ProfileViewModel,
     phone: String,
     onChangeVisible: () -> Unit,
     sendCode: (List<String>) -> Unit
 ) {
-    var isEnterEmail by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("") }
-    var checkedChoice by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+    val scope = rememberCoroutineScope()
+    var isEnterEmail by rememberSaveable { mutableStateOf(false) }
+    var email by rememberSaveable { mutableStateOf("") }
+    var checkedChoice by rememberSaveable { mutableStateOf(false) }
 
     val items = remember { mutableStateListOf(
         WayConfirmationCode("Telegram"),
@@ -93,7 +100,7 @@ fun CustomPopup(
     val stateWays = remember { mutableStateListOf<Boolean>().apply {
         addAll(items.map { it.checked })
     } }
-    var draggedIndex by remember { mutableIntStateOf(-1) }
+    var draggedIndex by rememberSaveable { mutableIntStateOf(-1) }
     // Смещение для анимации
     var draggedOffset by remember { mutableStateOf(Offset.Zero) }
 
@@ -317,8 +324,24 @@ fun CustomPopup(
                                 }
                             }
                             if (ways.isNotEmpty()) {
-                                if (checkedChoice)
-                                    viewModel.setWaysConfirmationCode(items)
+                                if (checkedChoice) {
+                                    scope.launch {
+                                        val prefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+                                        var orderWays = ""
+                                        items.forEach {
+                                            orderWays += when(it.text) {
+                                                "Telegram" -> '0'
+                                                "WhatsApp" -> '1'
+                                                "SMS" -> '2'
+                                                else -> '3' // "Email"
+                                            }
+                                        }
+                                        prefs.edit().putString("orderWays", orderWays).apply()
+                                        items.forEach {
+                                            prefs.edit().putBoolean(it.text, it.checked).apply()
+                                        }
+                                    }
+                                }
                                 sendCode(ways)
                             }
                         }

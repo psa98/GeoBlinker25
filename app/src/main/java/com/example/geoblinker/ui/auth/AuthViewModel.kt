@@ -1,5 +1,7 @@
 package com.example.geoblinker.ui.auth
 
+import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -12,7 +14,11 @@ import com.example.geoblinker.model.Authorization
 import com.example.geoblinker.network.RegistrationApi
 import kotlinx.coroutines.launch
 
-abstract class AuthViewModel : ViewModel() {
+abstract class AuthViewModel(
+    private val application: Application
+) : ViewModel() {
+    private val _prefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+    private val _avatarPrefs = application.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
     private val wayCodes = mapOf("Telegram" to "1234", "WhatsApp" to "6940", "SMS" to "2233", "Email" to "1111")
     private val wayTitles = mapOf(
         "Telegram" to R.string.telegram_way_title,
@@ -22,6 +28,8 @@ abstract class AuthViewModel : ViewModel() {
     )
     private var waysGetCode by mutableStateOf<List<String>>(emptyList())
     private var nowWay by mutableIntStateOf(0)
+    private var token by mutableStateOf("")
+    private var hash by mutableStateOf("")
 
     var phone by mutableStateOf("")
         private set
@@ -92,13 +100,19 @@ abstract class AuthViewModel : ViewModel() {
 
                     else -> {
                         Authorization(
-                            code = wayCodes[waysGetCode[nowWay]]!!
+                            code = "404"
                         )
                     }
                 }
                 codeUiState = if (res.code == "200" && res.user != null) {
                     name = res.user.name
                     email = res.user.email ?: ""
+                    Log.d("Photo", res.user.photo)
+                    _avatarPrefs.edit().putString("avatar_uri", res.user.photo).apply()
+                    val timeHash = res.hash!!
+                    val data = RegistrationApi.retrofitService.token(timeHash).data
+                    token = data.token
+                    hash = data.hash
                     CodeUiState.Success
                 } else
                     CodeUiState.Error
@@ -106,6 +120,19 @@ abstract class AuthViewModel : ViewModel() {
                 Log.e("Code", e.toString())
                 codeUiState = CodeUiState.Error
             }
+        }
+    }
+
+    fun saveData() {
+        viewModelScope.launch {
+            _prefs
+                .edit()
+                .putString("name", name)
+                .putString("email", email)
+                .putString("phone", phone)
+                .putString("token", token)
+                .putString("hash", hash)
+                .apply()
         }
     }
 }

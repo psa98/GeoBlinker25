@@ -3,7 +3,6 @@ package com.example.geoblinker.ui
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -399,38 +398,6 @@ fun WhiteButton(
 }
 
 @Composable
-fun WhiteMediumButton(
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    text: String,
-    onClick: () -> Unit,
-    radius: Int = 10,
-    height: Int = 55
-) {
-    Surface(
-        shape = RoundedCornerShape(radius.sdp()),
-        border = BorderStroke(1.sdp(), Color(0xFF999696))
-    ) {
-        Button(
-            onClick,
-            modifier = modifier
-                .height(height.sdp())
-                .background(
-                    brush = whiteGradient,
-                    shape = RoundedCornerShape(radius.sdp())
-                ),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent
-            )
-        ) {
-            Text(
-                text,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
-}
-
-@Composable
 fun WhiteSmallButton(
     text: String,
     onClick: () -> Unit
@@ -584,7 +551,7 @@ fun CustomButton(
     val textColor = if (enabled) when(typeColor) {
         TypeColor.Green -> blackBorder
         TypeColor.Black -> Color.White
-        TypeColor.White -> Color.Unspecified
+        TypeColor.White -> Color.Black
         TypeColor.White1 -> Color.White
         TypeColor.Blue -> Color.White
     }
@@ -597,17 +564,17 @@ fun CustomButton(
             .background(
                 brush = brush,
                 shape = RoundedCornerShape(radius.hdp())
-            )
-            .border(
-                1.hdp(),
-                border,
-                RoundedCornerShape(radius.hdp())
             ),
         enabled = enabled,
         shape = RoundedCornerShape(radius.hdp()),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent
-        )
+        ),
+        border = BorderStroke(
+            1.hdp(),
+            border
+        ),
+        contentPadding = PaddingValues(0.hdp())
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically

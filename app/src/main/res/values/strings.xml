@@ -161,4 +161,26 @@
     <string name="confirmation_privacy_policy_2">политикой конфиденциальности</string>
     <string name="invalid_double_phone">Номер телефона уже занят</string>
     <string name="invalid_register">Произошла ошибка при регистрации</string>
+    <string name="subscription_active_until">Подписка активна до:</string>
+    <string name="buy_subscription">Купить подписку</string>
+    <string name="my_devices">Мои устройства</string>
+    <string name="settings">Настройки</string>
+    <string name="leave_review">Оставить отзыв</string>
+    <string name="set_photo">Установить фото</string>
+    <string name="change_photo">Сменить фото</string>
+    <string name="del_photo_description">Вы действительно желаете удалить фото аккаунта?</string>
+    <string name="del_photo">Удалить фото</string>
+    <string name="access_gallery_prohibited">Доступ к галерее запрещен</string>
+    <string name="change_name">Сменить имя</string>
+    <string name="change_phone">Номер телефона</string>
+    <string name="units_of_distance">Единицы расстояния</string>
+    <string name="confirmation_code">Код подтверждения</string>
+    <string name="del_account">Удалить аккаунт</string>
+    <string name="update_map">Обновлять карту</string>
+    <string name="map_updated_automatically">Карта будет обновляться автоматически</string>
+    <string name="logout">Выйти из аккаунта</string>
+    <string name="enter_new_name">Введите новое имя</string>
+    <string name="name_has_been_updated">Имя пользователя обновлено!</string>
+    <string name="name_cannot_empty">Имя не может быть пустым!</string>
+    <string name="server_error">Ошибка сервера</string>
 </resources>

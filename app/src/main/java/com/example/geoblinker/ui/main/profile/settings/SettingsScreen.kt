@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -47,19 +49,20 @@ fun SettingsScreen(
     toBack: () -> Unit
 ) {
     val settings = listOf(
-        Pair("Сменить имя", { toName() }),
-        Pair("Номер телефона", { toPhone() }),
-        Pair("Email аккаунта", { toEmail() }),
-        Pair("Настройка уведомлений", { toNotification() }),
-        Pair("Единицы расстояния", { toUnitsDistance() }),
-        Pair("Код подтверждения", { toConfirmationCode() })
+        Pair(stringResource(R.string.change_name), { toName() }),
+        Pair(stringResource(R.string.change_photo), { toPhone() }),
+        Pair(stringResource(R.string.account_email), { toEmail() }),
+        Pair(stringResource(R.string.setting_up_notifications), { toNotification() }),
+        Pair(stringResource(R.string.units_of_distance), { toUnitsDistance() }),
+        Pair(stringResource(R.string.confirmation_code), { toConfirmationCode() })
     )
     LazyColumn(
+        modifier = Modifier.requiredWidth(300.sdp()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         item {
             Text(
-                "Настройки",
+                stringResource(R.string.settings),
                 style = MaterialTheme.typography.displaySmall
             )
             Spacer(Modifier.height(30.sdp()))
@@ -98,7 +101,7 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "Выйти из аккаунта",
+                    stringResource(R.string.logout),
                     color = Color(0xFFC4162D),
                     style = MaterialTheme.typography.titleMedium
                 )
@@ -121,11 +124,11 @@ fun SettingsScreen(
             ) {
                 Column {
                     Text(
-                        "Обновлять карту",
+                        stringResource(R.string.update_map),
                         style = MaterialTheme.typography.labelMedium
                     )
                     Text(
-                        "Карта будет обновляться автоматически",
+                        stringResource(R.string.map_updated_automatically),
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontSize = 10.sp * sc()
                         )
@@ -156,7 +159,7 @@ fun SettingsScreen(
                     val (text, line) = createRefs()
 
                     Text(
-                        "Удалить аккаунт",
+                        stringResource(R.string.del_account),
                         color = Color(0xFF737373),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.constrainAs(text) {

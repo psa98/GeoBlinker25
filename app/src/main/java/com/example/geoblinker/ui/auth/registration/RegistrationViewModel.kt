@@ -1,5 +1,6 @@
 package com.example.geoblinker.ui.auth.registration
 
+import android.app.Application
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +12,7 @@ import com.example.geoblinker.ui.auth.AuthViewModel
 import com.example.geoblinker.ui.auth.RegisterUiState
 import kotlinx.coroutines.launch
 
-class RegistrationViewModel : AuthViewModel() {
+class RegistrationViewModel(application: Application) : AuthViewModel(application) {
     var registerUiState: RegisterUiState by mutableStateOf(RegisterUiState.Input)
         private set
 

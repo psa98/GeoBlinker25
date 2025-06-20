@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -54,9 +55,9 @@ import coil.compose.AsyncImage
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.BlackMediumButton
-import com.example.geoblinker.ui.GreenMediumButton
-import com.example.geoblinker.ui.WhiteMediumButton
+import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.HSpacer
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
@@ -79,9 +80,10 @@ fun ProfileScreen(
     val avatarUri by viewModel.avatarUri.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
     val subscription by profileViewModel.subscription.collectAsState()
-    val name by profileViewModel.name.collectAsState()
+    val name = profileViewModel.name
 
     Column(
+        modifier = Modifier.requiredWidth(330.sdp()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (avatarUri == null) {
@@ -103,7 +105,7 @@ fun ProfileScreen(
                 contentScale = ContentScale.Crop
             )
         }
-        Spacer(Modifier.height(10.sdp()))
+        HSpacer(10)
         Row(
             modifier = Modifier.clickable { toNameSettings() },
             verticalAlignment = Alignment.CenterVertically
@@ -121,10 +123,10 @@ fun ProfileScreen(
                 tint = Color.Unspecified
             )
         }
-        Spacer(Modifier.height(10.sdp()))
+        HSpacer(10)
         Text(
             buildAnnotatedString {
-                append("Подписка активна до: ")
+                append(stringResource(R.string.subscription_active_until) + " ")
                 withStyle(
                     style = SpanStyle(
                         color = MaterialTheme.typography.bodyMedium.color,
@@ -139,47 +141,71 @@ fun ProfileScreen(
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyMedium
         )
-        Spacer(Modifier.height(28.sdp()))
-        GreenMediumButton(
-            text = "Купить подписку",
+        HSpacer(28)
+        CustomButton(
+            text = stringResource(R.string.buy_subscription),
             onClick = toSubscription,
-            shape = RoundedCornerShape(10.sdp())
+            typeColor = TypeColor.Green,
+            height = 55,
+            radius = 10,
+            style = MaterialTheme.typography.bodyMedium
         )
-        Spacer(Modifier.height(10.sdp()))
+        HSpacer(10)
         Row {
-            BlackMediumButton(
+            CustomButton(
                 modifier = Modifier.width(160.sdp()),
-                text = "Мои устройства",
-                onClick = toListDevices
+                text = stringResource(R.string.my_devices),
+                onClick = toListDevices,
+                typeColor = TypeColor.Black,
+                height = 55,
+                radius = 10,
+                style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.width(10.sdp()))
-            BlackMediumButton(
+            CustomButton(
                 modifier = Modifier.width(160.sdp()),
-                text = "Журнал сигналов",
-                onClick = toJournalSignals
+                text = stringResource(R.string.signal_log),
+                onClick = toJournalSignals,
+                typeColor = TypeColor.Black,
+                height = 55,
+                radius = 10,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
-        Spacer(Modifier.height(10.sdp()))
-        BlackMediumButton(
-            text = "Настройки",
+        HSpacer(10)
+        CustomButton(
+            text = stringResource(R.string.settings),
             onClick = toSettings,
-            icon = R.drawable.settings
+            typeColor = TypeColor.Black,
+            rightIcon = R.drawable.settings,
+            iconSize = 19,
+            height = 55,
+            radius = 10,
+            style = MaterialTheme.typography.bodyMedium
         )
-        Spacer(Modifier.height(20.sdp()))
+        HSpacer(20)
         Row {
-            WhiteMediumButton(
+            CustomButton(
                 modifier = Modifier.width(160.sdp()),
-                text = "Техподдержка",
-                onClick = toTechSupport
+                text = stringResource(R.string.tech_support),
+                onClick = toTechSupport,
+                typeColor = TypeColor.White,
+                height = 55,
+                radius = 10,
+                style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.width(10.sdp()))
-            WhiteMediumButton(
+            CustomButton(
                 modifier = Modifier.width(160.sdp()),
-                text = "Оставить отзыв",
-                onClick = {}
+                text = stringResource(R.string.leave_review),
+                onClick = {},
+                typeColor = TypeColor.White,
+                height = 55,
+                radius = 10,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
-        Spacer(Modifier.height(22.sdp()))
+        HSpacer(22)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
@@ -246,6 +272,7 @@ fun ProfileScreen(
     )
 
     if (isShow) {
+        val message = stringResource(R.string.access_gallery_prohibited)
         val context = LocalContext.current
         val pickImageLauncher = rememberLauncherForActivityResult(
             ActivityResultContracts.GetContent()
@@ -260,7 +287,7 @@ fun ProfileScreen(
                 // Если разрешение получено - запускаем выбор изображения
                 pickImageLauncher.launch("image/*")
             } else {
-                viewModel.setErrorMessage("Доступ к галерее запрещен")
+                viewModel.setErrorMessage(message)
             }
         }
 
@@ -307,10 +334,10 @@ fun ProfileScreen(
                                 contentScale = ContentScale.Crop
                             )
                         }
-                        Spacer(Modifier.height(25.sdp()))
+                        HSpacer(25)
                         if (avatarUri == null) {
                             Text(
-                                "Установить фото",
+                                stringResource(R.string.set_photo),
                                 modifier = Modifier.clickable {
                                     // Проверяем разрешение
                                     val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -332,7 +359,7 @@ fun ProfileScreen(
                             var isCheck by remember { mutableStateOf(false) }
 
                             Text(
-                                "Сменить фото",
+                                stringResource(R.string.change_photo),
                                 modifier = Modifier.clickable {
                                     isCheck = false
                                     // Проверяем разрешение
@@ -351,27 +378,27 @@ fun ProfileScreen(
                                 style = MaterialTheme.typography.headlineSmall
                             )
                             if (isCheck) {
-                                Spacer(Modifier.height(40.sdp()))
+                                HSpacer(40)
                                 Text(
-                                    "Вы действительно желаете удалить фото аккаунта?",
+                                    stringResource(R.string.del_photo_description),
                                     color = Color(0xFFC4162D),
                                     textAlign = TextAlign.Center,
                                     style = MaterialTheme.typography.labelMedium
                                 )
                             }
-                            Spacer(Modifier.height(15.sdp()))
+                            HSpacer(15)
                             Text(
-                                "Удалить фото",
+                                stringResource(R.string.del_photo),
                                 modifier = Modifier.clickable {
                                     if (!isCheck)
                                         isCheck = true
                                     else
-                                        viewModel.removeAvatar()
+                                        viewModel.removeAvatar(true)
                                 },
                                 style = MaterialTheme.typography.headlineSmall
                             )
                         }
-                        Spacer(Modifier.height(40.sdp()))
+                        HSpacer(40)
                         errorMessage?.let {
                             Text(
                                 it,
@@ -379,7 +406,7 @@ fun ProfileScreen(
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.labelMedium
                             )
-                            Spacer(Modifier.height(30.sdp()))
+                            HSpacer(30)
                         }
                     }
                 }

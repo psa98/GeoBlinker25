@@ -5,11 +5,8 @@ import android.app.Application
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,17 +14,14 @@ import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.techsupport.TechSupportRepository
+import com.example.geoblinker.ui.auth.LoginViewModel
 import com.example.geoblinker.ui.auth.authorization.AuthorizationScreen
-import com.example.geoblinker.ui.auth.authorization.AuthorizationViewModel
 import com.example.geoblinker.ui.auth.registration.RegistrationScreen
-import com.example.geoblinker.ui.auth.registration.RegistrationViewModel
 import com.example.geoblinker.ui.main.MainScreen
-import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
-import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 
 enum class GeoBlinkerScreen {
@@ -39,16 +33,13 @@ enum class GeoBlinkerScreen {
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun GeoBlinkerScreen(
-    profileViewModel: ProfileViewModel,
     navController: NavHostController = rememberNavController()
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
-    val isLogin by profileViewModel.isLogin.collectAsState()
-    val startDestination = if (isLogin) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name
-
-    val registrationViewModel: RegistrationViewModel = viewModel()
-    val authorizationViewModel: AuthorizationViewModel = viewModel()
+    val viewModel = LoginViewModel(application)
+    val login = viewModel.login
+    val startDestination = if (login) GeoBlinkerScreen.Main.name else GeoBlinkerScreen.Authorization.name
 
     Scaffold { innerPadding ->
         NavHost(
@@ -58,24 +49,20 @@ fun GeoBlinkerScreen(
         ) {
             composable(route = GeoBlinkerScreen.Authorization.name) {
                 AuthorizationScreen(
-                    authorizationViewModel,
-                    profileViewModel,
                     registrationScreen = { navController.navigate(GeoBlinkerScreen.Registration.name) },
                     mainScreen = {
-                        profileViewModel.setInitialSubscription()
-                        profileViewModel.setIsLogin(true)
+                        viewModel.setInitialSubscription()
+                        viewModel.setIsLogin(true)
                         navController.navigate(GeoBlinkerScreen.Main.name)
                     }
                 )
             }
             composable(route = GeoBlinkerScreen.Registration.name) {
                 RegistrationScreen(
-                    registrationViewModel,
-                    profileViewModel,
                     authorizationScreen = { navController.navigate(GeoBlinkerScreen.Authorization.name) },
                     mainScreen = {
-                        profileViewModel.setInitialSubscription()
-                        profileViewModel.setIsLogin(true)
+                        viewModel.setInitialSubscription()
+                        viewModel.setIsLogin(true)
                         navController.navigate(GeoBlinkerScreen.Main.name)
                     }
                 )
@@ -89,9 +76,7 @@ fun GeoBlinkerScreen(
                             AppDatabase.getInstance(application).signalDao(),
                             AppDatabase.getInstance(application).newsDao()),
                         application),
-                    AvatarViewModel(application),
                     SubscriptionViewModel(),
-                    profileViewModel,
                     JournalViewModel(application),
                     NotificationViewModel(application),
                     ChatsViewModel(

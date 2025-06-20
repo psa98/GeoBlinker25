@@ -1,5 +1,7 @@
 package com.example.geoblinker.ui.auth.authorization
 
+import android.annotation.SuppressLint
+import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -7,15 +9,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.ui.auth.CodeScreen
-import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 enum class AuthorizationScreen {
@@ -25,15 +25,16 @@ enum class AuthorizationScreen {
     Four
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun AuthorizationScreen(
-    viewModel: AuthorizationViewModel,
-    profileViewModel: ProfileViewModel,
     navController: NavHostController = rememberNavController(),
     registrationScreen: () -> Unit,
     mainScreen: () -> Unit
 ) {
-    val name by profileViewModel.name.collectAsState()
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+    val viewModel = AuthorizationViewModel(application)
 
     Scaffold { innerPadding ->
         Row(
@@ -52,7 +53,6 @@ fun AuthorizationScreen(
                 }
                 composable(route = AuthorizationScreen.Two.name) {
                     TwoScreen(
-                        profileViewModel,
                         { navController.navigate(AuthorizationScreen.Three.name) },
                         { navController.navigate(AuthorizationScreen.One.name) },
                         viewModel
@@ -61,9 +61,7 @@ fun AuthorizationScreen(
                 composable(route = AuthorizationScreen.Three.name) {
                     CodeScreen(
                         {
-                            profileViewModel.setPhone(viewModel.phone)
-                            profileViewModel.setName(viewModel.name)
-                            profileViewModel.setEmail(viewModel.email)
+                            viewModel.saveData()
                             navController.navigate(AuthorizationScreen.Four.name)
                         },
                         { navController.navigate(AuthorizationScreen.Two.name) },
@@ -72,7 +70,7 @@ fun AuthorizationScreen(
                 }
                 composable(route = AuthorizationScreen.Four.name) {
                     FourScreen(
-                        name,
+                        viewModel.name,
                         mainScreen
                     )
                 }

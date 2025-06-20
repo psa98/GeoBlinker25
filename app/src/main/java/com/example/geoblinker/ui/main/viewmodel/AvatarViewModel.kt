@@ -3,11 +3,18 @@ package com.example.geoblinker.ui.main.viewmodel
 import android.app.Application
 import android.content.Context
 import android.net.Uri
+import android.util.Base64
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.geoblinker.model.Profile
+import com.example.geoblinker.network.ProfileApi
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -18,10 +25,13 @@ class AvatarViewModel(
     private val application: Application
 ): ViewModel() {
     private val _prefs = application.getSharedPreferences("avatar_prefs", Context.MODE_PRIVATE)
+    private val _profilePrefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+    private var _token by mutableStateOf("")
+    private var _hash by mutableStateOf("")
     private val _avatarUri = MutableStateFlow<Uri?>(null)
     private val _errorMessage = MutableStateFlow<String?>(null)
-    val avatarUri: StateFlow<Uri?> = _avatarUri.asStateFlow()
-    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+    val avatarUri = _avatarUri.asStateFlow()
+    val errorMessage = _errorMessage.asStateFlow()
 
     init {
         loadSavedAvatar()
@@ -29,15 +39,9 @@ class AvatarViewModel(
 
     private fun loadSavedAvatar() {
         viewModelScope.launch {
-            // Используем Dispatchers.IO для работы с файлами
-            withContext(Dispatchers.IO) {
-                val uriString = _prefs.getString("avatar_uri", null)
-
-                // Обновляем значение в основном потоке
-                withContext(Dispatchers.Main) {
-                    _avatarUri.value = uriString?.let { Uri.parse(it) }
-                }
-            }
+            _avatarUri.value = _prefs.getString("avatar_uri", null)?.let { Uri.parse(it) }
+            _token = _profilePrefs.getString("token", null) ?: ""
+            _hash = _profilePrefs.getString("hash", null) ?: ""
         }
     }
 
@@ -87,7 +91,7 @@ class AvatarViewModel(
         return sizeBytes <= maxSizeMb * 1024 * 1024
     }
 
-    private fun saveAvatar(sourceUri: Uri) {
+    private suspend fun saveAvatar(sourceUri: Uri) {
         val fileName = "avatar_${System.currentTimeMillis()}.jpg"
         val outputFile = File(application.filesDir, fileName)
 
@@ -98,12 +102,22 @@ class AvatarViewModel(
         }
 
         val newUri = Uri.fromFile(outputFile)
-
-        // Сохраняем URI в SharedPreferences
         saveAvatarUriToPrefs(newUri)
-
-        // Обновляем состояние в основном потоке
         _avatarUri.value = newUri
+
+        val base64Photo = "data:image/png;base64," + Base64.encodeToString(outputFile.readBytes(), Base64.DEFAULT)
+        val res = ProfileApi.retrofitService.edit(
+            mapOf(
+                "token" to _token,
+                "u_hash" to _hash,
+                "data" to Gson().toJson(
+                    Profile(
+                        photo = base64Photo
+                    )
+                )
+            )
+        )
+        Log.d("ChangePhoto", "Code: ${res.code}, message: ${res.message}")
     }
 
     private fun saveAvatarUriToPrefs(uri: Uri) {
@@ -113,19 +127,26 @@ class AvatarViewModel(
             .apply()
     }
 
-    fun removeAvatar() {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun removeAvatar(onServer: Boolean = false) {
+        viewModelScope.launch {
             try {
-                // 1. Удаляем файл аватарки
                 deleteAvatarFile()
-
-                // 2. Удаляем URI из SharedPreferences
                 clearAvatarPrefs()
+                _avatarUri.value = null
+                _errorMessage.value = null
 
-                // 3. Обновляем состояние UI
-                withContext(Dispatchers.Main) {
-                    _avatarUri.value = null
-                    _errorMessage.value = null
+                if (onServer) {
+                    ProfileApi.retrofitService.edit(
+                        mapOf(
+                            "token" to _token,
+                            "u_hash" to _hash,
+                            "data" to Gson().toJson(
+                                Profile(
+                                    photo = ""
+                                )
+                            )
+                        )
+                    )
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
@@ -137,8 +158,8 @@ class AvatarViewModel(
 
     private fun deleteAvatarFile() {
         val uriString = _prefs.getString("avatar_uri", null)
-        uriString?.let { uriString ->
-            val uri = Uri.parse(uriString)
+        uriString?.let {
+            val uri = Uri.parse(it)
             uri.path?.let { filePath ->
                 File(filePath).delete()
             }

@@ -2,7 +2,6 @@ package com.example.geoblinker.ui.main
 
 import android.annotation.SuppressLint
 import android.app.Application
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -281,9 +280,7 @@ fun TopBar(
 @Composable
 fun MainScreen(
     viewModel: DeviceViewModel,
-    avatarViewModel: AvatarViewModel,
     subscriptionViewModel: SubscriptionViewModel,
-    profileViewModel: ProfileViewModel,
     journalViewModel: JournalViewModel,
     notificationViewModel: NotificationViewModel,
     chatsViewModel: ChatsViewModel,
@@ -292,11 +289,14 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
+    val profileViewModel = ProfileViewModel(application)
+    val avatarViewModel = AvatarViewModel(application)
     val scope = rememberCoroutineScope()
 
     val device by viewModel.device.collectAsState()
     val signals by viewModel.signals.collectAsState()
     val news by viewModel.news.collectAsState()
+    val isLogin by profileViewModel.isLogin.collectAsState()
     val pickSubscription by subscriptionViewModel.pickSubscription.collectAsState()
     val subscription by profileViewModel.subscription.collectAsState()
     var currentRoute by remember { mutableStateOf(MainScreen.Map.name) }
@@ -324,10 +324,7 @@ fun MainScreen(
     }
 
     LaunchedEffect(Instant.now().toEpochMilli()) {
-        if (Instant.now().toEpochMilli() > subscription)
-            isShow = true
-        else
-            isShow = false
+        isShow = isLogin && Instant.now().toEpochMilli() > subscription
     }
 
     NavHost(
@@ -340,7 +337,8 @@ fun MainScreen(
                 start = 15.sdp(),
                 top = 90.sdp(),
                 end = 15.sdp()
-            )
+            ),
+        contentAlignment = Alignment.TopCenter
     ) {
         composable(route = MainScreen.Map.name) {
             currentRoute = MainScreen.Map.name
@@ -648,7 +646,7 @@ fun MainScreen(
             composable(route = MainScreen.DeleteAccountSettings.name) {
                 DeleteAccountSettingsScreen(
                     deleteAccount = {
-                        // TODO: Доработать функцию удалеия аккаунта
+                        // TODO: Доработать функцию удаления аккаунта
                         scope.launch(Dispatchers.IO) {
                             AppDatabase.getInstance(application).clearAllTables()
                         }
@@ -748,7 +746,6 @@ fun MainScreen(
     )
 
     if (isShow && currentRoute != MainScreen.Subscription.name) {
-        Log.d("CurrentRoute", currentRoute)
         Dialog(
             {},
             properties = DialogProperties(usePlatformDefaultWidth = false)

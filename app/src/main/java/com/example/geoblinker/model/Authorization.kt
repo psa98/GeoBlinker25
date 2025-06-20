@@ -7,7 +7,10 @@ data class Authorization(
     val code: String,
 
     @SerializedName("auth_user")
-    val user: User? = null
+    val user: User? = null,
+
+    @SerializedName("auth_hash")
+    val hash: String? = null
 )
 
 data class User(
@@ -15,5 +18,21 @@ data class User(
     val name: String,
 
     @SerializedName("u_email")
-    val email: String?
+    val email: String?,
+
+    @SerializedName("u_photo")
+    val photo: String
+)
+
+data class Token(
+    @SerializedName("data")
+    val data: DataToken
+)
+
+data class DataToken(
+    @SerializedName("token")
+    val token: String,
+
+    @SerializedName("u_hash")
+    val hash: String
 )

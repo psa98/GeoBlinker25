@@ -1,5 +1,7 @@
 package com.example.geoblinker.ui.auth.registration
 
+import android.annotation.SuppressLint
+import android.app.Application
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,12 +10,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.ui.auth.CodeScreen
-import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
 enum class RegistrationScreen {
@@ -23,14 +25,16 @@ enum class RegistrationScreen {
     Four
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun RegistrationScreen(
-    viewModel: RegistrationViewModel,
-    profileViewModel: ProfileViewModel,
     navController: NavHostController = rememberNavController(),
     authorizationScreen: () -> Unit,
     mainScreen: () -> Unit
 ) {
+    val context = LocalContext.current
+    val application = context.applicationContext as Application
+    val viewModel = RegistrationViewModel(application)
     val name = viewModel.name
 
     Scaffold { innerPadding ->
@@ -48,7 +52,6 @@ fun RegistrationScreen(
                     Box(modifier = Modifier.width(310.sdp())) {
                         OneScreen(
                             viewModel,
-                            profileViewModel,
                             { navController.navigate(RegistrationScreen.Two.name) },
                             { authorizationScreen() }
                         )
@@ -58,8 +61,7 @@ fun RegistrationScreen(
                     Box(modifier = Modifier.width(310.sdp())) {
                         CodeScreen(
                             {
-                                profileViewModel.setName(name)
-                                profileViewModel.setPhone(viewModel.phone)
+                                viewModel.saveData()
                                 navController.navigate(RegistrationScreen.Three.name)
                             },
                             { navController.navigate(RegistrationScreen.One.name) },

@@ -8,22 +8,27 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.GreenMediumButton
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.NameTextField
+import com.example.geoblinker.ui.TypeColor
+import com.example.geoblinker.ui.main.viewmodel.DefaultStates
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
 
@@ -32,18 +37,20 @@ fun NameSettingsScreen(
     viewModel: ProfileViewModel,
     toBack: () -> Unit
 ) {
-    val name by viewModel.name.collectAsState()
-    var value by remember { mutableStateOf("") }
-    var isShow by remember { mutableStateOf(false) }
-    var isError by remember { mutableStateOf(false) }
+    val name = viewModel.name
+    val uiState = viewModel.uiState
+    var value by rememberSaveable { mutableStateOf("") }
 
     fun onClick() {
         if (value.isEmpty())
-            isError = true
+            viewModel.inputErrorUiState()
         else {
-            viewModel.setName(value)
-            isShow = true
+            viewModel.updateName(value)
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.resetUiState()
     }
 
     Box(
@@ -59,54 +66,66 @@ fun NameSettingsScreen(
         )
     }
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.requiredWidth(310.sdp()),
         verticalArrangement = Arrangement.Center
     ) {
         NameTextField(
-            value = name,
-            placeholder = "Введите новое имя",
+            value = value,
+            placeholder = stringResource(R.string.enter_new_name),
             onValueChange = {
-                isShow = false
-                isError = false
+                viewModel.resetUiState()
                 value = it
             },
             onDone = { onClick() },
-            isError = isError,
+            isError = uiState is DefaultStates.Error.InputError,
             radius = 16,
             height = 65
         )
         Spacer(Modifier.height(15.sdp()))
-        GreenMediumButton(
-            text = "Сменить имя",
+        CustomButton(
+            text = stringResource(R.string.change_name),
             onClick = { onClick() },
-            height = 65
+            typeColor = TypeColor.Green
         )
     }
-    if (isShow) {
-        Box(
-            modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "Имя пользователя обновлено!",
-                color = Color(0xFF12CD4A),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-    }
-    if (isError) {
-        Box(
-            modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "Имя не может быть пустым!",
-                color = Color(0xFFC4162D),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
+    when (uiState) {
+        is DefaultStates.Error.InputError ->
+            Box(
+                modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    stringResource(R.string.name_cannot_empty),
+                    color = Color(0xFFC4162D),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        is DefaultStates.Error.ServerError ->
+            Box(
+                modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    stringResource(R.string.server_error),
+                    color = Color(0xFFC4162D),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        is DefaultStates.Success ->
+            Box(
+                modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    stringResource(R.string.name_has_been_updated),
+                    color = Color(0xFF12CD4A),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        is DefaultStates.Input -> {}
     }
 
     BackButton(

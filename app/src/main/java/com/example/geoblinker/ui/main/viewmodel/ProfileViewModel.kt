@@ -2,13 +2,19 @@ package com.example.geoblinker.ui.main.viewmodel
 
 import android.app.Application
 import android.content.Context
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.geoblinker.model.Code
+import com.example.geoblinker.model.Profile
+import com.example.geoblinker.network.ProfileApi
 import com.example.geoblinker.ui.WayConfirmationCode
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -26,10 +32,11 @@ class ProfileViewModel(
     private val application: Application
 ): ViewModel() {
     private val _prefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-    private val _subscription = MutableStateFlow<Long>(0)
-    private val _name = MutableStateFlow("Константин Гусевский")
-    private val _phone = MutableStateFlow("")
+    private var _token by mutableStateOf("")
+    private var _hash by mutableStateOf("")
     private val _isLogin = MutableStateFlow(false)
+    private val _subscription = MutableStateFlow<Long>(0)
+    private val _phone = MutableStateFlow("")
     private val _email = MutableStateFlow("")
     private val _orderWays = MutableStateFlow("")
     private val _waysConfirmationCode = MutableStateFlow(
@@ -40,12 +47,15 @@ class ProfileViewModel(
             WayConfirmationCode("Email")
         )
     )
-    val subscription: StateFlow<Long> = _subscription.asStateFlow()
-    val name: StateFlow<String> = _name.asStateFlow()
-    val phone: StateFlow<String> = _phone.asStateFlow()
-    val isLogin: StateFlow<Boolean> = _isLogin.asStateFlow()
-    val email: StateFlow<String> = _email.asStateFlow()
+    val subscription = _subscription.asStateFlow()
+    var name by mutableStateOf("Константин Гусевский")
+        private set
+    val phone = _phone.asStateFlow()
+    val isLogin = _isLogin.asStateFlow()
+    val email = _email.asStateFlow()
     val waysConfirmationCode = _waysConfirmationCode.asStateFlow()
+    var uiState: DefaultStates by mutableStateOf(DefaultStates.Input)
+        private set
 
     init {
         loadData()
@@ -53,10 +63,12 @@ class ProfileViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
+            _token = _prefs.getString("token", null) ?: ""
+            _hash = _prefs.getString("hash", null) ?: ""
             _subscription.value = _prefs.getLong("subscription", 0)
-            _name.value = _prefs.getString("name", "") ?: ""
+            name = _prefs.getString("name", "") ?: ""
             _phone.value = _prefs.getString("phone", "") ?: ""
-            _isLogin.value = _prefs.getBoolean("isLogin", false)
+            _isLogin.value = _prefs.getBoolean("login", false)
             _email.value = _prefs.getString("email", "") ?: ""
             _orderWays.value = _prefs.getString("orderWays", "0123") ?: "0123"
              _waysConfirmationCode.value = List(INITIAL_WAYS.size) { index ->
@@ -82,29 +94,39 @@ class ProfileViewModel(
         }
     }
 
-    fun setInitialSubscription() {
-        viewModelScope.launch {
-            val time = Instant
-                .now()
-                .atZone(ZoneId.systemDefault())
-                .plusMinutes(2)
-                .toInstant()
-                .toEpochMilli()
-
-            _prefs.edit().putLong("subscription", time).apply()
-
-            withContext(Dispatchers.Main) {
-                _subscription.value = time
-            }
-        }
+    fun resetUiState() {
+        uiState = DefaultStates.Input
+    }
+    
+    fun inputErrorUiState() {
+        uiState = DefaultStates.Error.InputError
     }
 
-    fun setName(name: String) {
+    fun updateName(newName: String) {
         viewModelScope.launch {
-            _prefs.edit().putString("name", name).apply()
-
-            withContext(Dispatchers.Main) {
-                _name.value = name
+            val res: Code
+            try {
+                res = ProfileApi.retrofitService.edit(
+                    mapOf(
+                        "token" to _token,
+                        "u_hash" to _hash,
+                        "data" to Gson().toJson(Profile(
+                            name = newName
+                        ))
+                    )
+                )
+                Log.d("ChangeName", "Code: ${res.code}, message: ${res.message ?: "Unknown"}")
+            } catch(e: Exception) {
+                Log.e("ChangeName", e.toString())
+                uiState = DefaultStates.Error.ServerError
+                return@launch
+            }
+            if (res.code == "200") {
+                _prefs.edit().putString("name", newName).apply()
+                name = newName
+                uiState = DefaultStates.Success
+            } else {
+                uiState = DefaultStates.Error.ServerError
             }
         }
     }
@@ -122,16 +144,6 @@ class ProfileViewModel(
 
             withContext(Dispatchers.Main) {
                 _phone.value = phone
-            }
-        }
-    }
-
-    fun setIsLogin(it: Boolean) {
-        viewModelScope.launch {
-            _prefs.edit().putBoolean("isLogin", it).apply()
-
-            withContext(Dispatchers.Main) {
-                _isLogin.value = it
             }
         }
     }
@@ -170,34 +182,12 @@ class ProfileViewModel(
         }
     }
 
-    fun setWaysConfirmationCode(
-        waysConfirmationCode: SnapshotStateList<WayConfirmationCode>
-    ) {
-        viewModelScope.launch {
-            var orderWays = ""
-            waysConfirmationCode.forEach {
-                orderWays += when(it.text) {
-                    "Telegram" -> '0'
-                    "WhatsApp" -> '1'
-                    "SMS" -> '2'
-                    else -> '3' // "Email"
-                }
-            }
-            _orderWays.value = orderWays
-            _prefs.edit().putString("orderWays", orderWays).apply()
-            _waysConfirmationCode.value = waysConfirmationCode
-            waysConfirmationCode.forEach {
-                _prefs.edit().putBoolean(it.text, it.checked).apply()
-            }
-        }
-    }
-
     fun logout() {
         _prefs.edit().clear().apply()
-        _subscription.value = 0
-        _name.value = ""
-        _phone.value = ""
         _isLogin.value = false
+        _subscription.value = 0
+        name = ""
+        _phone.value = ""
         _email.value = ""
         _orderWays.value = ""
         _waysConfirmationCode.value = listOf(
