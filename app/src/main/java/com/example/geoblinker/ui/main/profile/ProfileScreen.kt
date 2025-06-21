@@ -52,6 +52,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.ui.BackButton
@@ -77,8 +78,8 @@ fun ProfileScreen(
     toBack: () -> Unit
 ) {
     var isShow by remember { mutableStateOf(false) }
-    val avatarUri by viewModel.avatarUri.collectAsState()
-    val errorMessage by viewModel.errorMessage.collectAsState()
+    val avatarUri = viewModel.avatarUri
+    val errorMessage = viewModel.errorMessage
     val subscription by profileViewModel.subscription.collectAsState()
     val name = profileViewModel.name
 
@@ -86,15 +87,8 @@ fun ProfileScreen(
         modifier = Modifier.requiredWidth(330.sdp()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if (avatarUri == null) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
-                contentDescription = null,
-                modifier = Modifier.size(84.sdp()).clickable { isShow = true },
-                tint = Color.Unspecified
-            )
-        }
-        else {
+        Box {
+            var success by remember { mutableStateOf(false) }
             AsyncImage(
                 avatarUri,
                 contentDescription = null,
@@ -102,8 +96,24 @@ fun ProfileScreen(
                     .clip(CircleShape)
                     .size(84.sdp())
                     .clickable { isShow = true },
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                onState = { state ->
+                    success = when (state) {
+                        is AsyncImagePainter.State.Loading -> false
+                        is AsyncImagePainter.State.Success -> true
+                        else -> false
+                    }
+                }
             )
+
+            if (!success) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
+                    contentDescription = null,
+                    modifier = Modifier.size(84.sdp()).clickable { isShow = true },
+                    tint = Color.Unspecified
+                )
+            }
         }
         HSpacer(10)
         Row(
@@ -287,7 +297,7 @@ fun ProfileScreen(
                 // Если разрешение получено - запускаем выбор изображения
                 pickImageLauncher.launch("image/*")
             } else {
-                viewModel.setErrorMessage(message)
+                viewModel.updateErrorMessage(message)
             }
         }
 
@@ -316,26 +326,35 @@ fun ProfileScreen(
                         ),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        if (avatarUri == null) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
-                                contentDescription = null,
-                                modifier = Modifier.size(125.sdp()).clickable { isShow = true },
-                                tint = Color.Unspecified
-                            )
-                        } else {
+                        var success by remember { mutableStateOf(false) }
+                        Box {
                             AsyncImage(
                                 avatarUri,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .clip(CircleShape)
-                                    .size(125.sdp())
-                                    .clickable { isShow = true },
-                                contentScale = ContentScale.Crop
+                                    .size(125.sdp()),
+                                contentScale = ContentScale.Crop,
+                                onState = { state ->
+                                    success = when (state) {
+                                        is AsyncImagePainter.State.Loading -> false
+                                        is AsyncImagePainter.State.Success -> true
+                                        else -> false
+                                    }
+                                }
                             )
+
+                            if (!success) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(125.sdp()),
+                                    tint = Color.Unspecified
+                                )
+                            }
                         }
                         HSpacer(25)
-                        if (avatarUri == null) {
+                        if (!success) {
                             Text(
                                 stringResource(R.string.set_photo),
                                 modifier = Modifier.clickable {

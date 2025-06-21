@@ -125,7 +125,7 @@ private fun PhoneScreen(
         verticalArrangement = Arrangement.Center
     ) {
         PhoneNumberTextField(
-            initial = phone,
+            initial = value,
             placeholder = ' ' + stringResource(R.string.link_new_phone),
             onValueChange = {
                 isError = false

@@ -52,6 +52,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
 import com.example.geoblinker.R
 import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Device
@@ -199,7 +200,7 @@ fun TopBar(
     countNotifications: Int,
     viewModel: AvatarViewModel
 ) {
-    val avatarUri by viewModel.avatarUri.collectAsState()
+    val avatarUri = viewModel.avatarUri
 
     Surface(
         modifier = Modifier.shadow(
@@ -218,30 +219,33 @@ fun TopBar(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (avatarUri == null) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(50.sdp())
-                        .clickable {
-                            navController.navigate(MainScreen.Profile.name)
-                        },
-                    tint = Color.Unspecified
-                )
-            }
-            else {
+            Box {
+                var success by remember { mutableStateOf(false) }
                 AsyncImage(
                     avatarUri,
                     contentDescription = null,
                     modifier = Modifier
                         .clip(CircleShape)
                         .size(50.sdp())
-                        .clickable {
-                            navController.navigate(MainScreen.Profile.name)
-                        },
-                    contentScale = ContentScale.Crop
+                        .clickable { navController.navigate(MainScreen.Profile.name) },
+                    contentScale = ContentScale.Crop,
+                    onState = { state ->
+                        success = when (state) {
+                            is AsyncImagePainter.State.Loading -> false
+                            is AsyncImagePainter.State.Success -> true
+                            else -> false
+                        }
+                    }
                 )
+
+                if (!success) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.user_without_photo),
+                        contentDescription = null,
+                        modifier = Modifier.size(50.sdp()).clickable { navController.navigate(MainScreen.Profile.name) },
+                        tint = Color.Unspecified
+                    )
+                }
             }
             Spacer(Modifier.width(10.sdp()))
             if (currentRoute == MainScreen.Map.name) {

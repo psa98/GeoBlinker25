@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -34,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -80,7 +82,8 @@ fun NotificationSettingsScreen(
 ) {
     NavHost(
         navController,
-        startDestination = Notification.Main.name
+        startDestination = Notification.Main.name,
+        modifier = Modifier.requiredWidth(310.sdp())
     ) {
         composable(route = Notification.Main.name) {
             Main(
@@ -134,7 +137,6 @@ private fun Main(
     var isShowEnd by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
@@ -399,7 +401,10 @@ private fun Types(
 ) {
     val allNotification by viewModel.allNotification.collectAsState()
     val news by viewModel.news.collectAsState()
-    val typesSignals by viewModel.typesSignals.collectAsState()
+    val typesSignals = viewModel.typesSignals
+    val state = remember { mutableStateListOf<Boolean>().apply {
+        addAll(typesSignals.map { it.checked })
+    } }
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -424,7 +429,11 @@ private fun Types(
                 )
                 Switch(
                     allNotification,
-                    { viewModel.setAllNotification(it) },
+                    {
+                        viewModel.setAllNotification(it)
+                        state.clear()
+                        state.addAll(typesSignals.map { it.checked })
+                    },
                     modifier = Modifier.size(40.sdp(), 21.sdp()),
                     colors = SwitchDefaults.colors(
                         uncheckedThumbColor = Color(0xFFBEBEBE),
@@ -471,8 +480,12 @@ private fun Types(
                     style = MaterialTheme.typography.labelMedium
                 )
                 Switch(
-                    typeSignal.checked,
-                    { viewModel.setTypeSignal(index, it) },
+                    state[index],
+                    {
+                        viewModel.setTypeSignal(index, it)
+                        state.clear()
+                        state.addAll(typesSignals.map { it.checked })
+                    },
                     modifier = Modifier.size(40.sdp(), 21.sdp()),
                     colors = SwitchDefaults.colors(
                         uncheckedThumbColor = Color(0xFFBEBEBE),
@@ -503,9 +516,12 @@ private fun Email(
     val getNotificationAroundClock by viewModel.getNotificationAroundClock.collectAsState()
     val startTime by viewModel.startTime.collectAsState()
     val endTime by viewModel.endTime.collectAsState()
-    val typesSignals by viewModel.typesSignals.collectAsState()
+    val typesSignals = viewModel.typesSignals
     var isShowStart by remember { mutableStateOf(false) }
     var isShowEnd by remember { mutableStateOf(false) }
+    val state = remember { mutableStateListOf<Boolean>().apply {
+        addAll(typesSignals.map { it.checked })
+    } }
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -530,7 +546,11 @@ private fun Email(
                 )
                 Switch(
                     allNotification,
-                    { viewModel.setAllNotification(it) },
+                    {
+                        viewModel.setAllNotification(it)
+                        state.clear()
+                        state.addAll(typesSignals.map { it.checked })
+                    },
                     modifier = Modifier.size(40.sdp(), 21.sdp()),
                     colors = SwitchDefaults.colors(
                         uncheckedThumbColor = Color(0xFFBEBEBE),
@@ -654,8 +674,12 @@ private fun Email(
                     style = MaterialTheme.typography.labelMedium
                 )
                 Switch(
-                    typeSignal.checked,
-                    { viewModel.setTypeSignal(index, it) },
+                    state[index],
+                    {
+                        viewModel.setTypeSignal(index, it)
+                        state.clear()
+                        state.addAll(typesSignals.map { it.checked })
+                    },
                     modifier = Modifier.size(40.sdp(), 21.sdp()),
                     colors = SwitchDefaults.colors(
                         uncheckedThumbColor = Color(0xFFBEBEBE),
@@ -700,9 +724,6 @@ private fun Email(
     }
 }
 
-/**
- * TODO: Доделать попап с выбором времени
- */
 @Composable
 private fun CustomTimePopup(
     initialHour: Int,

@@ -14,8 +14,6 @@ import com.example.geoblinker.model.Profile
 import com.example.geoblinker.network.ProfileApi
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -28,10 +26,10 @@ class AvatarViewModel(
     private val _profilePrefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     private var _token by mutableStateOf("")
     private var _hash by mutableStateOf("")
-    private val _avatarUri = MutableStateFlow<Uri?>(null)
-    private val _errorMessage = MutableStateFlow<String?>(null)
-    val avatarUri = _avatarUri.asStateFlow()
-    val errorMessage = _errorMessage.asStateFlow()
+    var avatarUri: Uri by mutableStateOf(Uri.parse(""))
+        private set
+    var errorMessage by mutableStateOf<String?>(null)
+        private set
 
     init {
         loadSavedAvatar()
@@ -39,7 +37,7 @@ class AvatarViewModel(
 
     private fun loadSavedAvatar() {
         viewModelScope.launch {
-            _avatarUri.value = _prefs.getString("avatar_uri", null)?.let { Uri.parse(it) }
+            avatarUri = Uri.parse(_prefs.getString("avatar_uri", ""))
             _token = _profilePrefs.getString("token", null) ?: ""
             _hash = _profilePrefs.getString("hash", null) ?: ""
         }
@@ -50,32 +48,32 @@ class AvatarViewModel(
             try {
                 if (!isValidImageFormat(uri)) {
                     withContext(Dispatchers.Main) {
-                        _errorMessage.value = "Только JPG/PNG форматы"
+                        errorMessage = "Только JPG/PNG форматы"
                     }
                     return@launch
                 }
 
                 if (!isValidImageSize(uri, maxSizeMb = 5)) {
                     withContext(Dispatchers.Main) {
-                        _errorMessage.value = "Файл слишком большой (макс. 5 МБ)"
+                        errorMessage = "Файл слишком большой (макс. 5 МБ)"
                     }
                     return@launch
                 }
 
                 saveAvatar(uri)
                 withContext(Dispatchers.Main) {
-                    _errorMessage.value = null
+                    errorMessage = null
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    _errorMessage.value = "Ошибка загрузки: ${e.message}"
+                    errorMessage = "Ошибка загрузки: ${e.message}"
                 }
             }
         }
     }
 
-    fun setErrorMessage(text: String) {
-        _errorMessage.value = text
+    fun updateErrorMessage(text: String) {
+        errorMessage = text
     }
 
     private fun isValidImageFormat(uri: Uri): Boolean {
@@ -103,7 +101,7 @@ class AvatarViewModel(
 
         val newUri = Uri.fromFile(outputFile)
         saveAvatarUriToPrefs(newUri)
-        _avatarUri.value = newUri
+        avatarUri = newUri
 
         val base64Photo = "data:image/png;base64," + Base64.encodeToString(outputFile.readBytes(), Base64.DEFAULT)
         val res = ProfileApi.retrofitService.edit(
@@ -132,8 +130,8 @@ class AvatarViewModel(
             try {
                 deleteAvatarFile()
                 clearAvatarPrefs()
-                _avatarUri.value = null
-                _errorMessage.value = null
+                avatarUri = Uri.parse("")
+                errorMessage = null
 
                 if (onServer) {
                     ProfileApi.retrofitService.edit(
@@ -150,7 +148,7 @@ class AvatarViewModel(
                 }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    _errorMessage.value = "Ошибка удаления: ${e.message}"
+                    errorMessage = "Ошибка удаления: ${e.message}"
                 }
             }
         }

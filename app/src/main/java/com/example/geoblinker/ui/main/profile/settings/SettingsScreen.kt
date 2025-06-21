@@ -50,7 +50,7 @@ fun SettingsScreen(
 ) {
     val settings = listOf(
         Pair(stringResource(R.string.change_name), { toName() }),
-        Pair(stringResource(R.string.change_photo), { toPhone() }),
+        Pair(stringResource(R.string.change_phone), { toPhone() }),
         Pair(stringResource(R.string.account_email), { toEmail() }),
         Pair(stringResource(R.string.setting_up_notifications), { toNotification() }),
         Pair(stringResource(R.string.units_of_distance), { toUnitsDistance() }),

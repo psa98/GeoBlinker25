@@ -28,7 +28,7 @@ class NotificationViewModel(
     private val _endTime = MutableStateFlow(DEFAULT_END)
     private val _allNotification = MutableStateFlow(true)
     private val _news = MutableStateFlow(false)
-    private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
+    //private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
     val quietMode = _quietMode.asStateFlow()
     val getAllNotification = _getAllNotification.asStateFlow()
     val emailNotification = _emailNotification.asStateFlow()
@@ -37,7 +37,8 @@ class NotificationViewModel(
     val endTime = _endTime.asStateFlow()
     val allNotification = _allNotification.asStateFlow()
     val news = _news.asStateFlow()
-    val typesSignals = _typesSignals.asStateFlow()
+    var typesSignals = mutableListOf<TypeSignal>()
+        private set
 
     init {
         loadData()
@@ -53,7 +54,7 @@ class NotificationViewModel(
             _endTime.value = _prefs.getInt("endTime", DEFAULT_END)
             _allNotification.value = _prefs.getBoolean("allNotification", true)
             _news.value = _prefs.getBoolean("news", true)
-            _typesSignals.value = SignalType.entries.map { TypeSignal(it, _prefs.getBoolean(it.name, true)) }
+            typesSignals = SignalType.entries.map { TypeSignal(it, _prefs.getBoolean(it.name, true)) }.toMutableList()
         }
     }
 
@@ -151,10 +152,10 @@ class NotificationViewModel(
 
     fun setTypeSignal(index: Int, it: Boolean) {
         viewModelScope.launch {
-            _prefs.edit().putBoolean("${_prefix}${_typesSignals.value[index].type.name}", it).apply()
-            _typesSignals.value[index].checked = it
+            _prefs.edit().putBoolean("${_prefix}${typesSignals[index].type.name}", it).apply()
+            typesSignals[index].checked = it
             var isNotAll = false
-            _typesSignals.value.forEach { if (!it.checked) isNotAll = true }
+            typesSignals.forEach { if (!it.checked) isNotAll = true }
             if (isNotAll) {
                 _prefs.edit().putBoolean("${_prefix}allNotification", false).apply()
                 _allNotification.value = false
@@ -174,7 +175,7 @@ class NotificationViewModel(
             _endTime.value = _prefs.getInt("emailendTime", DEFAULT_END)
             _allNotification.value = _prefs.getBoolean("emailallNotification", true)
             _news.value = _prefs.getBoolean("emailnews", true)
-            _typesSignals.value = SignalType.entries.map { TypeSignal(it, _prefs.getBoolean("email${it.name}", true)) }
+            typesSignals = SignalType.entries.map { TypeSignal(it, _prefs.getBoolean("email${it.name}", true)) }.toMutableList()
         }
         else {
             _prefix = ""
@@ -183,7 +184,7 @@ class NotificationViewModel(
             _endTime.value = _prefs.getInt("endTime", DEFAULT_END)
             _allNotification.value = _prefs.getBoolean("allNotification", true)
             _news.value = _prefs.getBoolean("news", true)
-            _typesSignals.value = SignalType.entries.map { TypeSignal(it, _prefs.getBoolean(it.name, true)) }
+            typesSignals = SignalType.entries.map { TypeSignal(it, _prefs.getBoolean(it.name, true)) }.toMutableList()
         }
     }
 
@@ -197,6 +198,6 @@ class NotificationViewModel(
         _endTime.value = DEFAULT_END
         _allNotification.value = true
         _news.value = false
-        _typesSignals.value = emptyList()
+        typesSignals = mutableListOf()
     }
 }
