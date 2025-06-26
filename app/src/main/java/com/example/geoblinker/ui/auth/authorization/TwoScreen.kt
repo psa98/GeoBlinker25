@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,10 +27,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.BlackButton
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.PhoneNumberTextField
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.formatPhoneNumber
 import com.example.geoblinker.ui.theme.sdp
 import com.skydoves.cloudy.cloudy
@@ -80,15 +80,18 @@ fun TwoScreen(
             isError = isPhoneNumberIncorrect
         )
         HSpacer(20)
-        BlackButton(
-            modifier = Modifier.fillMaxWidth(),
+        CustomButton(
             text = stringResource(R.string.enter),
             onClick = {
                 if (phone.length < 10)
                     isPhoneNumberIncorrect = true
                 else
                     visiblePopup = true
-            }
+            },
+            typeColor = TypeColor.Black,
+            height = 81,
+            radius = 24,
+            style = MaterialTheme.typography.headlineMedium
         )
     }
 

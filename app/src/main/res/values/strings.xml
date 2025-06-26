@@ -183,4 +183,6 @@
     <string name="name_has_been_updated">Имя пользователя обновлено!</string>
     <string name="name_cannot_empty">Имя не может быть пустым!</string>
     <string name="server_error">Ошибка сервера</string>
+    <string name="link_device_again">Подключить ещё устройство</string>
+    <string name="linked">Привязано:</string>
 </resources>

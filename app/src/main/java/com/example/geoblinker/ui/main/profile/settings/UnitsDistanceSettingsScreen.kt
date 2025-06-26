@@ -13,8 +13,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,7 +29,7 @@ fun UnitDistanceSettingsScreen(
     viewModel: DeviceViewModel,
     toBack: () -> Unit
 ) {
-    val unitsDistance by viewModel.unitsDistance.collectAsState()
+    val unitsDistance = viewModel.unitsDistance
 
     Text(
         stringResource(R.string.units_distance_map),
@@ -48,7 +46,7 @@ fun UnitDistanceSettingsScreen(
         Surface(
             modifier = Modifier
                 .size(229.sdp(), 48.sdp())
-                .clickable { viewModel.setUnitsDistance(true) },
+                .clickable { viewModel.updateUnitsDistance(true) },
             shape = RoundedCornerShape(99.sdp()),
             color = Color.Unspecified,
             border = BorderStroke(
@@ -71,7 +69,7 @@ fun UnitDistanceSettingsScreen(
         Surface(
             modifier = Modifier
                 .size(229.sdp(), 48.sdp())
-                .clickable { viewModel.setUnitsDistance(false) },
+                .clickable { viewModel.updateUnitsDistance(false) },
             shape = RoundedCornerShape(99.sdp()),
             color = Color.Unspecified,
             border = BorderStroke(

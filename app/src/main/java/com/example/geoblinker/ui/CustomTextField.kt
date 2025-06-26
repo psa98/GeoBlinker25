@@ -43,13 +43,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.example.geoblinker.R
+import com.example.geoblinker.ui.theme.ColorError
 import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-
-val red = Color(0xFFC4162D)
 
 @Composable
 fun CodeTextField(
@@ -65,7 +64,7 @@ fun CodeTextField(
 
     Surface(
         shape = RoundedCornerShape(radius.sdp()),
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) ColorError else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = TextFieldValue(
@@ -84,7 +83,7 @@ fun CodeTextField(
                 }
             ,
             textStyle = MaterialTheme.typography.displayMedium.copy(
-                color = if (isError) red else Color(0xFF222221)
+                color = if (isError) ColorError else Color(0xFF222221)
             ),
             placeholder = {
                 if (!isFocused)
@@ -139,14 +138,14 @@ fun PhoneNumberTextField(
 
     Surface(
         shape = RoundedCornerShape(radius.hdp()),
-        border = BorderStroke(1.hdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.hdp(), if (isError) ColorError else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = textFieldValueState,
             onValueChange = { value ->
-                val filtered = value.text.filter { it.isDigit() }.take(10)
-                val format = formatPhoneNumber(filtered)
-                onValueChange(filtered)
+                val filteColorError = value.text.filter { it.isDigit() }.take(10)
+                val format = formatPhoneNumber(filteColorError)
+                onValueChange(filteColorError)
                 textFieldValueState = TextFieldValue(
                     text = format,
                     selection = TextRange(format.length)
@@ -159,7 +158,7 @@ fun PhoneNumberTextField(
                     isFocused = focusState.isFocused
                 },
             textStyle = MaterialTheme.typography.headlineMedium.copy(
-                color = if (isError) red else Color(0xFF222221)
+                color = if (isError) ColorError else Color(0xFF222221)
             ),
             placeholder = {
                 if (!isFocused)
@@ -172,7 +171,7 @@ fun PhoneNumberTextField(
                 if (isFocused || textFieldValueState.text.isNotEmpty())
                     Text(
                         text = "  + 7 ",
-                        color = if (isError) red else Color.Unspecified,
+                        color = if (isError) ColorError else Color.Unspecified,
                         style = MaterialTheme.typography.headlineMedium
                     )
             },
@@ -207,7 +206,7 @@ fun NameTextField(
 ) {
     Surface(
         shape = RoundedCornerShape(radius.sdp()),
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) ColorError else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = value,
@@ -219,7 +218,7 @@ fun NameTextField(
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
-                color = if (isError) red else Color(0xFF222221)
+                color = if (isError) ColorError else Color(0xFF222221)
             ),
             placeholder = {
                 Text(
@@ -259,7 +258,7 @@ fun NameDeviceTextField(
 ) {
     Surface(
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) ColorError else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = value,
@@ -271,16 +270,13 @@ fun NameDeviceTextField(
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.bodyMedium.copy(
-                color = if (isError) red else Color(0xFF222221)
+                color = if (isError) ColorError else Color(0xFF222221)
             ),
             placeholder = {
                 Text(
                     text = placeholder,
                     style = MaterialTheme.typography.bodyMedium
                 )
-            },
-            prefix = {
-                Text("  ")
             },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
@@ -299,6 +295,29 @@ fun NameDeviceTextField(
             )
         )
     }
+
+    /*
+    BasicTextField(
+        value = value,
+        onValueChange = {
+            onValueChange(it.filter { c -> c.isLetterOrDigit() || c == ' ' }.take(64))
+        },
+        modifier = Modifier
+            .height(65.sdp())
+            .fillMaxWidth(),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(
+            color = if (isError) ColorError else Color(0xFF222221)
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone =  { onDone() }
+        ),
+        singleLine = true
+    )
+     */
 }
 
 @Composable
@@ -313,7 +332,7 @@ fun EmailTextField(
 ) {
     Surface(
         shape = RoundedCornerShape(radius.sdp()),
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFBEBEBE))
+        border = BorderStroke(1.sdp(), if (isError) ColorError else Color(0xFFBEBEBE))
     ) {
         TextField(
             value = email,
@@ -325,7 +344,7 @@ fun EmailTextField(
                 .fillMaxWidth()
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
-                color = if (isError) red else Color(0xFF222221)
+                color = if (isError) ColorError else Color(0xFF222221)
             ),
             placeholder = {
                 Text(
@@ -382,7 +401,7 @@ fun ImeiTextField(
 
     Surface(
         shape = MaterialTheme.shapes.medium,
-        border = BorderStroke(1.sdp(), if (isError) red else Color(0xFFC0C0C0))
+        border = BorderStroke(1.sdp(), if (isError) ColorError else Color(0xFFC0C0C0))
     ) {
         TextField(
             value = imei,
@@ -397,7 +416,7 @@ fun ImeiTextField(
                 }
             ,
             textStyle = MaterialTheme.typography.headlineMedium.copy(
-                color = if (isError) red else Color(0xFF222221)
+                color = if (isError) ColorError else Color(0xFF222221)
             ),
             placeholder = {
                 Text(

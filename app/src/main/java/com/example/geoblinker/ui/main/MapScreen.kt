@@ -1,13 +1,10 @@
 package com.example.geoblinker.ui.main
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.background
@@ -65,16 +62,16 @@ import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.BackButton
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomCommentsPopup
 import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomEmptyDevicesPopup
-import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.SearchDevice
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.device.formatSpeed
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
-import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 
 @Composable
@@ -248,7 +245,7 @@ fun MapScreen(
                             Spacer(Modifier.height(23.sdp()))
                             SearchDevice(keySearch) { keySearch = it }
                             Spacer(Modifier.height(15.sdp()))
-                            GreenMediumButton(
+                            CustomButton(
                                 text = stringResource(R.string.find),
                                 onClick = {
                                     val findDevices =
@@ -259,7 +256,9 @@ fun MapScreen(
                                         selectedMarker = findDevices[0]
                                         isShowPopupSearch = false
                                     }
-                                }
+                                },
+                                typeColor = TypeColor.Green,
+                                height = 55
                             )
                         } else {
                             Box(
@@ -320,83 +319,48 @@ fun MapFromAssets(
     val devices by viewModel.devices.collectAsState()
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
 
-    val context = LocalContext.current
-    var currentLocation by remember { mutableStateOf<LatLng?>(null) }
-
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            LocationHelper(context) { location ->
-                currentLocation = location
-            }.getLastLocation()
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-    }
-
-    if (currentLocation != null) {
-        AndroidView(
-            factory = { _ ->
-                webView.apply {
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
-                    settings.javaScriptEnabled = true
-                    addJavascriptInterface(
-                        WebAppInterface { markerId ->
-                            selectedMarker = devices.filter { it.imei == markerId }[0]
-                        },
-                        "AndroidInterface"
-                    )
-                    webViewClient = object : WebViewClient() {
-                        override fun onPageFinished(view: WebView?, url: String?) {
-                            // Вызываем JS-функцию после загрузки страницы
-                            devices.forEach { item ->
-                                evaluateJavascript(
-                                    "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons})",
-                                    null
-                                )
-                            }
-                            webView.evaluateJavascript(
-                                "setCenter(${currentLocation!!.latitude}, ${currentLocation!!.longitude})",
+    AndroidView(
+        factory = { _ ->
+            webView.apply {
+                layoutParams = ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
+                settings.javaScriptEnabled = true
+                addJavascriptInterface(
+                    WebAppInterface { markerId ->
+                        selectedMarker = devices.filter { it.imei == markerId }[0]
+                    },
+                    "AndroidInterface"
+                )
+                webViewClient = object : WebViewClient() {
+                    override fun onPageFinished(view: WebView?, url: String?) {
+                        // Вызываем JS-функцию после загрузки страницы
+                        devices.forEach { item ->
+                            evaluateJavascript(
+                                "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons})",
                                 null
                             )
                         }
                     }
-                    loadUrl("file:///android_asset/map.html")
                 }
-            },
-            modifier = Modifier
-                .fillMaxSize()
-                .layout { measurable, constraints ->
-                    // Игнорируем padding родителя
-                    val looseConstraints = constraints.copy(
-                        maxWidth = constraints.maxWidth + addWidth.roundToPx(),
-                        maxHeight = constraints.maxHeight + addHeight.roundToPx() * 2
-                    )
-                    val placeable = measurable.measure(looseConstraints)
-                    layout(placeable.width, placeable.height) {
-                        placeable.place(0, -addHeight.roundToPx()) // Смещение
-                    }
+                loadUrl("file:///android_asset/map.html")
+            }
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .layout { measurable, constraints ->
+                // Игнорируем padding родителя
+                val looseConstraints = constraints.copy(
+                    maxWidth = constraints.maxWidth + addWidth.roundToPx(),
+                    maxHeight = constraints.maxHeight + addHeight.roundToPx() * 2
+                )
+                val placeable = measurable.measure(looseConstraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(0, -addHeight.roundToPx()) // Смещение
                 }
-        )
-    }
-    else {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                stringResource(R.string.add_location_permissions),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge
-            )
-        }
-    }
+            }
+    )
 
     CustomDevicePopup(
         viewModel,
@@ -415,7 +379,7 @@ fun CustomDevicePopup(
     onChangeValueToNull: () -> Unit,
     toDeviceScreen: (Device) -> Unit
 ) {
-    val unitsDistance by viewModel.unitsDistance.collectAsState()
+    val unitsDistance = viewModel.unitsDistance
 
     selectedMarker?.let { item ->
         var isShowAdd by remember { mutableStateOf(false) }

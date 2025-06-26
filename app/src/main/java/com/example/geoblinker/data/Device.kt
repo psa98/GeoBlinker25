@@ -8,6 +8,7 @@ import kotlin.random.Random
 data class Device(
     @PrimaryKey
     val imei: String,
+    val id: String,
     val name: String,
     val isConnected: Boolean = true,
     val bindingTime: Long,

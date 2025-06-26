@@ -22,8 +22,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
-import com.example.geoblinker.ui.BlackMediumButton
-import com.example.geoblinker.ui.RedButton
+import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 
@@ -102,19 +102,25 @@ fun DeviceDetachOneScreen(
             modifier = Modifier.width(330.sdp()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            RedButton(
-                stringResource(R.string.detach),
+            CustomButton(
+                text = stringResource(R.string.detach),
                 onClick = {
                     val name = device.name
                     val imei = device.imei
                     viewModel.updateDevice(device.copy(isConnected = false))
                     toTwo(name, imei)
-                }
+                },
+                typeColor = TypeColor.Red,
+                height = 55,
+                radius = 10
             )
             Spacer(Modifier.height(15.sdp()))
-            BlackMediumButton(
+            CustomButton(
                 text = stringResource(R.string.cancellation),
-                onClick = toBack
+                onClick = toBack,
+                typeColor = TypeColor.Black,
+                height = 55,
+                radius = 10
             )
         }
     }

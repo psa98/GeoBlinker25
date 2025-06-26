@@ -46,7 +46,7 @@
             minZoom: 3,
             maxZoom: 18,
             layers: [layers.light]
-        }).setView([0, 0], 10);
+        }).setView([51.505, -0.09], 10);
 
         currentLayer = layers.light;
 
@@ -61,6 +61,7 @@
 
     function updateMap(lat, lng, zoom) {
         map.setView([lat, lng], zoom);
+        currentZoom = zoom;
     }
 
     // Функция для изменения центра без изменения зума
@@ -88,10 +89,12 @@
 
     function zoomIn() {
         map.zoomIn();
+        currentZoom++;
     }
 
     function zoomOut() {
         map.zoomOut();
+        currentZoom--;
     }
 
     function switchTheme(theme) {

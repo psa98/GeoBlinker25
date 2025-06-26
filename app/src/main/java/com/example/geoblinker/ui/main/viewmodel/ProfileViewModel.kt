@@ -10,7 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.model.Code
 import com.example.geoblinker.model.Profile
-import com.example.geoblinker.network.ProfileApi
+import com.example.geoblinker.network.Api
 import com.example.geoblinker.ui.WayConfirmationCode
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
@@ -106,7 +106,7 @@ class ProfileViewModel(
         viewModelScope.launch {
             val res: Code
             try {
-                res = ProfileApi.retrofitService.edit(
+                res = Api.retrofitService.edit(
                     mapOf(
                         "token" to _token,
                         "u_hash" to _hash,

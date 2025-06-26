@@ -12,7 +12,10 @@ class Repository(
         deviceDao.insert(device)
     }
 
-    suspend fun clearDevice() = deviceDao.clear()
+    suspend fun clearDevice() {
+        typeSignalDao.clear()
+        deviceDao.clear()
+    }
 
     fun getDevice(imei: String): Flow<Device> {
         return deviceDao.getDevice(imei)

@@ -1,8 +1,5 @@
 package com.example.geoblinker.ui.main
 
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,14 +50,18 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomCommentsPopup
 import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomListPopup
-import com.example.geoblinker.ui.GreenMediumButton
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.SearchDevice
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.device.calculateDistance
 import com.example.geoblinker.ui.main.device.formatSpeed
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
+import com.example.geoblinker.ui.theme.ColorStar
+import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 import com.google.android.gms.maps.model.LatLng
 
@@ -78,26 +79,18 @@ fun ListScreen(
     val context = LocalContext.current
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
     val device by viewModel.device.collectAsState()
-    val unitsDistance by viewModel.unitsDistance.collectAsState()
-
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            LocationHelper(context) { location ->
-                currentLocation = location
-            }.getLastLocation()
-        }
-    }
+    val unitsDistance = viewModel.unitsDistance
 
     LaunchedEffect(Unit) {
-        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        LocationHelper(context) { location ->
+            currentLocation = location
+        }.getLastLocation()
     }
     val stateDevices = viewModel.devices.collectAsState()
     var sortedDevices = when(keySort) {
         R.string.by_name -> stateDevices.value.sortedBy { it.name }
         R.string.by_binding_date -> stateDevices.value.sortedByDescending { it.bindingTime }
-        R.string.by_distance -> if (currentLocation != null) stateDevices.value.sortedBy { calculateDistance(LatLng(it.lat, it.lng), currentLocation!!) } else stateDevices.value.sortedBy { it.name }
+        R.string.by_distance -> stateDevices.value.sortedBy { calculateDistance(LatLng(it.lat, it.lng), currentLocation!!) }
         else -> stateDevices.value.sortedBy { it.name }
     }.filter { it.isConnected }
     var sortedNullDevices = stateDevices.value.filter { !it.isConnected }
@@ -169,7 +162,7 @@ fun ListScreen(
                         Column(
                             modifier = Modifier.width(330.sdp())
                         ) {
-                            Spacer(Modifier.height(15.sdp()))
+                            HSpacer(15)
                             Surface(
                                 modifier = Modifier.fillMaxWidth().animateContentSize(),
                                 shape = RoundedCornerShape(10.sdp()),
@@ -318,7 +311,7 @@ fun ListScreen(
                                                             imageVector = Icons.Filled.StarRate,
                                                             contentDescription = null,
                                                             modifier = Modifier.size(24.sdp()),
-                                                            tint = Color.Yellow
+                                                            tint = ColorStar
                                                         )
                                                         Spacer(Modifier.width(4.sdp()))
                                                     }
@@ -339,7 +332,7 @@ fun ListScreen(
                         Column(
                             modifier = Modifier.width(330.sdp())
                         ) {
-                            Spacer(Modifier.height(15.sdp()))
+                            HSpacer(15)
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(10.sdp()),
@@ -371,7 +364,7 @@ fun ListScreen(
                         }
                     }
                     item {
-                        Spacer(Modifier.height(115.sdp()))
+                        HSpacer(115)
                     }
                 }
             }
@@ -381,26 +374,34 @@ fun ListScreen(
     Box(
         Modifier
             .fillMaxSize()
-            .offset(y = (-32).sdp()),
+            .offset(y = (-32).hdp()),
         contentAlignment = Alignment.BottomCenter
     ) {
-        GreenMediumButton(
+        CustomButton(
             modifier = Modifier.width(260.sdp()),
-            icon = R.drawable.plus,
             text = stringResource(R.string.link_device),
-            onClick = toBindingScreen
+            onClick = toBindingScreen,
+            typeColor = TypeColor.Green,
+            leftIcon = R.drawable.plus
         )
     }
 
     if (isShow) {
         CustomListPopup(
             R.string.sort_devices,
+            if (currentLocation != null)
             listOf(R.string.by_name,
                 R.string.by_device_type,
                 R.string.by_distance,
                 R.string.by_binding_date,
                 R.string.by_signal_strength,
-                R.string.by_charge_level),
+                R.string.by_charge_level)
+            else
+                listOf(R.string.by_name,
+                    R.string.by_device_type,
+                    R.string.by_binding_date,
+                    R.string.by_signal_strength,
+                    R.string.by_charge_level),
             {
                 keySort = it
                 isShow = false

@@ -2,6 +2,10 @@ package com.example.geoblinker.ui.main.viewmodel
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.data.Device
@@ -10,6 +14,11 @@ import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.Signal
 import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.data.TypeSignal
+import com.example.geoblinker.model.Car
+import com.example.geoblinker.model.Cars
+import com.example.geoblinker.model.Details
+import com.example.geoblinker.network.Api
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,16 +32,17 @@ class DeviceViewModel(
     private val repository: Repository,
     private val application: Application
 ): ViewModel() {
+    private val _profilePrefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+    private var _token by mutableStateOf("")
+    private var _hash by mutableStateOf("")
     private val _prefs = application.getSharedPreferences("device", Context.MODE_PRIVATE)
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
-    private val _device = MutableStateFlow(Device("", "", false, 0))
+    private val _device = MutableStateFlow(Device("", "", "", false, 0))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
     private val _typeSignal = MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.MovementStarted))
     private val _signalsDevice = MutableStateFlow<List<Signal>>(emptyList())
     private val _signals = MutableStateFlow<List<Signal>>(emptyList())
     private val _news = MutableStateFlow<List<News>>(emptyList())
-    private val _countNotifications = MutableStateFlow(0)
-    private val _unitsDistance = MutableStateFlow(true) // true - км / м, false - мили / футы
     val devices: StateFlow<List<Device>> = _devices.asStateFlow()
     val device: StateFlow<Device> = _device.asStateFlow()
     val typesSignals: StateFlow<List<TypeSignal>> = _typesSignals.asStateFlow()
@@ -40,12 +50,47 @@ class DeviceViewModel(
     val signalsDevice: StateFlow<List<Signal>> = _signalsDevice.asStateFlow()
     val signals: StateFlow<List<Signal>> = _signals.asStateFlow()
     val news: StateFlow<List<News>> = _news.asStateFlow()
-    val unitsDistance = _unitsDistance.asStateFlow()
+    var unitsDistance by mutableStateOf(true) // true - км / м, false - мили / футы
+        private set
+    var uiState: DefaultStates by mutableStateOf(DefaultStates.Input)
+        private set
 
     init {
-        // Запускаем подписку на изменения
         viewModelScope.launch {
-            _unitsDistance.value = _prefs.getBoolean("unitsDistance", true)
+            _token = _profilePrefs.getString("token", null) ?: ""
+            _hash = _profilePrefs.getString("hash", null) ?: ""
+            unitsDistance = _prefs.getBoolean("unitsDistance", true)
+            repository.clearDevice()
+            var res: Cars
+            var next = false
+            while (!next) {
+                try {
+                    res = Api.retrofitService.getAllCar(
+                        mapOf(
+                            "token" to _token,
+                            "u_hash" to _hash
+                        )
+                    )
+                    if (res.code != "200")
+                        throw Exception("Code: ${res.code}")
+                } catch (e: Exception) {
+                    Log.e("getAllCar", e.toString())
+                    continue
+                }
+                res.data.cars.forEach { entry ->
+                    val device = entry.value
+                    repository.insertDevice(Device(
+                        imei = device.registrationPlate,
+                        id = device.id,
+                        name = device.details.name,
+                        isConnected = device.details.isConnected,
+                        bindingTime = device.details.bindingTime,
+                    ))
+                    Log.d("insertDevice", device.details.name)
+                    repository.insertAllTypeSignal(device.registrationPlate)
+                }
+                next = true
+            }
             launch {
                 repository.getDevices()
                     .collect { devicesList ->
@@ -64,21 +109,50 @@ class DeviceViewModel(
                         _news.value = it
                     }
             }
-            launch {
-                _countNotifications.value = _signals.value.size + _news.value.size - (_signals.value.count { it.isSeen } + _news.value.count { it.isSeen })
-            }
         }
     }
 
+    fun resetUiState() {
+        uiState = DefaultStates.Input
+    }
+
+    fun inputErrorUiState() {
+        uiState = DefaultStates.Error.InputError
+    }
+
     fun insertDevice(imei: String, name: String) {
-        val nowTime = Instant.now().toEpochMilli()
-        val device = Device(
-            imei,
-            name,
-            bindingTime = nowTime
-        )
-        _device.value = device
         viewModelScope.launch {
+            val nowTime = Instant.now().toEpochMilli()
+            val id: String
+            try {
+                val res = Api.retrofitService.addCar(
+                    mapOf(
+                        "token" to _token,
+                        "u_hash" to _hash,
+                        "data" to Gson().toJson(Car(
+                            registrationPlate = imei,
+                            details = Details(
+                                name = name,
+                                bindingTime = nowTime
+                            )
+                        ))
+                    )
+                )
+                if (res.code != "200")
+                    throw Exception("Code: ${res.code}, message: ${res.message}")
+                id = res.data.cteatedCar.cId
+            } catch (e: Exception) {
+                Log.e("addCar", e.toString())
+                uiState = DefaultStates.Error.ServerError
+                return@launch
+            }
+            val device = Device(
+                imei,
+                id = id,
+                name = name,
+                bindingTime = nowTime
+            )
+            _device.value = device
             repository.insertDevice(device)
             launch {
                 repository.insertAllTypeSignal(imei)
@@ -100,6 +174,7 @@ class DeviceViewModel(
                         _signalsDevice.value = it
                     }
             }
+            uiState = DefaultStates.Success
         }
     }
 
@@ -144,6 +219,30 @@ class DeviceViewModel(
     fun updateDevice(device: Device) {
         viewModelScope.launch {
             repository.updateDevice(device)
+            try {
+                val res = Api.retrofitService.updateCar(
+                    device.id,
+                    mapOf(
+                        "token" to _token,
+                        "u_hash" to _hash,
+                        "data" to Gson().toJson(
+                            Car(
+                                registrationPlate = device.imei,
+                                details = Details(
+                                    name = device.name,
+                                    isConnected = device.isConnected,
+                                    bindingTime = device.bindingTime
+                                )
+                            )
+                        )
+                    )
+                )
+                if (res.code != "200")
+                    throw Exception("Code: ${res.code}, message: ${res.message}")
+            } catch (e: Exception) {
+                Log.e("updateCar", e.toString())
+                uiState = DefaultStates.Error.ServerError
+            }
         }
         _device.value = device
     }
@@ -196,12 +295,12 @@ class DeviceViewModel(
         }
     }
 
-    fun setUnitsDistance(it: Boolean) {
+    fun updateUnitsDistance(it: Boolean) {
         viewModelScope.launch {
             _prefs.edit().putBoolean("unitsDistance", it).apply()
 
             withContext(Dispatchers.Main) {
-                _unitsDistance.value = it
+                unitsDistance = it
             }
         }
     }

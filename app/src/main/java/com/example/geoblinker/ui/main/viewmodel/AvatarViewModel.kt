@@ -11,7 +11,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.model.Profile
-import com.example.geoblinker.network.ProfileApi
+import com.example.geoblinker.network.Api
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -104,7 +104,7 @@ class AvatarViewModel(
         avatarUri = newUri
 
         val base64Photo = "data:image/png;base64," + Base64.encodeToString(outputFile.readBytes(), Base64.DEFAULT)
-        val res = ProfileApi.retrofitService.edit(
+        val res = Api.retrofitService.edit(
             mapOf(
                 "token" to _token,
                 "u_hash" to _hash,
@@ -134,7 +134,7 @@ class AvatarViewModel(
                 errorMessage = null
 
                 if (onServer) {
-                    ProfileApi.retrofitService.edit(
+                    Api.retrofitService.edit(
                         mapOf(
                             "token" to _token,
                             "u_hash" to _hash,

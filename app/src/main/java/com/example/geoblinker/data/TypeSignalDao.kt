@@ -16,4 +16,7 @@ interface TypeSignalDao {
 
     @Update
     suspend fun update(typeSignal: TypeSignal)
+
+    @Query("DELETE FROM type_signals")
+    suspend fun clear()
 }

@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.model.Code
-import com.example.geoblinker.network.RegistrationApi
+import com.example.geoblinker.network.Api
 import com.example.geoblinker.ui.auth.AuthViewModel
 import com.example.geoblinker.ui.auth.RegisterUiState
 import kotlinx.coroutines.launch
@@ -32,7 +32,7 @@ class RegistrationViewModel(application: Application) : AuthViewModel(applicatio
         viewModelScope.launch {
             val response: Code
             try {
-                response = RegistrationApi.retrofitService.register(
+                response = Api.retrofitService.register(
                     mapOf(
                         "u_phone" to "7$newPhone", // 7 999 999 99 99
                         "u_name" to newName,

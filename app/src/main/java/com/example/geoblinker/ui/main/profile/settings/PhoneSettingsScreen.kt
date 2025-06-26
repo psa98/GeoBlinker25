@@ -37,7 +37,6 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CodeTextField
 import com.example.geoblinker.ui.CustomButton
-import com.example.geoblinker.ui.GreenMediumButton
 import com.example.geoblinker.ui.PhoneNumberTextField
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.formatPhoneNumber
@@ -137,10 +136,10 @@ private fun PhoneScreen(
             height = 65
         )
         Spacer(Modifier.height(15.sdp()))
-        GreenMediumButton(
+        CustomButton(
             text = stringResource(R.string.confirm),
             onClick = { onClick() },
-            height = 65
+            typeColor = TypeColor.Green
         )
     }
     Box(

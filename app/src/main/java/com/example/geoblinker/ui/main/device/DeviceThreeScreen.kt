@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,8 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
 import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.BlueButton
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomLinkEmailPopup
+import com.example.geoblinker.ui.HSpacer
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.theme.sdp
@@ -50,6 +53,7 @@ fun DeviceThreeScreen(
     var isShow by remember { mutableStateOf(false) }
 
     Column(
+        modifier = Modifier.requiredWidth(330.sdp()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (device.name.isNotEmpty()) {
@@ -191,11 +195,15 @@ fun DeviceThreeScreen(
                 }
             }
         }
-        Spacer(Modifier.height(25.sdp()))
-        BlueButton(
-            stringResource(R.string.select_alarm_sound),
+        HSpacer(25)
+        CustomButton(
+            text = stringResource(R.string.select_alarm_sound),
+            onClick = {},
+            typeColor = TypeColor.Blue,
             enabled = typeSignal.checkedAlarm,
-            onClick = {}
+            height = 55,
+            radius = 10,
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 

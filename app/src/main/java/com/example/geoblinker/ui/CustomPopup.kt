@@ -55,8 +55,6 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.layout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -65,7 +63,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -74,6 +71,7 @@ import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
+import com.example.geoblinker.ui.theme.ColorStar
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.launch
@@ -314,7 +312,7 @@ fun CustomPopup(
                         )
                     }
                     HSpacer(25)
-                    GreenButton(
+                    CustomButton(
                         text = stringResource(R.string.send_the_code),
                         onClick = {
                             val ways = emptyList<String>().toMutableList()
@@ -344,7 +342,11 @@ fun CustomPopup(
                                 }
                                 sendCode(ways)
                             }
-                        }
+                        },
+                        typeColor = TypeColor.Green,
+                        height = 81,
+                        radius = 24,
+                        style = MaterialTheme.typography.headlineMedium
                     )
                     HSpacer(20)
                     Text(
@@ -357,16 +359,6 @@ fun CustomPopup(
         }
     }
 
-    /*
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Bottom,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        BackWhiteButton({ onChangeVisible(false) })
-        Spacer(Modifier.height(24.sdp()))
-    }
-     */
     if (isEnterEmail) {
         CustomEmailPopup(
             email,
@@ -414,20 +406,21 @@ fun CustomEmptyDevicesPopup(
                         modifier = Modifier.size(28.sdp()),
                         tint = Color.Unspecified
                     )
-                    Spacer(Modifier.height(21.sdp()))
+                    HSpacer(21)
                     Text(
                         stringResource(R.string.ask_add_new_device),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleLarge
                     )
-                    Spacer(Modifier.height(53.sdp()))
-                    GreenMediumButton(
+                    HSpacer(53)
+                    CustomButton(
                         modifier = Modifier.width(260.sdp()),
-                        icon = R.drawable.plus,
                         text = stringResource(R.string.link_device),
-                        onClick = toBindingScreen
+                        onClick = toBindingScreen,
+                        typeColor = TypeColor.Green,
+                        leftIcon = R.drawable.plus
                     )
-                    Spacer(Modifier.height(20.sdp()))
+                    HSpacer(20)
                     Text(
                         stringResource(R.string.problems_with_linking),
                         style = MaterialTheme.typography.bodyLarge
@@ -619,9 +612,11 @@ fun CustomDiagnosisPopup(
                             }
                         }
                         Spacer(Modifier.height(15.sdp()))
-                        GreenMediumButton(
+                        CustomButton(
                             text ="Обратиться в сервис",
-                            onClick = {}
+                            onClick = {},
+                            typeColor = TypeColor.Green,
+                            height = 55
                         )
                     }
                 }
@@ -722,7 +717,7 @@ fun CustomCommentsPopup(
                                 Icon(
                                     imageVector = Icons.Filled.StarRate,
                                     contentDescription = null,
-                                    tint = Color.Yellow
+                                    tint = ColorStar
                                 )
                             }
                         }
@@ -824,35 +819,6 @@ fun round(fl: Float): Int {
 }
 
 @Composable
-fun FullScreenBox() {
-    // Получаем размеры экрана
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.sdp()
-    val screenHeight = configuration.screenHeightDp.sdp()
-
-    Box(
-        modifier = Modifier
-            .graphicsLayer { clip = false }
-            .layout { measurable, _ ->
-                // Игнорируем родительские ограничения
-                val placeable = measurable.measure(
-                    Constraints(
-                        minWidth = 0,
-                        maxWidth = Constraints.Infinity,
-                        minHeight = 0,
-                        maxHeight = Constraints.Infinity
-                    )
-                )
-                layout(placeable.width, placeable.height) {
-                    placeable.place(0, 0)
-                }
-            }
-            .size(screenWidth, screenHeight) // Явно задаем размер экрана
-            .background(Color.Black.copy(alpha = 0.2f))
-    )
-}
-
-@Composable
 fun CustomEmailPopup(
     email: String,
     onDone: (String) -> Unit,
@@ -884,14 +850,22 @@ fun CustomEmailPopup(
                     isError = isError
                 )
                 Spacer(Modifier.height(25.sdp()))
-                GreenButton(
+                CustomButton(
                     text = stringResource(R.string.confirm),
-                    onClick = { onDone(value) }
+                    onClick = { onDone(value) },
+                    typeColor = TypeColor.Green,
+                    height = 81,
+                    radius = 24,
+                    style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(Modifier.height(10.sdp()))
-                WhiteButton(
+                CustomButton(
                     text = stringResource(R.string.cancellation),
-                    onClick = onCancel
+                    onClick = onCancel,
+                    typeColor = TypeColor.White,
+                    height = 81,
+                    radius = 24,
+                    style = MaterialTheme.typography.headlineMedium
                 )
             }
         }

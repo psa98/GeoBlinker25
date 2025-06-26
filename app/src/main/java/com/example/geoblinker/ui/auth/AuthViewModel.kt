@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.R
 import com.example.geoblinker.model.Authorization
-import com.example.geoblinker.network.RegistrationApi
+import com.example.geoblinker.network.Api
 import kotlinx.coroutines.launch
 
 abstract class AuthViewModel(
@@ -60,7 +60,7 @@ abstract class AuthViewModel(
     fun sendCode() {
         viewModelScope.launch {
             when (waysGetCode[nowWay]) {
-                "WhatsApp" -> Log.d("SendCode", "WhatsApp: " + RegistrationApi.retrofitService.auth(
+                "WhatsApp" -> Log.d("SendCode", "WhatsApp: " + Api.retrofitService.auth(
                     mapOf(
                         "login" to "7$phone", // 7 999 999 99 99
                         "type" to "whatsapp"
@@ -90,7 +90,7 @@ abstract class AuthViewModel(
         viewModelScope.launch {
             try {
                 val res = when (waysGetCode[nowWay]) {
-                    "WhatsApp" -> RegistrationApi.retrofitService.auth(
+                    "WhatsApp" -> Api.retrofitService.auth(
                         mapOf(
                             "login" to "7$phone", // 7 999 999 99 99
                             "password" to code,
@@ -110,7 +110,7 @@ abstract class AuthViewModel(
                     Log.d("Photo", res.user.photo)
                     _avatarPrefs.edit().putString("avatar_uri", res.user.photo).apply()
                     val timeHash = res.hash!!
-                    val data = RegistrationApi.retrofitService.token(timeHash).data
+                    val data = Api.retrofitService.getToken(timeHash).data
                     token = data.token
                     hash = data.hash
                     CodeUiState.Success

@@ -12,14 +12,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.data.AppDatabase
-import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.techsupport.TechSupportRepository
 import com.example.geoblinker.ui.auth.LoginViewModel
 import com.example.geoblinker.ui.auth.authorization.AuthorizationScreen
 import com.example.geoblinker.ui.auth.registration.RegistrationScreen
 import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
-import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
@@ -69,13 +67,6 @@ fun GeoBlinkerScreen(
             }
             composable(route = GeoBlinkerScreen.Main.name) {
                 MainScreen(
-                    DeviceViewModel(
-                        Repository(
-                            AppDatabase.getInstance(application).deviceDao(),
-                            AppDatabase.getInstance(application).typeSignalDao(),
-                            AppDatabase.getInstance(application).signalDao(),
-                            AppDatabase.getInstance(application).newsDao()),
-                        application),
                     SubscriptionViewModel(),
                     JournalViewModel(application),
                     NotificationViewModel(application),

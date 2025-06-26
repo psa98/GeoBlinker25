@@ -44,6 +44,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -56,9 +57,9 @@ import coil.compose.AsyncImagePainter
 import com.example.geoblinker.R
 import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Device
-import com.example.geoblinker.ui.GreenMediumButton
-import com.example.geoblinker.ui.GreenSmallButton
-import com.example.geoblinker.ui.WhiteSmallButton
+import com.example.geoblinker.data.Repository
+import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.binding.BindingOneScreen
 import com.example.geoblinker.ui.main.binding.BindingThreeScreen
 import com.example.geoblinker.ui.main.binding.BindingTwoScreen
@@ -94,6 +95,7 @@ import com.example.geoblinker.ui.main.profile.techsupport.TechSupport
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModelFactory
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.main.viewmodel.NotificationViewModel
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
@@ -249,26 +251,42 @@ fun TopBar(
             }
             Spacer(Modifier.width(10.sdp()))
             if (currentRoute == MainScreen.Map.name) {
-                GreenSmallButton(
-                    stringResource(R.string.map),
-                    {}
+                CustomButton(
+                    modifier = Modifier.width(105.sdp()),
+                    text = stringResource(R.string.map),
+                    onClick = {},
+                    typeColor = TypeColor.Green1,
+                    height = 50,
+                    radius = 100
                 )
             } else {
-                WhiteSmallButton(
-                    stringResource(R.string.map),
-                    { navController.navigate(MainScreen.Map.name) }
+                CustomButton(
+                    modifier = Modifier.width(105.sdp()),
+                    text = stringResource(R.string.map),
+                    onClick = { navController.navigate(MainScreen.Map.name) },
+                    typeColor = TypeColor.White,
+                    height = 50,
+                    radius = 100
                 )
             }
             Spacer(Modifier.width(10.sdp()))
             if (currentRoute == MainScreen.List.name) {
-                GreenSmallButton(
-                    stringResource(R.string.list),
-                    {}
+                CustomButton(
+                    modifier = Modifier.width(105.sdp()),
+                    text = stringResource(R.string.list),
+                    onClick = {},
+                    typeColor = TypeColor.Green1,
+                    height = 50,
+                    radius = 100
                 )
             } else {
-                WhiteSmallButton(
-                    stringResource(R.string.list),
-                    { navController.navigate(MainScreen.List.name) }
+                CustomButton(
+                    modifier = Modifier.width(105.sdp()),
+                    text = stringResource(R.string.list),
+                    onClick = { navController.navigate(MainScreen.List.name) },
+                    typeColor = TypeColor.White,
+                    height = 50,
+                    radius = 100
                 )
             }
             Spacer(Modifier.width(10.sdp()))
@@ -283,7 +301,6 @@ fun TopBar(
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun MainScreen(
-    viewModel: DeviceViewModel,
     subscriptionViewModel: SubscriptionViewModel,
     journalViewModel: JournalViewModel,
     notificationViewModel: NotificationViewModel,
@@ -293,6 +310,15 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
+    val repository = remember { Repository(
+        AppDatabase.getInstance(application).deviceDao(),
+        AppDatabase.getInstance(application).typeSignalDao(),
+        AppDatabase.getInstance(application).signalDao(),
+        AppDatabase.getInstance(application).newsDao())
+    }
+    val viewModel: DeviceViewModel = viewModel(
+        factory = DeviceViewModelFactory(repository, application)
+    )
     val profileViewModel = ProfileViewModel(application)
     val avatarViewModel = AvatarViewModel(application)
     val scope = rememberCoroutineScope()
@@ -386,11 +412,9 @@ fun MainScreen(
             }
             composable(route = MainScreen.BindingTwo.name) {
                 BindingTwoScreen(
+                    viewModel,
                     bindingImei,
-                    { name ->
-                        viewModel.insertDevice(bindingImei, name)
-                        navController.navigate(MainScreen.BindingThree.name)
-                    },
+                    { navController.navigate(MainScreen.BindingThree.name) },
                     { navController.navigateUp() }
                 )
             }
@@ -783,9 +807,11 @@ fun MainScreen(
                             style = MaterialTheme.typography.titleLarge
                         )
                         Spacer(Modifier.height(28.sdp()))
-                        GreenMediumButton(
+                        CustomButton(
                             text = "Перейти к оплате",
-                            onClick = { navController.navigate("${MainScreen.Subscription.name}/${currentRoute}") }
+                            onClick = { navController.navigate("${MainScreen.Subscription.name}/${currentRoute}") },
+                            typeColor = TypeColor.Green,
+                            height = 55
                         )
                     }
                 }

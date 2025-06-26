@@ -32,7 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.GreenMediumButton
+import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
 
@@ -140,10 +141,10 @@ fun SubscriptionTwoScreen(
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(Modifier.height(54.sdp()))
-        GreenMediumButton(
+        CustomButton(
             text = "Оплатить",
             onClick = paySubscription,
-            height = 65,
+            typeColor = TypeColor.Green,
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold
             )

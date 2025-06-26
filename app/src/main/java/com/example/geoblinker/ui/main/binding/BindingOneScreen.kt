@@ -10,18 +10,14 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,8 +31,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.GreenMediumButton
+import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.ImeiTextField
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.theme.sdp
 import com.example.geoblinker.ui.theme.ssp
 import com.google.mlkit.vision.barcode.BarcodeScanner
@@ -48,9 +46,9 @@ fun BindingOneScreen(
     toTwoScreen: (String) -> Unit,
     toBack: () -> Unit
 ) {
-    var imei by remember { mutableStateOf("") }
-    var isError by remember { mutableStateOf(false) }
-    var isShow by remember { mutableStateOf(false) }
+    var imei by rememberSaveable { mutableStateOf("") }
+    var isError by rememberSaveable { mutableStateOf(false) }
+    var isShow by rememberSaveable { mutableStateOf(false) }
 
     fun onDone() {
         if (imei.length != 15)
@@ -59,59 +57,49 @@ fun BindingOneScreen(
             toTwoScreen(imei)
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+    Column(
+        modifier = Modifier.requiredWidth(310.sdp()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item {
-            Column(
-                modifier = Modifier.width(310.sdp()),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    stringResource(R.string.new_device),
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(Modifier.height(20.sdp()))
-                Image(
-                    painter = painterResource(R.drawable.new_device_image),
-                    contentDescription = null,
-                    modifier = Modifier.size(310.sdp(), 222.sdp())
-                )
-                Spacer(Modifier.height(50.sdp()))
-                ImeiTextField(
-                    imei,
-                    {
-                        imei = it
-                        isError = false
-                    },
-                    { onDone() },
-                    {
-                        isShow = true
-                    },
-                    isError = isError
-                )
-                Spacer(Modifier.height(15.sdp()))
-                GreenMediumButton(
-                    text = stringResource(R.string.link),
-                    onClick = { onDone() },
-                    height = 65,
-                    style = MaterialTheme.typography.headlineMedium
-                )
-
-                if (isError) {
-                    Spacer(Modifier.height(10.sdp()))
-                    Text(
-                        stringResource(R.string.imei_not_found),
-                        color = MaterialTheme.colorScheme.error,
-                        lineHeight = 22.ssp(),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                } else {
-                    Spacer(Modifier.height(32.sdp()))
-                }
-                Spacer(Modifier.height(115.sdp()))
-            }
+        Text(
+            stringResource(R.string.new_device),
+            style = MaterialTheme.typography.titleMedium
+        )
+        HSpacer(20)
+        Image(
+            painter = painterResource(R.drawable.new_device_image),
+            contentDescription = null,
+            modifier = Modifier.size(310.sdp(), 222.sdp())
+        )
+        HSpacer(50)
+        ImeiTextField(
+            imei,
+            {
+                imei = it
+                isError = false
+            },
+            { onDone() },
+            {
+                isShow = true
+            },
+            isError = isError
+        )
+        HSpacer(15)
+        CustomButton(
+            text = stringResource(R.string.link),
+            onClick = { onDone() },
+            typeColor = TypeColor.Green,
+            height = 65,
+            style = MaterialTheme.typography.headlineMedium
+        )
+        HSpacer(10)
+        if (isError) {
+            Text(
+                stringResource(R.string.imei_not_found),
+                color = MaterialTheme.colorScheme.error,
+                lineHeight = 22.ssp(),
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 
@@ -122,7 +110,6 @@ fun BindingOneScreen(
     if (isShow) {
         BarcodeScannerScreen {
             imei = it
-            onDone()
         }
     }
 }

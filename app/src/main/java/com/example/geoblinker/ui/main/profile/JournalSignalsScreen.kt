@@ -45,8 +45,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.ui.BackButton
-import com.example.geoblinker.ui.BlackMediumButton
+import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomListPopup
+import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
 import com.example.geoblinker.ui.theme.sdp
@@ -223,12 +224,13 @@ fun JournalSignalsScreen(
             )
             if (signals.isNotEmpty()) {
                 Spacer(Modifier.width(20.sdp()))
-                BlackMediumButton(
+                CustomButton(
                     modifier = Modifier.width(205.sdp()),
-                    icon = R.drawable.download,
                     text = "Скачать журнал",
                     onClick = { journalViewModel.downloadJournal(devices, signals) },
-                    height = 65
+                    typeColor = TypeColor.Black,
+                    rightIcon = R.drawable.download,
+                    iconSize = 16
                 )
             }
         }

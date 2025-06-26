@@ -9,7 +9,10 @@ converterGsonVersion = "2.9.0"
 firebaseBom = "33.15.0"
 gsonVersion = "1.0.0"
 hiltAndroid = "2.50"
+hiltAndroidVersion = "2.48.1"
+hiltCompiler = "2.48.1"
 hiltCompilerVersion = "2.50"
+hiltNavigationCompose = "1.0.0"
 hiltNavigationComposeVersion = "1.1.0"
 kotlin = "2.0.0"
 coreKtx = "1.16.0"
@@ -43,6 +46,7 @@ androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "
 androidx-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayoutCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationComposeVersion" }
+androidx-hilt-navigation-compose-v100 = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 androidx-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 androidx-lifecycle-viewmodel-compose-v270 = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 androidx-material-icons-core = { module = "androidx.compose.material:material-icons-core" }
@@ -57,7 +61,9 @@ firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 gms-play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 google-accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissionsVersion" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gsonVersion" }
+hilt-android-v2481 = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroidVersion" }
 hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompilerVersion" }
+hilt-compiler-v2481 = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
