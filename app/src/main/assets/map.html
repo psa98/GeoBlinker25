@@ -25,6 +25,7 @@
     var customIcons = {};
     var map;
     var currentLayer;
+    var markers = {};
     var layers = {
         light: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap'
@@ -64,7 +65,6 @@
         currentZoom = zoom;
     }
 
-    // Функция для изменения центра без изменения зума
     function setCenter(lat, lng) {
         if (!map) return;
         const currentZoom = map.getZoom();
@@ -72,6 +72,11 @@
     }
 
     function addSvgMarker(imei, lat, lng, svgFileName, width, height) {
+        if (markers[imei]) {
+            markers[imei].setLatLng([lat, lng]);
+            return;
+        }
+
         if (!customIcons[svgFileName]) {
             customIcons[svgFileName] = L.icon({
                 iconUrl: 'file:///android_asset/' + svgFileName,
@@ -80,11 +85,18 @@
                 popupAnchor: [0, -height/2]
             });
         }
-        L.marker([lat, lng], {icon: customIcons[svgFileName]})
-        .on('click', function(e) {
-            AndroidInterface.onMarkerClicked(imei);
-        })
-        .addTo(map);
+
+        markers[imei] = L.marker([lat, lng], {icon: customIcons[svgFileName]})
+            .on('click', function(e) {
+                AndroidInterface.onMarkerClicked(imei);
+            })
+            .addTo(map);
+    }
+
+    function updateMarkerPosition(imei, lat, lng) {
+        if (markers[imei]) {
+            markers[imei].setLatLng([lat, lng]);
+        }
     }
 
     function zoomIn() {

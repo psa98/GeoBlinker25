@@ -115,6 +115,15 @@ fun MapScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(1000)
+            devices.forEach { device ->
+                webView.evaluateJavascript("updateMarkerPosition(${device.imei}, ${device.lat}, ${device.lng})", null)
+            }
+        }
+    }
+
     Box(
         Modifier.fillMaxSize(),
         contentAlignment = Alignment.CenterEnd

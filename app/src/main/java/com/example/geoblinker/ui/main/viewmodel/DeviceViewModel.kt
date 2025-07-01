@@ -17,9 +17,20 @@ import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.model.Car
 import com.example.geoblinker.model.Cars
 import com.example.geoblinker.model.Details
+import com.example.geoblinker.model.imei.AddParamsImei
+import com.example.geoblinker.model.imei.GetDetailImei
+import com.example.geoblinker.model.imei.GetDetailParamsImei
+import com.example.geoblinker.model.imei.GetDeviceListImei
+import com.example.geoblinker.model.imei.GetDeviceListParamsImei
+import com.example.geoblinker.model.imei.LoginImei
+import com.example.geoblinker.model.imei.LoginParamsImei
+import com.example.geoblinker.model.imei.PosData
+import com.example.geoblinker.model.imei.RequestImei
 import com.example.geoblinker.network.Api
+import com.example.geoblinker.network.ApiImei
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,9 +46,12 @@ class DeviceViewModel(
     private val _profilePrefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     private var _token by mutableStateOf("")
     private var _hash by mutableStateOf("")
+    private var _sid by mutableStateOf("")
+    private var _sidFamily by mutableStateOf("")
+    private var _sgid by mutableStateOf("")
     private val _prefs = application.getSharedPreferences("device", Context.MODE_PRIVATE)
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
-    private val _device = MutableStateFlow(Device("", "", "", false, 0))
+    private val _device = MutableStateFlow(Device("", "", "", false, 0, ""))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
     private val _typeSignal = MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.MovementStarted))
     private val _signalsDevice = MutableStateFlow<List<Signal>>(emptyList())
@@ -77,25 +91,22 @@ class DeviceViewModel(
                     Log.e("getAllCar", e.toString())
                     continue
                 }
+                val newDevices = mutableListOf<Device>()
                 res.data.cars.forEach { entry ->
                     val device = entry.value
-                    repository.insertDevice(Device(
+                    val newDevice = Device(
                         imei = device.registrationPlate,
                         id = device.id,
                         name = device.details.name,
                         isConnected = device.details.isConnected,
-                        bindingTime = device.details.bindingTime,
-                    ))
-                    Log.d("insertDevice", device.details.name)
+                        bindingTime = device.details.bindingTime
+                    )
+                    newDevices.add(newDevice)
+                    repository.insertDevice(newDevice)
                     repository.insertAllTypeSignal(device.registrationPlate)
                 }
+                _devices.update { newDevices }
                 next = true
-            }
-            launch {
-                repository.getDevices()
-                    .collect { devicesList ->
-                        _devices.value = devicesList
-                    }
             }
             launch {
                 repository.getAllSignals()
@@ -108,6 +119,97 @@ class DeviceViewModel(
                     .collect {
                         _news.value = it
                     }
+            }
+            var resImei: LoginImei
+            var nextImei = false
+            while (!nextImei) {
+                try {
+                    resImei = ApiImei.retrofitService.login(
+                        RequestImei(
+                            module = "user",
+                            func = "Login",
+                            params = LoginParamsImei()
+                        )
+                    )
+                } catch (e: Exception) {
+                    Log.e("loginImei", e.toString())
+                    continue
+                }
+                _sid = resImei.sid
+                _sidFamily = resImei.family[0]["sid"] as String
+                Log.d("LoginImei", "sid: $_sid, sidFamily: $_sidFamily")
+                nextImei = true
+            }
+            var resDeviceListImei: GetDeviceListImei
+            nextImei = false
+            while (!nextImei) {
+                try {
+                    resDeviceListImei = ApiImei.retrofitService.getDeviceList(
+                        _sid,
+                        RequestImei(
+                            module = "family",
+                            func = "GetDeviceList",
+                            params = GetDeviceListParamsImei(
+                                family = _sidFamily
+                            )
+                        )
+                    )
+                } catch (e: Exception) {
+                    Log.e("getDeviceListImei", e.toString())
+                    continue
+                }
+                _sgid = resDeviceListImei.items[0].sgid
+                _devices.update { currentList ->
+                    currentList.map { device ->
+                        resDeviceListImei.items.forEach {
+                            if (it.imei.toString() == device.imei) {
+                                Log.i("getDeviceListImei", "name: ${device.name}, simei: ${it.simei}")
+                                return@map device.copy(
+                                    simei = it.simei
+                                )
+                            }
+                        }
+                        device
+                    }
+                }
+                nextImei = true
+            }
+        }
+        viewModelScope.launch {
+            while (true) {
+                delay(1000)
+                _devices.update { currentList ->
+                    currentList.map { device ->
+                        if (device.simei == "" || _sid == "")
+                            return@map device
+                        val res: GetDetailImei
+                        try {
+                            res = ApiImei.retrofitService.getDetail(
+                                sid = _sid,
+                                RequestImei(
+                                    module = "device",
+                                    func = "GetDetail",
+                                    params = GetDetailParamsImei(
+                                        simei = device.simei
+                                    )
+                                )
+                            )
+                        } catch (e: Exception) {
+                            Log.e("getDetailImei", e.toString())
+                            return@map device
+                        }
+                        //Log.i("getDetailImei", _sid)
+                        //Log.i("getDetailImei", device.name)
+                        //Log.i("getDetailImei", device.simei)
+                        //Log.e("getDetailImei", res.error)
+                        //Log.i("getDetailImei", res.posString)
+                        val pos = Gson().fromJson(res.posString, PosData::class.java)
+                        return@map device.copy(
+                            lat = pos.lat / 1e6,
+                            lng = pos.lon / 1e6
+                        )
+                    }
+                }
             }
         }
     }
@@ -122,6 +224,27 @@ class DeviceViewModel(
 
     fun insertDevice(imei: String, name: String) {
         viewModelScope.launch {
+            val simei: String
+            try {
+                val res = ApiImei.retrofitService.add(
+                    sid = _sid,
+                    RequestImei(
+                        module = "device",
+                        func = "Add",
+                        params = AddParamsImei(
+                            info = listOf(mapOf("imei" to imei.toLong())),
+                            sgid = _sgid
+                        )
+                    )
+                )
+                if (res.items.isEmpty())
+                    throw Exception("Failed attempt to add a device to the server")
+                simei = res.items[0].simei
+            } catch (e: Exception) {
+                Log.e("addImei", e.toString())
+                uiState = DefaultStates.Error.ServerError
+                return@launch
+            }
             val nowTime = Instant.now().toEpochMilli()
             val id: String
             try {
@@ -140,7 +263,7 @@ class DeviceViewModel(
                 )
                 if (res.code != "200")
                     throw Exception("Code: ${res.code}, message: ${res.message}")
-                id = res.data.cteatedCar.cId
+                id = res.data.createdCar.cId
             } catch (e: Exception) {
                 Log.e("addCar", e.toString())
                 uiState = DefaultStates.Error.ServerError
@@ -150,9 +273,13 @@ class DeviceViewModel(
                 imei,
                 id = id,
                 name = name,
-                bindingTime = nowTime
+                bindingTime = nowTime,
+                simei = simei
             )
             _device.value = device
+            _devices.update { currentList ->
+                currentList.plus(device)
+            }
             repository.insertDevice(device)
             launch {
                 repository.insertAllTypeSignal(imei)

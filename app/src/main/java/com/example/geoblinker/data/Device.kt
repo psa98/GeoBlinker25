@@ -12,6 +12,7 @@ data class Device(
     val name: String,
     val isConnected: Boolean = true,
     val bindingTime: Long,
+    val simei: String = "",
     val lat: Double = Random.nextDouble(-90.0, 90.0),
     val lng: Double = Random.nextDouble(-180.0, 180.0),
     val typeStatus: TypeStatus = TypeStatus.Available,

@@ -49,8 +49,8 @@ data class ResponseCreateCar(
 )
 
 data class DataResponseCreateCar(
-    @SerializedName("cteated_car")
-    val cteatedCar: IdDataResponseCreateCar
+    @SerializedName("created_car")
+    val createdCar: IdDataResponseCreateCar
 )
 
 data class IdDataResponseCreateCar(
