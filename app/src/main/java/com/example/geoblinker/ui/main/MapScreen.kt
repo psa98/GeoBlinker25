@@ -60,7 +60,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
-import com.example.geoblinker.data.Device
+import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomCommentsPopup

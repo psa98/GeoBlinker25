@@ -49,7 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
-import com.example.geoblinker.data.Device
+import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomCommentsPopup
 import com.example.geoblinker.ui.CustomDiagnosisPopup

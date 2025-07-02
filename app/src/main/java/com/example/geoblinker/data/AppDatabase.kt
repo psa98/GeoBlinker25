@@ -12,11 +12,10 @@ import com.example.geoblinker.data.techsupport.MessageTechSupport
 import com.example.geoblinker.data.techsupport.MessageTechSupportDao
 
 @Database(
-    entities = [Device::class, TypeSignal::class, Signal::class, News::class, ChatTechSupport::class, MessageTechSupport::class],
-    version = 12
+    entities = [TypeSignal::class, Signal::class, News::class, ChatTechSupport::class, MessageTechSupport::class],
+    version = 13
 )
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun deviceDao(): DeviceDao
     abstract fun typeSignalDao(): TypeSignalDao
     abstract fun signalDao(): SignalDao
     abstract fun newsDao(): NewsDao
@@ -24,6 +23,40 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun MessageTechSupportDao(): MessageTechSupportDao
 
     companion object {
+        private val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE signals")
+                db.execSQL("DROP TABLE type_signals")
+                db.execSQL("DROP TABLE devices")
+
+                db.execSQL(
+                    """
+                        CREATE TABLE 'signals' (
+                            'id' INTEGER NOT NULL PRIMARY KEY,
+                            'deviceId' TEXT NOT NULL,
+                            'name' TEXT NOT NULL,
+                            'dateTime' INTEGER NOT NULL,
+                            'isSeen' INTEGER NOT NULL DEFAULT 0
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        CREATE TABLE 'type_signals' (
+                            'id' INTEGER NOT NULL PRIMARY KEY,
+                            'deviceId' TEXT NOT NULL,
+                            'type' TEXT NOT NULL,
+                            'checked' INTEGER NOT NULL,
+                            'checkedPush' INTEGER NOT NULL,
+                            'checkedEmail' INTEGER NOT NULL,
+                            'checkedAlarm' INTEGER NOT NULL,
+                            'soundUri' TEXT
+                        )
+                    """.trimIndent()
+                )
+            }
+        }
         private val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL(
@@ -213,7 +246,8 @@ abstract class AppDatabase : RoomDatabase() {
                         MIGRATION_8_9,
                         MIGRATION_9_10,
                         MIGRATION_10_11,
-                        MIGRATION_11_12)
+                        MIGRATION_11_12,
+                        MIGRATION_12_13)
                     .build()
                 INSTANCE = instance
                 instance

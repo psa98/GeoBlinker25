@@ -56,8 +56,8 @@ import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import com.example.geoblinker.R
 import com.example.geoblinker.data.AppDatabase
-import com.example.geoblinker.data.Device
 import com.example.geoblinker.data.Repository
+import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.binding.BindingOneScreen
@@ -311,7 +311,6 @@ fun MainScreen(
     val context = LocalContext.current
     val application = context.applicationContext as Application
     val repository = remember { Repository(
-        AppDatabase.getInstance(application).deviceDao(),
         AppDatabase.getInstance(application).typeSignalDao(),
         AppDatabase.getInstance(application).signalDao(),
         AppDatabase.getInstance(application).newsDao())

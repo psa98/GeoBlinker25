@@ -3,30 +3,10 @@ package com.example.geoblinker.data
 import kotlinx.coroutines.flow.Flow
 
 class Repository(
-    private val deviceDao: DeviceDao,
     private val typeSignalDao: TypeSignalDao,
     private val signalDao: SignalDao,
     private val newsDao: NewsDao
 ) {
-    suspend fun insertDevice(device: Device) {
-        deviceDao.insert(device)
-    }
-
-    suspend fun clearDevice() {
-        typeSignalDao.clear()
-        deviceDao.clear()
-    }
-
-    fun getDevice(imei: String): Flow<Device> {
-        return deviceDao.getDevice(imei)
-    }
-
-    fun getDevices(): Flow<List<Device>> = deviceDao.getAllDevices()
-
-    suspend fun updateDevice(device: Device) {
-        deviceDao.updateDevice(device)
-    }
-
     suspend fun insertAllTypeSignal(imei: String) {
         val listTypeSignal = listOf(
             TypeSignal(deviceId = imei, type = SignalType.MovementStarted),

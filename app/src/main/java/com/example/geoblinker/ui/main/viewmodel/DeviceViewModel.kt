@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.geoblinker.data.Device
 import com.example.geoblinker.data.News
 import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.Signal
@@ -17,6 +16,7 @@ import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.model.Car
 import com.example.geoblinker.model.Cars
 import com.example.geoblinker.model.Details
+import com.example.geoblinker.model.Device
 import com.example.geoblinker.model.imei.AddParamsImei
 import com.example.geoblinker.model.imei.GetDetailImei
 import com.example.geoblinker.model.imei.GetDetailParamsImei
@@ -74,7 +74,7 @@ class DeviceViewModel(
             _token = _profilePrefs.getString("token", null) ?: ""
             _hash = _profilePrefs.getString("hash", null) ?: ""
             unitsDistance = _prefs.getBoolean("unitsDistance", true)
-            repository.clearDevice()
+            //repository.clearDevice()
             var res: Cars
             var next = false
             while (!next) {
@@ -102,7 +102,7 @@ class DeviceViewModel(
                         bindingTime = device.details.bindingTime
                     )
                     newDevices.add(newDevice)
-                    repository.insertDevice(newDevice)
+                    //repository.insertDevice(newDevice)
                     repository.insertAllTypeSignal(device.registrationPlate)
                 }
                 _devices.update { newDevices }
@@ -280,7 +280,7 @@ class DeviceViewModel(
             _devices.update { currentList ->
                 currentList.plus(device)
             }
-            repository.insertDevice(device)
+            //repository.insertDevice(device)
             launch {
                 repository.insertAllTypeSignal(imei)
                 repository.getTypeSignal(device.imei)
@@ -337,15 +337,22 @@ class DeviceViewModel(
 
     fun getDevice(imei: String) {
         viewModelScope.launch {
-            repository.getDevice(imei).collect {
-                _device.value = it
+            _devices.value.forEach {
+                if (it.imei == imei)
+                    _device.value = it
             }
         }
     }
 
     fun updateDevice(device: Device) {
         viewModelScope.launch {
-            repository.updateDevice(device)
+            _devices.update { currentList ->
+                currentList.map {
+                    if (it.imei == device.imei)
+                        return@map device
+                    it
+                }
+            }
             try {
                 val res = Api.retrofitService.updateCar(
                     device.id,

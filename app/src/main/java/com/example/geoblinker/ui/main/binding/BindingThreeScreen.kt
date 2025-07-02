@@ -26,7 +26,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
-import com.example.geoblinker.data.Device
+import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.HSpacer

@@ -1,4 +1,4 @@
-package com.example.geoblinker.data
+package com.example.geoblinker.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -70,7 +70,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
-import com.example.geoblinker.data.Device
+import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.theme.ColorStar
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
