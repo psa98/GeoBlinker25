@@ -70,7 +70,7 @@ fun AuthorizationScreen(
                 }
                 composable(route = AuthorizationScreen.Four.name) {
                     FourScreen(
-                        viewModel.name,
+                        viewModel.name.value,
                         mainScreen
                     )
                 }

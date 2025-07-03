@@ -40,7 +40,7 @@ fun CodeScreen(
     toBack: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    val uiState = viewModel.codeUiState
+    val uiState by viewModel.codeUiState
     var value by rememberSaveable { mutableStateOf("") }
     var changeMode by rememberSaveable { mutableStateOf(false) }
     var remainingTime by rememberSaveable { mutableIntStateOf(30) }

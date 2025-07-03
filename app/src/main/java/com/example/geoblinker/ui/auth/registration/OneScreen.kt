@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -38,9 +39,9 @@ fun OneScreen(
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val uiState = viewModel.registerUiState
-    val phone = viewModel.phone
-    val name = viewModel.name
+    val uiState by viewModel.registerUiState
+    val phone by viewModel.phone
+    val name by viewModel.name
 
     fun onClick() {
         viewModel.register(phone, name)
@@ -107,6 +108,7 @@ fun OneScreen(
                         is RegisterUiState.Error.ErrorName -> R.string.enter_the_user_name
                         is RegisterUiState.Error.ErrorDoublePhone -> R.string.invalid_double_phone
                         is RegisterUiState.Error.ErrorRegister -> R.string.invalid_register
+                        else -> R.string.invalid_register
                     }
                 ),
                 color = Color(0xFFC4162D),

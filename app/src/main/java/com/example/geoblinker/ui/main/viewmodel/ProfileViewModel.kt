@@ -3,6 +3,7 @@ package com.example.geoblinker.ui.main.viewmodel
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -48,13 +49,13 @@ class ProfileViewModel(
         )
     )
     val subscription = _subscription.asStateFlow()
-    var name by mutableStateOf("Константин Гусевский")
+    var name = mutableStateOf("Константин Гусевский")
         private set
     val phone = _phone.asStateFlow()
     val isLogin = _isLogin.asStateFlow()
     val email = _email.asStateFlow()
     val waysConfirmationCode = _waysConfirmationCode.asStateFlow()
-    var uiState: DefaultStates by mutableStateOf(DefaultStates.Input)
+    var uiState: MutableState<DefaultStates> = mutableStateOf(DefaultStates.Input)
         private set
 
     init {
@@ -66,7 +67,7 @@ class ProfileViewModel(
             _token = _prefs.getString("token", null) ?: ""
             _hash = _prefs.getString("hash", null) ?: ""
             _subscription.value = _prefs.getLong("subscription", 0)
-            name = _prefs.getString("name", "") ?: ""
+            name.value = _prefs.getString("name", "") ?: ""
             _phone.value = _prefs.getString("phone", "") ?: ""
             _isLogin.value = _prefs.getBoolean("login", false)
             _email.value = _prefs.getString("email", "") ?: ""
@@ -95,11 +96,11 @@ class ProfileViewModel(
     }
 
     fun resetUiState() {
-        uiState = DefaultStates.Input
+        uiState.value = DefaultStates.Input
     }
     
     fun inputErrorUiState() {
-        uiState = DefaultStates.Error.InputError
+        uiState.value = DefaultStates.Error.InputError
     }
 
     fun updateName(newName: String) {
@@ -118,15 +119,15 @@ class ProfileViewModel(
                 Log.d("ChangeName", "Code: ${res.code}, message: ${res.message ?: "Unknown"}")
             } catch(e: Exception) {
                 Log.e("ChangeName", e.toString())
-                uiState = DefaultStates.Error.ServerError
+                uiState.value = DefaultStates.Error.ServerError
                 return@launch
             }
             if (res.code == "200") {
                 _prefs.edit().putString("name", newName).apply()
-                name = newName
-                uiState = DefaultStates.Success
+                name.value = newName
+                uiState.value = DefaultStates.Success
             } else {
-                uiState = DefaultStates.Error.ServerError
+                uiState.value = DefaultStates.Error.ServerError
             }
         }
     }
@@ -186,7 +187,7 @@ class ProfileViewModel(
         _prefs.edit().clear().apply()
         _isLogin.value = false
         _subscription.value = 0
-        name = ""
+        name.value = ""
         _phone.value = ""
         _email.value = ""
         _orderWays.value = ""

@@ -37,8 +37,8 @@ fun NameSettingsScreen(
     viewModel: ProfileViewModel,
     toBack: () -> Unit
 ) {
-    val name = viewModel.name
-    val uiState = viewModel.uiState
+    val name by viewModel.name
+    val uiState by viewModel.uiState
     var value by rememberSaveable { mutableStateOf("") }
 
     fun onClick() {

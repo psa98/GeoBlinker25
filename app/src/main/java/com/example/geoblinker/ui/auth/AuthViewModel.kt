@@ -3,6 +3,7 @@ package com.example.geoblinker.ui.auth
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -31,25 +32,25 @@ abstract class AuthViewModel(
     private var token by mutableStateOf("")
     private var hash by mutableStateOf("")
 
-    var phone by mutableStateOf("")
+    var phone = mutableStateOf("")
         private set
-    var name by mutableStateOf("")
+    var name = mutableStateOf("")
         private set
-    var email by mutableStateOf("")
+    var email = mutableStateOf("")
         private set
-    var codeUiState: CodeUiState by mutableStateOf(CodeUiState.Input)
+    var codeUiState: MutableState<CodeUiState> = mutableStateOf(CodeUiState.Input)
         private set
 
     fun resetCodeUiState() {
-        codeUiState = CodeUiState.Input
+        codeUiState.value = CodeUiState.Input
     }
 
     fun updatePhone(newPhone: String) {
-        phone = newPhone
+        phone.value = newPhone
     }
 
     fun updateName(newName: String) {
-        name = newName
+        name.value = newName
     }
 
     fun setWays(ways: List<String>) {
@@ -62,7 +63,7 @@ abstract class AuthViewModel(
             when (waysGetCode[nowWay]) {
                 "WhatsApp" -> Log.d("SendCode", "WhatsApp: " + Api.retrofitService.auth(
                     mapOf(
-                        "login" to "7$phone", // 7 999 999 99 99
+                        "login" to "7${phone.value}", // 7 999 999 99 99
                         "type" to "whatsapp"
                     )
                 ).code)
@@ -92,7 +93,7 @@ abstract class AuthViewModel(
                 val res = when (waysGetCode[nowWay]) {
                     "WhatsApp" -> Api.retrofitService.auth(
                         mapOf(
-                            "login" to "7$phone", // 7 999 999 99 99
+                            "login" to "7${phone.value}", // 7 999 999 99 99
                             "password" to code,
                             "type" to "whatsapp"
                         )
@@ -104,9 +105,9 @@ abstract class AuthViewModel(
                         )
                     }
                 }
-                codeUiState = if (res.code == "200" && res.user != null) {
-                    name = res.user.name
-                    email = res.user.email ?: ""
+                codeUiState.value = if (res.code == "200" && res.user != null) {
+                    name.value = res.user.name
+                    email.value = res.user.email ?: ""
                     Log.d("Photo", res.user.photo)
                     _avatarPrefs.edit().putString("avatar_uri", res.user.photo).apply()
                     val timeHash = res.hash!!
@@ -118,7 +119,7 @@ abstract class AuthViewModel(
                     CodeUiState.Error
             } catch (e: Exception) {
                 Log.e("Code", e.toString())
-                codeUiState = CodeUiState.Error
+                codeUiState.value = CodeUiState.Error
             }
         }
     }
@@ -127,9 +128,9 @@ abstract class AuthViewModel(
         viewModelScope.launch {
             _prefs
                 .edit()
-                .putString("name", name)
-                .putString("email", email)
-                .putString("phone", phone)
+                .putString("name", name.value)
+                .putString("email", email.value)
+                .putString("phone", phone.value)
                 .putString("token", token)
                 .putString("hash", hash)
                 .apply()

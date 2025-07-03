@@ -81,7 +81,7 @@ fun ProfileScreen(
     val avatarUri = viewModel.avatarUri
     val errorMessage = viewModel.errorMessage
     val subscription by profileViewModel.subscription.collectAsState()
-    val name = profileViewModel.name
+    val name by profileViewModel.name
 
     Column(
         modifier = Modifier.requiredWidth(330.sdp()),

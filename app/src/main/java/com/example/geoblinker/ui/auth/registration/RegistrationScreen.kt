@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -35,7 +36,7 @@ fun RegistrationScreen(
     val context = LocalContext.current
     val application = context.applicationContext as Application
     val viewModel = RegistrationViewModel(application)
-    val name = viewModel.name
+    val name by viewModel.name
 
     Scaffold { innerPadding ->
         Box(
