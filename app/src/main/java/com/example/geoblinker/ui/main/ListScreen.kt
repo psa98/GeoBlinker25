@@ -19,11 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.geoblinker.R
-import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomCommentsPopup
@@ -60,7 +55,6 @@ import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.device.calculateDistance
 import com.example.geoblinker.ui.main.device.formatSpeed
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
-import com.example.geoblinker.ui.theme.ColorStar
 import com.example.geoblinker.ui.theme.hdp
 import com.example.geoblinker.ui.theme.sdp
 import com.google.android.gms.maps.model.LatLng
@@ -157,7 +151,7 @@ fun ListScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     items(sortedDevices) { item ->
-                        var isShowAdd by remember { mutableStateOf(false) }
+                        //var isShowAdd by remember { mutableStateOf(false) }
 
                         Column(
                             modifier = Modifier.width(330.sdp())
@@ -173,11 +167,11 @@ fun ListScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable {
-                                                if (isShowAdd) {
+                                                //if (isShowAdd) {
                                                     viewModel.setDevice(item)
                                                     toDeviceScreen()
-                                                }
-                                                isShowAdd = true
+                                                //}
+                                                //isShowAdd = true
                                             },
                                         shape = RoundedCornerShape(10.sdp()),
                                         color = Color.White,
@@ -245,9 +239,32 @@ fun ListScreen(
                                                     tint = Color.Unspecified
                                                 )
                                             }
-
+                                            HorizontalDivider(
+                                                Modifier.fillMaxWidth()
+                                                    .padding(horizontal = 15.sdp()),
+                                                1.sdp(),
+                                                Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                                            )
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth()
+                                                    .padding(15.sdp()),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    formatSpeed(10.0, unitsDistance),
+                                                    modifier = Modifier.weight(1f),
+                                                    style = MaterialTheme.typography.labelMedium
+                                                )
+                                                Icon(
+                                                    imageVector = Icons.Filled.Speed,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.sdp()),
+                                                    tint = Color(0xFF12CD4A)
+                                                )
+                                            }
                                         }
                                     }
+                                    /*
                                     if (isShowAdd) {
                                         Column(
                                             modifier = Modifier.padding(15.sdp())
@@ -324,6 +341,7 @@ fun ListScreen(
                                             }
                                         }
                                     }
+                                     */
                                 }
                             }
                         }

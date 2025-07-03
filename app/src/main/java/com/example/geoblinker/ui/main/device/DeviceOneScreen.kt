@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -22,11 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -66,7 +61,6 @@ import com.example.geoblinker.ui.OkButton
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.LocationHelper
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
-import com.example.geoblinker.ui.theme.ColorStar
 import com.example.geoblinker.ui.theme.sdp
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
@@ -255,6 +249,23 @@ fun DeviceOneScreen(
                             Color(0xFFDAD9D9).copy(alpha = 0.5f)
                         )
                         Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                formatSpeed(10.0, unitsDistance),
+                                modifier = Modifier.weight(1f),
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.Speed,
+                                contentDescription = null,
+                                modifier = Modifier.size(24.sdp()),
+                                tint = Color(0xFF12CD4A)
+                            )
+                        }
+                        /*
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { isShowDiagnosis = true },
@@ -321,6 +332,7 @@ fun DeviceOneScreen(
                                 )
                             }
                         }
+                         */
                     }
                 }
                 HSpacer(15)

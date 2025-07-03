@@ -6,7 +6,6 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,11 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,13 +48,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
 import com.example.geoblinker.R
-import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
@@ -391,13 +384,13 @@ fun CustomDevicePopup(
     val unitsDistance = viewModel.unitsDistance
 
     selectedMarker?.let { item ->
-        var isShowAdd by remember { mutableStateOf(false) }
+        //var isShowAdd by remember { mutableStateOf(false) }
         var isShowDiagnosis by remember { mutableStateOf(false) }
         var isShowComments by remember { mutableStateOf(false) }
-        val offsetYAnimated by animateIntAsState(
-            targetValue = if (isShowAdd) (-414).sdp().value.toInt() else (-290).sdp().value.toInt(),
-            label = ""
-        )
+        //val offsetYAnimated by animateIntAsState(
+        //    targetValue = if (isShowAdd) (-414).sdp().value.toInt() else (-290).sdp().value.toInt(),
+        //    label = ""
+        //)
 
         webView.evaluateJavascript(
             "setCenter(${item.lat}, ${item.lng})",
@@ -406,105 +399,145 @@ fun CustomDevicePopup(
 
         Popup(
             Alignment.Center,
-            offset = IntOffset(x = 0, y = offsetYAnimated),
             onDismissRequest = onChangeValueToNull
         ) {
-            Surface(
+            Box(
                 modifier = Modifier
-                    .width(332.sdp())
-                    .animateContentSize(),
-                shape = ComicBubbleShape(
-                    cornerRadius = 10.sdp(),
-                    pointerHeight = 24.sdp(),
-                    pointerWidth = 20.sdp()),
-                color = Color(0xFFDAD9D9)
+                    .fillMaxSize()
+                    .clickable { onChangeValueToNull() },
+                contentAlignment = Alignment.Center
             ) {
-                Column {
+                Box(
+                    modifier = Modifier.padding(bottom = 196.sdp())
+                ) {
                     Surface(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                if (isShowAdd) {
-                                    onChangeValueToNull()
-                                    toDeviceScreen(item)
-                                }
-                                isShowAdd = true
-                            },
-                        shape = RoundedCornerShape(10.sdp()),
-                        color = Color.White,
-                        shadowElevation = 4.sdp()
+                            .width(332.sdp())
+                            .animateContentSize(),
+                        shape = ComicBubbleShape(
+                            cornerRadius = 10.sdp(),
+                            pointerHeight = 24.sdp(),
+                            pointerWidth = 20.sdp()
+                        ),
+                        color = Color(0xFFDAD9D9)
                     ) {
                         Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(15.sdp()),
-                                verticalAlignment = Alignment.CenterVertically
+                            Surface(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        //if (isShowAdd) {
+                                        onChangeValueToNull()
+                                        toDeviceScreen(item)
+                                        //}
+                                        //isShowAdd = true
+                                    },
+                                shape = RoundedCornerShape(10.sdp()),
+                                color = Color.White,
+                                shadowElevation = 4.sdp()
                             ) {
-                                Box(
-                                    Modifier.size(9.sdp()).background(
-                                        Color(0xFF12CD4A),
-                                        MaterialTheme.shapes.small
-                                    )
-                                )
-                                Spacer(Modifier.width(11.sdp()))
-                                if (item.name.isNotEmpty()) {
-                                    Text(
-                                        item.name,
-                                        modifier = Modifier.weight(1f),
-                                        overflow = TextOverflow.Ellipsis,
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.Bold
+                                Column(
+                                    modifier = Modifier.padding(bottom = 24.sdp())
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(15.sdp()),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            Modifier.size(9.sdp()).background(
+                                                Color(0xFF12CD4A),
+                                                MaterialTheme.shapes.small
+                                            )
                                         )
-                                    )
-                                } else {
-                                    Text(
-                                        stringResource(R.string.an_unnamed_device),
-                                        modifier = Modifier.weight(1f),
-                                        color = Color(0xFF737373),
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.Bold
+                                        Spacer(Modifier.width(11.sdp()))
+                                        if (item.name.isNotEmpty()) {
+                                            Text(
+                                                item.name,
+                                                modifier = Modifier.weight(1f),
+                                                overflow = TextOverflow.Ellipsis,
+                                                maxLines = 1,
+                                                style = MaterialTheme.typography.labelMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                        } else {
+                                            Text(
+                                                stringResource(R.string.an_unnamed_device),
+                                                modifier = Modifier.weight(1f),
+                                                color = Color(0xFF737373),
+                                                style = MaterialTheme.typography.labelMedium.copy(
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.sdp(), 17.sdp()),
+                                            tint = Color.Unspecified
                                         )
+                                    }
+                                    HorizontalDivider(
+                                        Modifier.fillMaxWidth()
+                                            .padding(horizontal = 15.sdp()),
+                                        1.sdp(),
+                                        Color(0xFFDAD9D9).copy(alpha = 0.5f)
                                     )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(15.sdp()),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            "Tracker ULTRA 3",
+                                            modifier = Modifier.weight(1f),
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(R.drawable.battery_full),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.sdp()),
+                                            tint = Color.Unspecified
+                                        )
+                                    }
+                                    HorizontalDivider(
+                                        Modifier.fillMaxWidth()
+                                            .padding(horizontal = 15.sdp()),
+                                        1.sdp(),
+                                        Color(0xFFDAD9D9).copy(alpha = 0.5f)
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth()
+                                            .padding(15.sdp()),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            formatSpeed(10.0, unitsDistance),
+                                            modifier = Modifier.weight(1f),
+                                            style = MaterialTheme.typography.labelMedium
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Filled.Speed,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.sdp()),
+                                            tint = Color(0xFF12CD4A)
+                                        )
+                                    }
                                 }
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.sdp(), 17.sdp()),
-                                    tint = Color.Unspecified
-                                )
                             }
-                            HorizontalDivider(
-                                Modifier.fillMaxWidth().padding(horizontal = 15.sdp()),
-                                1.sdp(),
-                                Color(0xFFDAD9D9).copy(alpha = 0.5f)
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(15.sdp())
-                                    .padding(bottom = if (isShowAdd) 0.sdp() else 24.sdp()),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    "Tracker ULTRA 3",
-                                    modifier = Modifier.weight(1f),
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(R.drawable.battery_full),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(24.sdp()),
-                                    tint = Color.Unspecified
-                                )
-                            }
-                        }
-                    }
+                            /*
                     if (isShowAdd) {
                         Column(
-                            modifier = Modifier.padding(15.sdp()).padding(bottom = 24.sdp())
+                            modifier = Modifier.padding(15.sdp())
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { isShowDiagnosis = true },
+                                    .clickable {
+                                        viewModel.setDevice(item)
+                                        isShowDiagnosis = true
+                                    },
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -557,7 +590,7 @@ fun CustomDevicePopup(
                                             imageVector = Icons.Filled.StarRate,
                                             contentDescription = null,
                                             modifier = Modifier.size(24.sdp()),
-                                            tint = Color.Yellow
+                                            tint = ColorStar
                                         )
                                         Spacer(Modifier.width(4.sdp()))
                                     }
@@ -568,6 +601,9 @@ fun CustomDevicePopup(
                                     )
                                 }
                             }
+                        }
+                    }
+                     */
                         }
                     }
                 }
