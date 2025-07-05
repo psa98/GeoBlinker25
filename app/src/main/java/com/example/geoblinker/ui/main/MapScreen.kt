@@ -1,10 +1,14 @@
 package com.example.geoblinker.ui.main
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,8 +23,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -52,6 +58,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.Popup
+import androidx.core.content.ContextCompat
 import com.example.geoblinker.R
 import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.BackButton
@@ -59,12 +66,14 @@ import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomCommentsPopup
 import com.example.geoblinker.ui.CustomDiagnosisPopup
 import com.example.geoblinker.ui.CustomEmptyDevicesPopup
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.SearchDevice
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.device.formatSpeed
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.delay
 
 @Composable
@@ -84,7 +93,18 @@ fun MapScreen(
     var isShowPopupSearch by remember { mutableStateOf(false) }
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
     var dontSearch by remember { mutableStateOf(false) }
+    var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+
     val scaleIcons = sc()
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            LocationHelper(context) { location ->
+                currentLocation = location
+            }.getLastLocation()
+        }
+    }
 
     // Интерфейс для взаимодействия с JavaScript
     webView.addJavascriptInterface(object {
@@ -119,6 +139,20 @@ fun MapScreen(
                         null
                     )
             }
+            val hasPermission = ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+            if (hasPermission)
+                LocationHelper(context) { location ->
+                    currentLocation = location
+                }.getLastLocation()
+            currentLocation?.let {
+                webView.evaluateJavascript(
+                    "addSvgMarker('myLocation', ${it.latitude}, ${it.longitude}, 'my_marker.svg', ${26 * scaleIcons})",
+                    null
+                )
+            }
         }
     }
 
@@ -127,7 +161,7 @@ fun MapScreen(
         contentAlignment = Alignment.CenterEnd
     ) {
         Column {
-            Spacer(Modifier.height(66.sdp()))
+            HSpacer(66)
             Box(
                 Modifier
                     .size(40.sdp())
@@ -146,7 +180,7 @@ fun MapScreen(
                     tint = Color.Unspecified
                 )
             }
-            Spacer(Modifier.height(30.sdp()))
+            HSpacer(30)
             Box(
                 Modifier
                     .size(40.sdp())
@@ -165,7 +199,7 @@ fun MapScreen(
                     tint = Color.Unspecified
                 )
             }
-            Spacer(Modifier.height(15.sdp()))
+            HSpacer(15)
             Box(
                 Modifier
                     .size(40.sdp())
@@ -184,7 +218,7 @@ fun MapScreen(
                     tint = Color.Unspecified
                 )
             }
-            Spacer(Modifier.height(30.sdp()))
+            HSpacer(30)
             Icon(
                 painter = painterResource(R.drawable.theme),
                 contentDescription = null,
@@ -198,7 +232,7 @@ fun MapScreen(
                 ,
                 tint = Color.Unspecified
             )
-            Spacer(Modifier.height(15.sdp()))
+            HSpacer(15)
             Icon(
                 painter = painterResource(R.drawable.sputnik),
                 contentDescription = null,
@@ -212,6 +246,42 @@ fun MapScreen(
                 ,
                 tint = Color.Unspecified
             )
+            HSpacer(30)
+            Box(
+                Modifier
+                    .size(40.sdp())
+                    .background(
+                        brush = Brush.verticalGradient(listOf(Color(0xFF373736), Color(0xFF212120))),
+                        shape = CircleShape
+                    )
+                    .clickable {
+                        val hasPermission = ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                        if (!hasPermission)
+                            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                        else
+                            LocationHelper(context) { location ->
+                                currentLocation = location
+                            }.getLastLocation()
+
+                        currentLocation?.let {
+                            webView.evaluateJavascript(
+                                "setCenter(${it.latitude}, ${it.longitude})",
+                                null
+                            )
+                        }
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.MyLocation,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.sdp()),
+                    tint = Color.White
+                )
+            }
         }
     }
 

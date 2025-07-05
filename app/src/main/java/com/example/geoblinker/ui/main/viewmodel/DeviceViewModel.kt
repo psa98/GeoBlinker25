@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
@@ -73,11 +74,12 @@ class DeviceViewModel(
         viewModelScope.launch {
             _token = _profilePrefs.getString("token", null) ?: ""
             _hash = _profilePrefs.getString("hash", null) ?: ""
+            Log.d("tokenAndHash", "token: $_token, hash: $_hash")
             unitsDistance = _prefs.getBoolean("unitsDistance", true)
             //repository.clearDevice()
             var res: Cars
             var next = false
-            while (!next) {
+            while (!next && isActive) {
                 try {
                     res = Api.retrofitService.getAllCar(
                         mapOf(
@@ -108,21 +110,9 @@ class DeviceViewModel(
                 _devices.update { newDevices }
                 next = true
             }
-            launch {
-                repository.getAllSignals()
-                    .collect {
-                        _signals.value = it
-                    }
-            }
-            launch {
-                repository.getAllNews()
-                    .collect {
-                        _news.value = it
-                    }
-            }
             var resImei: LoginImei
-            var nextImei = false
-            while (!nextImei) {
+            next = false
+            while (!next && isActive) {
                 try {
                     resImei = ApiImei.retrofitService.login(
                         RequestImei(
@@ -138,11 +128,11 @@ class DeviceViewModel(
                 _sid = resImei.sid
                 _sidFamily = resImei.family[0]["sid"] as String
                 Log.d("LoginImei", "sid: $_sid, sidFamily: $_sidFamily")
-                nextImei = true
+                next = true
             }
             var resDeviceListImei: GetDeviceListImei
-            nextImei = false
-            while (!nextImei) {
+            next = false
+            while (!next && isActive) {
                 try {
                     resDeviceListImei = ApiImei.retrofitService.getDeviceList(
                         _sid,
@@ -172,11 +162,11 @@ class DeviceViewModel(
                         device
                     }
                 }
-                nextImei = true
+                next = true
             }
         }
         viewModelScope.launch {
-            while (true) {
+            while (isActive) {
                 delay(1000)
                 _devices.update { currentList ->
                     currentList.map { device ->
@@ -213,6 +203,18 @@ class DeviceViewModel(
                     }
                 }
             }
+        }
+        viewModelScope.launch {
+            repository.getAllSignals()
+                .collect {
+                    _signals.value = it
+                }
+        }
+        viewModelScope.launch {
+            repository.getAllNews()
+                .collect {
+                    _news.value = it
+                }
         }
     }
 
