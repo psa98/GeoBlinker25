@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,20 +36,18 @@ import com.example.geoblinker.ui.theme.sdp
 @Composable
 fun BindingTwoScreen(
     viewModel: DeviceViewModel,
-    imei: String,
     toDevice: () -> Unit,
     toBack: () -> Unit
 ) {
     val uiState = viewModel.uiState
+    val device by viewModel.device.collectAsState()
     var name by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        viewModel.resetUiState()
-    }
-
     LaunchedEffect(uiState) {
-        if (uiState == DefaultStates.Success)
+        if (uiState is DefaultStates.Success) {
+            viewModel.resetUiState()
             toDevice()
+        }
     }
 
     Column(
@@ -76,7 +75,7 @@ fun BindingTwoScreen(
                 style = MaterialTheme.typography.titleLarge
             )
             Text(
-                imei,
+                device.imei,
                 color = Color.Unspecified,
                 style = MaterialTheme.typography.titleLarge
             )
@@ -92,12 +91,12 @@ fun BindingTwoScreen(
                     viewModel.resetUiState()
                     name = it
                 },
-                onDone = { viewModel.insertDevice(imei, name) }
+                onDone = { viewModel.insertDevice(name) }
             )
             HSpacer(15)
             CustomButton(
                 text = stringResource(R.string.link),
-                onClick = { viewModel.insertDevice(imei, name) },
+                onClick = { viewModel.insertDevice(name) },
                 typeColor = TypeColor.Green,
                 height = 65,
                 style = MaterialTheme.typography.headlineMedium

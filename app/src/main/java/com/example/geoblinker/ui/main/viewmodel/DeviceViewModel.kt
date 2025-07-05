@@ -203,10 +203,12 @@ class DeviceViewModel(
                         //Log.i("getDetailImei", device.simei)
                         //Log.e("getDetailImei", res.error)
                         //Log.i("getDetailImei", res.posString)
+                        if (res.posString == null)
+                            return@map device
                         val pos = Gson().fromJson(res.posString, PosData::class.java)
                         return@map device.copy(
-                            lat = pos.lat / 1e6,
-                            lng = pos.lon / 1e6
+                            lat = (pos.lat) / 1e6,
+                            lng = (pos.lon) / 1e6
                         )
                     }
                 }
@@ -218,13 +220,13 @@ class DeviceViewModel(
         uiState = DefaultStates.Input
     }
 
-    fun inputErrorUiState() {
-        uiState = DefaultStates.Error.InputError
-    }
-
-    fun insertDevice(imei: String, name: String) {
+    fun checkImei(imei: String) {
         viewModelScope.launch {
-            val simei: String
+            if (imei.length != 15) {
+                Log.e("addImei", "Неверный IMEI: $imei")
+                uiState = DefaultStates.Error.InputError
+                return@launch
+            }
             try {
                 val res = ApiImei.retrofitService.add(
                     sid = _sid,
@@ -239,12 +241,37 @@ class DeviceViewModel(
                 )
                 if (res.items.isEmpty())
                     throw Exception("Failed attempt to add a device to the server")
-                simei = res.items[0].simei
+                _device.value = Device(imei, "", "", bindingTime = 0, simei = res.items[0].simei)
             } catch (e: Exception) {
                 Log.e("addImei", e.toString())
                 uiState = DefaultStates.Error.ServerError
                 return@launch
             }
+            try {
+                val res = ApiImei.retrofitService.getDetail(
+                    sid = _sid,
+                    RequestImei(
+                        module = "device",
+                        func = "GetDetail",
+                        params = GetDetailParamsImei(
+                            simei = _device.value.simei
+                        )
+                    )
+                )
+                val pos = Gson().fromJson(res.posString, PosData::class.java)
+                pos.lat
+                pos.lon
+            } catch (e: Exception) {
+                Log.e("addImei", e.toString())
+                uiState = DefaultStates.Error.ServerError
+                return@launch
+            }
+            uiState = DefaultStates.Success
+        }
+    }
+
+    fun insertDevice(name: String) {
+        viewModelScope.launch {
             val nowTime = Instant.now().toEpochMilli()
             val id: String
             try {
@@ -253,7 +280,7 @@ class DeviceViewModel(
                         "token" to _token,
                         "u_hash" to _hash,
                         "data" to Gson().toJson(Car(
-                            registrationPlate = imei,
+                            registrationPlate = _device.value.imei,
                             details = Details(
                                 name = name,
                                 bindingTime = nowTime
@@ -270,11 +297,11 @@ class DeviceViewModel(
                 return@launch
             }
             val device = Device(
-                imei,
+                _device.value.imei,
                 id = id,
                 name = name,
                 bindingTime = nowTime,
-                simei = simei
+                simei = _device.value.simei
             )
             _device.value = device
             _devices.update { currentList ->
@@ -282,7 +309,7 @@ class DeviceViewModel(
             }
             //repository.insertDevice(device)
             launch {
-                repository.insertAllTypeSignal(imei)
+                repository.insertAllTypeSignal(_device.value.imei)
                 repository.getTypeSignal(device.imei)
                     .collect {
                         _typesSignals.value = it
@@ -291,7 +318,7 @@ class DeviceViewModel(
             launch {
                 repository.insertSignal(
                     Signal(
-                        deviceId = imei,
+                        deviceId = _device.value.imei,
                         name = "Устройство привязано",
                         dateTime = nowTime
                     )

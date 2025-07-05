@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,6 +36,8 @@ import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.ImeiTextField
 import com.example.geoblinker.ui.TypeColor
+import com.example.geoblinker.ui.main.viewmodel.DefaultStates
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
 import com.example.geoblinker.ui.theme.ssp
 import com.google.mlkit.vision.barcode.BarcodeScanner
@@ -43,18 +46,23 @@ import com.google.mlkit.vision.common.InputImage
 
 @Composable
 fun BindingOneScreen(
+    viewModel: DeviceViewModel,
     toTwoScreen: (String) -> Unit,
     toBack: () -> Unit
 ) {
+    val uiState = viewModel.uiState
     var imei by rememberSaveable { mutableStateOf("") }
-    var isError by rememberSaveable { mutableStateOf(false) }
     var isShow by rememberSaveable { mutableStateOf(false) }
 
     fun onDone() {
-        if (imei.length != 15)
-            isError = true
-        else
+        viewModel.checkImei(imei)
+    }
+
+    LaunchedEffect(uiState) {
+        if (uiState is DefaultStates.Success) {
+            viewModel.resetUiState()
             toTwoScreen(imei)
+        }
     }
 
     Column(
@@ -76,13 +84,13 @@ fun BindingOneScreen(
             imei,
             {
                 imei = it
-                isError = false
+                viewModel.resetUiState()
             },
             { onDone() },
             {
                 isShow = true
             },
-            isError = isError
+            isError = uiState is DefaultStates.Error
         )
         HSpacer(15)
         CustomButton(
@@ -93,13 +101,21 @@ fun BindingOneScreen(
             style = MaterialTheme.typography.headlineMedium
         )
         HSpacer(10)
-        if (isError) {
-            Text(
-                stringResource(R.string.imei_not_found),
-                color = MaterialTheme.colorScheme.error,
-                lineHeight = 22.ssp(),
-                style = MaterialTheme.typography.bodyLarge
-            )
+        if (uiState is DefaultStates.Error) {
+            when(uiState) {
+                is DefaultStates.Error.InputError -> Text(
+                    stringResource(R.string.imei_input_error),
+                    color = MaterialTheme.colorScheme.error,
+                    lineHeight = 22.ssp(),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                is DefaultStates.Error.ServerError -> Text(
+                    stringResource(R.string.imei_not_found),
+                    color = MaterialTheme.colorScheme.error,
+                    lineHeight = 22.ssp(),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
     }
 

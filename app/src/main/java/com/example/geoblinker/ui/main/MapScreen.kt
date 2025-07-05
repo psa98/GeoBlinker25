@@ -84,6 +84,7 @@ fun MapScreen(
     var isShowPopupSearch by remember { mutableStateOf(false) }
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
     var dontSearch by remember { mutableStateOf(false) }
+    val scaleIcons = sc()
 
     // Интерфейс для взаимодействия с JavaScript
     webView.addJavascriptInterface(object {
@@ -111,8 +112,12 @@ fun MapScreen(
     LaunchedEffect(Unit) {
         while (true) {
             delay(1000)
-            devices.forEach { device ->
-                webView.evaluateJavascript("updateMarkerPosition(${device.imei}, ${device.lat}, ${device.lng})", null)
+            devices.forEach { item ->
+                if (item.isConnected)
+                    webView.evaluateJavascript(
+                        "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons})",
+                        null
+                    )
             }
         }
     }
@@ -335,17 +340,7 @@ fun MapFromAssets(
                     },
                     "AndroidInterface"
                 )
-                webViewClient = object : WebViewClient() {
-                    override fun onPageFinished(view: WebView?, url: String?) {
-                        // Вызываем JS-функцию после загрузки страницы
-                        devices.forEach { item ->
-                            evaluateJavascript(
-                                "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons})",
-                                null
-                            )
-                        }
-                    }
-                }
+                webViewClient = WebViewClient()
                 loadUrl("file:///android_asset/map.html")
             }
         },

@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class GetDetailImei(
     @SerializedName("last_pos")
-    val posString: String,
+    val posString: String?,
 
     @SerializedName("error_message")
     val error: String

@@ -61,12 +61,12 @@ abstract class AuthViewModel(
     fun sendCode() {
         viewModelScope.launch {
             when (waysGetCode[nowWay]) {
-                "WhatsApp" -> Log.d("SendCode", "WhatsApp: " + Api.retrofitService.auth(
+                "WhatsApp" -> Api.retrofitService.auth(
                     mapOf(
                         "login" to "7${phone.value}", // 7 999 999 99 99
                         "type" to "whatsapp"
                     )
-                ).code)
+                ).code
                 else -> {}
             }
         }

@@ -329,7 +329,6 @@ fun MainScreen(
     val pickSubscription by subscriptionViewModel.pickSubscription.collectAsState()
     val subscription by profileViewModel.subscription.collectAsState()
     var currentRoute by remember { mutableStateOf(MainScreen.Map.name) }
-    var bindingImei by remember { mutableStateOf("") }
     var previousScreen by remember { mutableStateOf(MainScreen.Map.name) }
     var countNotifications by remember { mutableIntStateOf(0) }
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
@@ -402,17 +401,15 @@ fun MainScreen(
                 backStackEntry.arguments?.getString("previousScreen")?.let {
                     previousScreen = it
                 }
-                BindingOneScreen({
-                    bindingImei = it
-                    navController.navigate(MainScreen.BindingTwo.name)
-                },
+                BindingOneScreen(
+                    viewModel,
+                    { navController.navigate(MainScreen.BindingTwo.name) },
                     { navController.navigate(previousScreen) }
                 )
             }
             composable(route = MainScreen.BindingTwo.name) {
                 BindingTwoScreen(
                     viewModel,
-                    bindingImei,
                     { navController.navigate(MainScreen.BindingThree.name) },
                     { navController.navigateUp() }
                 )
