@@ -50,7 +50,7 @@ fun BindingOneScreen(
     toTwoScreen: (String) -> Unit,
     toBack: () -> Unit
 ) {
-    val uiState = viewModel.uiState
+    val uiState by viewModel.uiState
     var imei by rememberSaveable { mutableStateOf("") }
     var isShow by rememberSaveable { mutableStateOf(false) }
 
@@ -102,20 +102,12 @@ fun BindingOneScreen(
         )
         HSpacer(10)
         if (uiState is DefaultStates.Error) {
-            when(uiState) {
-                is DefaultStates.Error.InputError -> Text(
-                    stringResource(R.string.imei_input_error),
-                    color = MaterialTheme.colorScheme.error,
-                    lineHeight = 22.ssp(),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                is DefaultStates.Error.ServerError -> Text(
-                    stringResource(R.string.imei_not_found),
-                    color = MaterialTheme.colorScheme.error,
-                    lineHeight = 22.ssp(),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
+            Text(
+                stringResource((uiState as DefaultStates.Error).message),
+                color = MaterialTheme.colorScheme.error,
+                lineHeight = 22.ssp(),
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 

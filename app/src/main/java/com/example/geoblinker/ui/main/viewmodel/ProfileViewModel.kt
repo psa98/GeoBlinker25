@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.geoblinker.R
 import com.example.geoblinker.model.Code
 import com.example.geoblinker.model.Profile
 import com.example.geoblinker.network.Api
@@ -98,13 +99,13 @@ class ProfileViewModel(
     fun resetUiState() {
         uiState.value = DefaultStates.Input
     }
-    
-    fun inputErrorUiState() {
-        uiState.value = DefaultStates.Error.InputError
-    }
 
     fun updateName(newName: String) {
         viewModelScope.launch {
+            if (newName.isEmpty()) {
+                uiState.value = DefaultStates.Error(R.string.name_cannot_empty)
+                return@launch
+            }
             val res: Code
             try {
                 res = Api.retrofitService.edit(
@@ -119,7 +120,7 @@ class ProfileViewModel(
                 Log.d("ChangeName", "Code: ${res.code}, message: ${res.message ?: "Unknown"}")
             } catch(e: Exception) {
                 Log.e("ChangeName", e.toString())
-                uiState.value = DefaultStates.Error.ServerError
+                uiState.value = DefaultStates.Error(R.string.server_error)
                 return@launch
             }
             if (res.code == "200") {
@@ -127,7 +128,7 @@ class ProfileViewModel(
                 name.value = newName
                 uiState.value = DefaultStates.Success
             } else {
-                uiState.value = DefaultStates.Error.ServerError
+                uiState.value = DefaultStates.Error(R.string.server_error)
             }
         }
     }

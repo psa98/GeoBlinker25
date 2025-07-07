@@ -39,7 +39,7 @@ fun BindingTwoScreen(
     toDevice: () -> Unit,
     toBack: () -> Unit
 ) {
-    val uiState = viewModel.uiState
+    val uiState by viewModel.uiState
     val device by viewModel.device.collectAsState()
     var name by rememberSaveable { mutableStateOf("") }
 
@@ -103,9 +103,9 @@ fun BindingTwoScreen(
             )
         }
         HSpacer(20)
-        if (uiState is DefaultStates.Error.ServerError) {
+        if (uiState is DefaultStates.Error) {
             Text(
-                stringResource(R.string.server_error),
+                stringResource((uiState as DefaultStates.Error).message),
                 color = ColorError,
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.bodyLarge

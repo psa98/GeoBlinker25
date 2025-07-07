@@ -3,11 +3,13 @@ package com.example.geoblinker.ui.main.viewmodel
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.geoblinker.R
 import com.example.geoblinker.data.News
 import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.Signal
@@ -38,6 +40,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.threeten.bp.Instant
+import java.security.SecureRandom
 
 class DeviceViewModel(
     private val repository: Repository,
@@ -68,7 +71,7 @@ class DeviceViewModel(
     val news: StateFlow<List<News>> = _news.asStateFlow()
     var unitsDistance by mutableStateOf(true) // true - км / м, false - мили / футы
         private set
-    var uiState: DefaultStates by mutableStateOf(DefaultStates.Input)
+    var uiState: MutableState<DefaultStates> = mutableStateOf(DefaultStates.Input)
         private set
     var updateMap = mutableStateOf(true)
         private set
@@ -188,7 +191,7 @@ class DeviceViewModel(
     }
 
     fun resetUiState() {
-        uiState = DefaultStates.Input
+        uiState.value = DefaultStates.Input
     }
 
     fun setUpdateMap(it: Boolean) {
@@ -238,9 +241,14 @@ class DeviceViewModel(
 
     fun checkImei(imei: String) {
         viewModelScope.launch {
+            if (_devices.value.find { it.imei == imei && it.isConnected } != null) {
+                Log.e("addImei", "IMEI уже привязан: $imei")
+                uiState.value = DefaultStates.Error(R.string.device_with_this_imei_already_linked)
+                return@launch
+            }
             if (imei.length != 15) {
                 Log.e("addImei", "Неверный IMEI: $imei")
-                uiState = DefaultStates.Error.InputError
+                uiState.value = DefaultStates.Error(R.string.imei_input_error)
                 return@launch
             }
             try {
@@ -260,7 +268,7 @@ class DeviceViewModel(
                 _device.value = Device(imei, "", "", bindingTime = 0, simei = res.items[0].simei)
             } catch (e: Exception) {
                 Log.e("addImei", e.toString())
-                uiState = DefaultStates.Error.ServerError
+                uiState.value= DefaultStates.Error(R.string.imei_not_found)
                 return@launch
             }
             try {
@@ -279,59 +287,82 @@ class DeviceViewModel(
                 pos.lon
             } catch (e: Exception) {
                 Log.e("addImei", e.toString())
-                uiState = DefaultStates.Error.ServerError
+                uiState.value = DefaultStates.Error(R.string.imei_not_found)
                 return@launch
             }
-            uiState = DefaultStates.Success
+            uiState.value= DefaultStates.Success
         }
+    }
+
+    private fun randomHash(length: Int = 64): String {
+        val byteArray = ByteArray(length / 2) // 1 байт = 2 hex-символа
+        SecureRandom().nextBytes(byteArray)
+        return byteArray.joinToString("") { "%02x".format(it) }
     }
 
     fun insertDevice(name: String) {
         viewModelScope.launch {
             val nowTime = Instant.now().toEpochMilli()
             val id: String
-            try {
-                val res = Api.retrofitService.addCar(
-                    mapOf(
-                        "token" to _token,
-                        "u_hash" to _hash,
-                        "data" to Gson().toJson(
-                            Car(
-                                registrationPlate = _device.value.imei,
-                                details = Details(
-                                    name = name,
-                                    bindingTime = nowTime
+            val foundDevice = _devices.value.find { it.imei == _device.value.imei && !it.isConnected }
+            if (foundDevice != null) {
+                updateDevice(foundDevice.copy(
+                    name = name,
+                    bindingTime = nowTime,
+                    isConnected = true
+                ))
+                if (uiState.value is DefaultStates.Error)
+                    return@launch
+                _device.value = foundDevice.copy(
+                    name = name,
+                    bindingTime = nowTime,
+                    isConnected = true
+                )
+            }
+            else {
+                try {
+                    val res = Api.retrofitService.addCar(
+                        mapOf(
+                            "token" to _token,
+                            "u_hash" to _hash,
+                            "data" to Gson().toJson(
+                                Car(
+                                    registrationPlate = _device.value.imei + randomHash(),
+                                    details = Details(
+                                        imei = _device.value.imei,
+                                        name = name,
+                                        bindingTime = nowTime
+                                    )
                                 )
                             )
                         )
                     )
+                    if (res.code != "200")
+                        throw Exception("Code: ${res.code}, message: ${res.message}")
+                    id = res.data.createdCar.cId
+                } catch (e: Exception) {
+                    Log.e("addCar", e.toString())
+                    uiState.value= DefaultStates.Error(R.string.server_error)
+                    return@launch
+                }
+                val device = Device(
+                    _device.value.imei,
+                    id = id,
+                    name = name,
+                    bindingTime = nowTime,
+                    simei = _device.value.simei
                 )
-                if (res.code != "200")
-                    throw Exception("Code: ${res.code}, message: ${res.message}")
-                id = res.data.createdCar.cId
-            } catch (e: Exception) {
-                Log.e("addCar", e.toString())
-                uiState = DefaultStates.Error.ServerError
-                return@launch
-            }
-            val device = Device(
-                _device.value.imei,
-                id = id,
-                name = name,
-                bindingTime = nowTime,
-                simei = _device.value.simei
-            )
-            _device.value = device
-            _devices.update { currentList ->
-                currentList.plus(device)
-            }
-            //repository.insertDevice(device)
-            launch {
-                repository.insertAllTypeSignal(_device.value.imei)
-                repository.getTypeSignal(device.imei)
-                    .collect {
-                        _typesSignals.value = it
-                    }
+                _device.value = device
+                _devices.update { currentList ->
+                    currentList.plus(device)
+                }
+                launch {
+                    repository.insertAllTypeSignal(_device.value.imei)
+                    repository.getTypeSignal(_device.value.imei)
+                        .collect {
+                            _typesSignals.value = it
+                        }
+                }
             }
             launch {
                 repository.insertSignal(
@@ -341,12 +372,12 @@ class DeviceViewModel(
                         dateTime = nowTime
                     )
                 )
-                repository.getAllDeviceSignals(device.imei)
+                repository.getAllDeviceSignals(_device.value.imei)
                     .collect {
                         _signalsDevice.value = it
                     }
             }
-            uiState = DefaultStates.Success
+            uiState.value= DefaultStates.Success
         }
     }
 
@@ -412,6 +443,7 @@ class DeviceViewModel(
                             Car(
                                 registrationPlate = device.imei,
                                 details = Details(
+                                    imei = device.imei,
                                     name = device.name,
                                     isConnected = device.isConnected,
                                     bindingTime = device.bindingTime
@@ -424,8 +456,10 @@ class DeviceViewModel(
                     throw Exception("Code: ${res.code}, message: ${res.message}")
             } catch (e: Exception) {
                 Log.e("updateCar", e.toString())
-                uiState = DefaultStates.Error.ServerError
+                uiState.value= DefaultStates.Error(R.string.server_error)
+                return@launch
             }
+            uiState.value= DefaultStates.Success
         }
         _device.value = device
     }

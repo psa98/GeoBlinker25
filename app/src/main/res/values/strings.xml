@@ -186,4 +186,5 @@
     <string name="link_device_again">Подключить ещё устройство</string>
     <string name="linked">Привязано:</string>
     <string name="imei_input_error">IMEI должен содержать 15 цифр</string>
+    <string name="device_with_this_imei_already_linked">Уже привязано устройство с таким IMEI</string>
 </resources>

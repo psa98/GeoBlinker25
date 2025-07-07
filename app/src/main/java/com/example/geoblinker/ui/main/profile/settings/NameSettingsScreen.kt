@@ -42,11 +42,7 @@ fun NameSettingsScreen(
     var value by rememberSaveable { mutableStateOf("") }
 
     fun onClick() {
-        if (value.isEmpty())
-            viewModel.inputErrorUiState()
-        else {
-            viewModel.updateName(value)
-        }
+        viewModel.updateName(value)
     }
 
     LaunchedEffect(Unit) {
@@ -77,7 +73,7 @@ fun NameSettingsScreen(
                 value = it
             },
             onDone = { onClick() },
-            isError = uiState is DefaultStates.Error.InputError,
+            isError = uiState is DefaultStates.Error,
             radius = 16,
             height = 65
         )
@@ -88,26 +84,27 @@ fun NameSettingsScreen(
             typeColor = TypeColor.Green
         )
     }
+    if (uiState is DefaultStates.Error) {
+        Box(
+            modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                stringResource((uiState as DefaultStates.Error).message),
+                color = Color(0xFFC4162D),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+    }
     when (uiState) {
-        is DefaultStates.Error.InputError ->
+        is DefaultStates.Error ->
             Box(
                 modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    stringResource(R.string.name_cannot_empty),
-                    color = Color(0xFFC4162D),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        is DefaultStates.Error.ServerError ->
-            Box(
-                modifier = Modifier.fillMaxSize().offset(y = 100.sdp()),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    stringResource(R.string.server_error),
+                    stringResource((uiState as DefaultStates.Error).message),
                     color = Color(0xFFC4162D),
                     textAlign = TextAlign.Center,
                     style = MaterialTheme.typography.bodyLarge

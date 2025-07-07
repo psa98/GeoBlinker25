@@ -406,7 +406,7 @@ fun MainScreen(
     ) {
         composable(route = MainScreen.Map.name) {
             currentRoute = MainScreen.Map.name
-            selectedMarker = null
+            //selectedMarker = null
         }
         composable(route = MainScreen.List.name) {
             currentRoute = MainScreen.List.name

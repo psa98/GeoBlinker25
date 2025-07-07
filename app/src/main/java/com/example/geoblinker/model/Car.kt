@@ -27,6 +27,9 @@ data class Car(
 )
 
 data class Details(
+    @SerializedName("imei")
+    val imei: String,
+
     @SerializedName("name")
     val name: String,
 
