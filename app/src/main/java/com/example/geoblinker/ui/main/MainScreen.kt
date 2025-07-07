@@ -102,6 +102,7 @@ import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.threeten.bp.Instant
 
@@ -328,6 +329,7 @@ fun MainScreen(
     val isLogin by profileViewModel.isLogin.collectAsState()
     val pickSubscription by subscriptionViewModel.pickSubscription.collectAsState()
     val subscription by profileViewModel.subscription.collectAsState()
+    val updateMap by viewModel.updateMap
     var currentRoute by remember { mutableStateOf(MainScreen.Map.name) }
     var previousScreen by remember { mutableStateOf(MainScreen.Map.name) }
     var countNotifications by remember { mutableIntStateOf(0) }
@@ -338,6 +340,7 @@ fun MainScreen(
 
     fun BackgroundColor(): Color {
         return when(currentRoute) {
+            MainScreen.Map.name -> Color.Unspecified
             MainScreen.Binding.name -> Color(0xFFF6F6F6)
             else -> Color(0xFFEFEFEF)
         }
@@ -355,6 +358,39 @@ fun MainScreen(
         isShow = isLogin && Instant.now().toEpochMilli() > subscription
     }
 
+    LaunchedEffect(currentRoute) {
+        if (currentRoute == MainScreen.Map.name) {
+            if (updateMap) {
+                while (true) {
+                    delay(1000)
+                    viewModel.updateLocationDevices()
+                }
+            } else {
+                viewModel.updateLocationDevices()
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                start = 15.sdp(),
+                top = 90.sdp(),
+                end = 15.sdp()
+            )
+    ) {
+        MapScreen(
+            viewModel,
+            selectMarker = selectedMarker,
+            { navController.navigate("${MainScreen.Binding.name}/${MainScreen.Map.name}") },
+            toDeviceScreen = { device ->
+                viewModel.setDevice(device)
+                navController.navigate("${MainScreen.Device.name}/${MainScreen.Map.name}")
+            }
+        )
+    }
+
     NavHost(
         navController = navController,
         startDestination = MainScreen.Map.name,
@@ -370,15 +406,6 @@ fun MainScreen(
     ) {
         composable(route = MainScreen.Map.name) {
             currentRoute = MainScreen.Map.name
-            MapScreen(
-                viewModel,
-                selectMarker = selectedMarker,
-                { navController.navigate("${MainScreen.Binding.name}/${MainScreen.Map.name}") },
-                toDeviceScreen = { device ->
-                    viewModel.setDevice(device)
-                    navController.navigate("${MainScreen.Device.name}/${MainScreen.Map.name}")
-                }
-            )
             selectedMarker = null
         }
         composable(route = MainScreen.List.name) {
@@ -590,6 +617,7 @@ fun MainScreen(
                     previousScreen = it
                 }
                 SettingsScreen(
+                    viewModel,
                     toName = { navController.navigate(MainScreen.NameSettings.name) },
                     toPhone = { navController.navigate(MainScreen.PhoneSettings.name) },
                     toEmail = { navController.navigate(MainScreen.EmailSettings.name) },

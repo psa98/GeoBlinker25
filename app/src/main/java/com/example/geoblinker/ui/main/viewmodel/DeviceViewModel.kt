@@ -30,7 +30,6 @@ import com.example.geoblinker.network.Api
 import com.example.geoblinker.network.ApiImei
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,8 +42,9 @@ import org.threeten.bp.Instant
 class DeviceViewModel(
     private val repository: Repository,
     private val application: Application
-): ViewModel() {
-    private val _profilePrefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+) : ViewModel() {
+    private val _profilePrefs =
+        application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     private var _token by mutableStateOf("")
     private var _hash by mutableStateOf("")
     private var _sid by mutableStateOf("")
@@ -54,7 +54,8 @@ class DeviceViewModel(
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
     private val _device = MutableStateFlow(Device("", "", "", false, 0, ""))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
-    private val _typeSignal = MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.MovementStarted))
+    private val _typeSignal =
+        MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.MovementStarted))
     private val _signalsDevice = MutableStateFlow<List<Signal>>(emptyList())
     private val _signals = MutableStateFlow<List<Signal>>(emptyList())
     private val _news = MutableStateFlow<List<News>>(emptyList())
@@ -69,6 +70,8 @@ class DeviceViewModel(
         private set
     var uiState: DefaultStates by mutableStateOf(DefaultStates.Input)
         private set
+    var updateMap = mutableStateOf(true)
+        private set
 
     init {
         viewModelScope.launch {
@@ -76,6 +79,7 @@ class DeviceViewModel(
             _hash = _profilePrefs.getString("hash", null) ?: ""
             Log.d("tokenAndHash", "token: $_token, hash: $_hash")
             unitsDistance = _prefs.getBoolean("unitsDistance", true)
+            updateMap.value = _prefs.getBoolean("updateMap", true)
             //repository.clearDevice()
             var res: Cars
             var next = false
@@ -153,7 +157,10 @@ class DeviceViewModel(
                     currentList.map { device ->
                         resDeviceListImei.items.forEach {
                             if (it.imei.toString() == device.imei) {
-                                Log.i("getDeviceListImei", "name: ${device.name}, simei: ${it.simei}")
+                                Log.i(
+                                    "getDeviceListImei",
+                                    "name: ${device.name}, simei: ${it.simei}"
+                                )
                                 return@map device.copy(
                                     simei = it.simei
                                 )
@@ -164,45 +171,7 @@ class DeviceViewModel(
                 }
                 next = true
             }
-        }
-        viewModelScope.launch {
-            while (isActive) {
-                delay(1000)
-                _devices.update { currentList ->
-                    currentList.map { device ->
-                        if (device.simei == "" || _sid == "")
-                            return@map device
-                        val res: GetDetailImei
-                        try {
-                            res = ApiImei.retrofitService.getDetail(
-                                sid = _sid,
-                                RequestImei(
-                                    module = "device",
-                                    func = "GetDetail",
-                                    params = GetDetailParamsImei(
-                                        simei = device.simei
-                                    )
-                                )
-                            )
-                        } catch (e: Exception) {
-                            Log.e("getDetailImei", e.toString())
-                            return@map device
-                        }
-                        //Log.i("getDetailImei", _sid)
-                        //Log.i("getDetailImei", device.name)
-                        //Log.i("getDetailImei", device.simei)
-                        //Log.e("getDetailImei", res.error)
-                        //Log.i("getDetailImei", res.posString)
-                        if (res.posString == null)
-                            return@map device
-                        val pos = Gson().fromJson(res.posString, PosData::class.java)
-                        return@map device.copy(
-                            lat = (pos.lat) / 1e6,
-                            lng = (pos.lon) / 1e6
-                        )
-                    }
-                }
-            }
+            updateLocationDevices()
         }
         viewModelScope.launch {
             repository.getAllSignals()
@@ -220,6 +189,51 @@ class DeviceViewModel(
 
     fun resetUiState() {
         uiState = DefaultStates.Input
+    }
+
+    fun setUpdateMap(it: Boolean) {
+        viewModelScope.launch {
+            updateMap.value = it
+            _prefs.edit().putBoolean("updateMap", it).apply()
+        }
+    }
+
+    suspend fun updateLocationDevices() {
+        _devices.update { currentList ->
+            currentList.map { device ->
+                if (device.simei == "" || _sid == "")
+                    return@map device
+                val res: GetDetailImei
+                try {
+                    res = ApiImei.retrofitService.getDetail(
+                        sid = _sid,
+                        RequestImei(
+                            module = "device",
+                            func = "GetDetail",
+                            params = GetDetailParamsImei(
+                                simei = device.simei
+                            )
+                        )
+                    )
+                } catch (e: Exception) {
+                    Log.e("getDetailImei", e.toString())
+                    return@map device
+                }
+                //Log.i("getDetailImei", _sid)
+                //Log.i("getDetailImei", device.name)
+                //Log.i("getDetailImei", device.simei)
+                //Log.e("getDetailImei", res.error)
+                //Log.i("getDetailImei", res.posString)
+                if (res.posString == null)
+                    return@map device
+                val pos = Gson().fromJson(res.posString, PosData::class.java)
+                return@map device.copy(
+                    lat = (pos.lat) / 1e6,
+                    lng = (pos.lon) / 1e6
+                )
+            }
+        }
+        Log.d("updateLocationDevices", "Update")
     }
 
     fun checkImei(imei: String) {
@@ -281,13 +295,15 @@ class DeviceViewModel(
                     mapOf(
                         "token" to _token,
                         "u_hash" to _hash,
-                        "data" to Gson().toJson(Car(
-                            registrationPlate = _device.value.imei,
-                            details = Details(
-                                name = name,
-                                bindingTime = nowTime
+                        "data" to Gson().toJson(
+                            Car(
+                                registrationPlate = _device.value.imei,
+                                details = Details(
+                                    name = name,
+                                    bindingTime = nowTime
+                                )
                             )
-                        ))
+                        )
                     )
                 )
                 if (res.code != "200")
@@ -348,17 +364,21 @@ class DeviceViewModel(
                 )
             )
             if (_devices.value.isNotEmpty()) {
-                updateDevice(_devices.value[0].copy(
-                    typeStatus = Device.TypeStatus.RequiresRepair,
-                    breakdownForecast = "После очередного Пробега в 1000 км проверить колеса",
-                    maintenanceRecommendations = "Проверить колёса"
-                ))
-                if (_devices.value.size > 1) {
-                    updateDevice(_devices.value[1].copy(
+                updateDevice(
+                    _devices.value[0].copy(
                         typeStatus = Device.TypeStatus.RequiresRepair,
-                        breakdownForecast = "У ТС часто короткие аренды",
-                        maintenanceRecommendations = "Необходимо проверить ТС"
-                    ))
+                        breakdownForecast = "После очередного Пробега в 1000 км проверить колеса",
+                        maintenanceRecommendations = "Проверить колёса"
+                    )
+                )
+                if (_devices.value.size > 1) {
+                    updateDevice(
+                        _devices.value[1].copy(
+                            typeStatus = Device.TypeStatus.RequiresRepair,
+                            breakdownForecast = "У ТС часто короткие аренды",
+                            maintenanceRecommendations = "Необходимо проверить ТС"
+                        )
+                    )
                 }
             }
         }

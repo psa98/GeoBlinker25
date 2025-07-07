@@ -22,6 +22,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,11 +34,13 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
+import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sc
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
 fun SettingsScreen(
+    viewModel: DeviceViewModel,
     toName: () -> Unit,
     toPhone: () -> Unit,
     toEmail: () -> Unit,
@@ -48,6 +51,7 @@ fun SettingsScreen(
     toDelete: () -> Unit,
     toBack: () -> Unit
 ) {
+    val updateMap by viewModel.updateMap
     val settings = listOf(
         Pair(stringResource(R.string.change_name), { toName() }),
         Pair(stringResource(R.string.change_phone), { toPhone() }),
@@ -135,8 +139,8 @@ fun SettingsScreen(
                     )
                 }
                 Switch(
-                    true,
-                    {},
+                    updateMap,
+                    { viewModel.setUpdateMap(it) },
                     modifier = Modifier.size(40.sdp(), 21.sdp()),
                     colors = SwitchDefaults.colors(
                         uncheckedThumbColor = Color(0xFFBEBEBE),

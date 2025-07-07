@@ -59,9 +59,6 @@
 
         map.on('zoomend', function() {
             currentZoom = map.getZoom();
-            if (typeof Android !== 'undefined') {
-                Android.onZoomChanged(currentZoom);
-            }
         });
 
         map.getContainer().addEventListener('click', function(e) {

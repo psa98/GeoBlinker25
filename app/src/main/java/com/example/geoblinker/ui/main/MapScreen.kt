@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.view.ViewGroup
-import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,7 +36,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,7 +55,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.Popup
 import androidx.core.content.ContextCompat
 import com.example.geoblinker.R
 import com.example.geoblinker.model.Device
@@ -88,7 +85,6 @@ fun MapScreen(
     val webView = remember { WebView(context) }
     var isDarkTheme by remember { mutableStateOf(false) }
     var isSatellite by remember { mutableStateOf(false) }
-    var currentZoom by remember { mutableIntStateOf(10) }
     var isShowPopup by remember { mutableStateOf(false) }
     var isShowPopupSearch by remember { mutableStateOf(false) }
     var selectedMarker by remember { mutableStateOf<Device?>(null) }
@@ -105,14 +101,6 @@ fun MapScreen(
             }.getLastLocation()
         }
     }
-
-    // Интерфейс для взаимодействия с JavaScript
-    webView.addJavascriptInterface(object {
-        @JavascriptInterface
-        fun onZoomChanged(zoom: Int) {
-            currentZoom = zoom
-        }
-    }, "Android")
 
     LaunchedEffect(Unit) {
         delay(2000)
@@ -326,12 +314,12 @@ fun MapScreen(
                                 text = stringResource(R.string.find),
                                 onClick = {
                                     val findDevices =
-                                        devices.filter { keySearch in it.imei || keySearch in it.name }
+                                        devices.filter { (keySearch in it.imei || keySearch in it.name) && it.isConnected }
                                     if (findDevices.isEmpty())
                                         dontSearch = true
                                     else {
-                                        selectedMarker = findDevices[0]
                                         isShowPopupSearch = false
+                                        selectedMarker = findDevices[0]
                                     }
                                 },
                                 typeColor = TypeColor.Green,
@@ -462,9 +450,9 @@ fun CustomDevicePopup(
             null
         )
 
-        Popup(
-            Alignment.Center,
-            onDismissRequest = onChangeValueToNull
+        Dialog(
+            onChangeValueToNull,
+            properties = DialogProperties(usePlatformDefaultWidth = false)
         ) {
             Box(
                 modifier = Modifier
