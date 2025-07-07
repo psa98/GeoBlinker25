@@ -3,6 +3,7 @@ package com.example.geoblinker.ui.main.viewmodel
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import android.webkit.WebView
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -77,6 +78,8 @@ class DeviceViewModel(
         private set
     var selectedMarker = mutableStateOf<Device?>(null)
         private set
+    var removeAllMarkers = mutableStateOf(false)
+        private set
 
     init {
         viewModelScope.launch {
@@ -106,7 +109,7 @@ class DeviceViewModel(
                 res.data.cars.forEach { entry ->
                     val device = entry.value
                     val newDevice = Device(
-                        imei = device.details.imei,
+                        imei = device.details.imei ?: device.registrationPlate,
                         id = device.id,
                         name = device.details.name,
                         isConnected = device.details.isConnected,
@@ -115,7 +118,7 @@ class DeviceViewModel(
                     )
                     newDevices.add(newDevice)
                     //repository.insertDevice(newDevice)
-                    repository.insertAllTypeSignal(device.details.imei)
+                    repository.insertAllTypeSignal(device.details.imei ?: device.registrationPlate)
                 }
                 _devices.update { newDevices }
                 next = true
@@ -190,6 +193,12 @@ class DeviceViewModel(
                 .collect {
                     _news.value = it
                 }
+        }
+    }
+
+    fun setRemoveAllMarkers(it: Boolean = true) {
+        viewModelScope.launch {
+            removeAllMarkers.value = it
         }
     }
 

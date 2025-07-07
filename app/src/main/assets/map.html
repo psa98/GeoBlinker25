@@ -102,6 +102,15 @@
             .addTo(map);
     }
 
+    function removeAllMarkers() {
+        // Перебираем все маркеры и удаляем их с карты
+        Object.values(markers).forEach(marker => {
+            map.removeLayer(marker);
+        });
+        // Очищаем хранилище маркеров
+        markers = {};
+    }
+
     function updateMarkerPosition(imei, lat, lng) {
         if (markers[imei]) {
             markers[imei].setLatLng([lat, lng]);

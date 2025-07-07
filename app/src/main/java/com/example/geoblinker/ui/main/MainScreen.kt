@@ -403,6 +403,7 @@ fun MainScreen(
     ) {
         composable(route = MainScreen.Map.name) {
             currentRoute = MainScreen.Map.name
+            viewModel.setRemoveAllMarkers(true)
             //selectedMarker = null
         }
         composable(route = MainScreen.List.name) {
