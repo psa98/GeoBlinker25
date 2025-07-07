@@ -55,7 +55,7 @@ class DeviceViewModel(
     private var _sgid by mutableStateOf("")
     private val _prefs = application.getSharedPreferences("device", Context.MODE_PRIVATE)
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
-    private val _device = MutableStateFlow(Device("", "", "", false, 0, ""))
+    private val _device = MutableStateFlow(Device("", "", "", false, 0, "", ""))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
     private val _typeSignal =
         MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.MovementStarted))
@@ -106,15 +106,16 @@ class DeviceViewModel(
                 res.data.cars.forEach { entry ->
                     val device = entry.value
                     val newDevice = Device(
-                        imei = device.registrationPlate,
+                        imei = device.details.imei,
                         id = device.id,
                         name = device.details.name,
                         isConnected = device.details.isConnected,
-                        bindingTime = device.details.bindingTime
+                        bindingTime = device.details.bindingTime,
+                        registrationPlate = device.registrationPlate
                     )
                     newDevices.add(newDevice)
                     //repository.insertDevice(newDevice)
-                    repository.insertAllTypeSignal(device.registrationPlate)
+                    repository.insertAllTypeSignal(device.details.imei)
                 }
                 _devices.update { newDevices }
                 next = true
@@ -273,7 +274,7 @@ class DeviceViewModel(
                 )
                 if (res.items.isEmpty())
                     throw Exception("Failed attempt to add a device to the server")
-                _device.value = Device(imei, "", "", bindingTime = 0, simei = res.items[0].simei)
+                _device.value = Device(imei, "", "", bindingTime = 0, simei = res.items[0].simei, registrationPlate = "")
             } catch (e: Exception) {
                 Log.e("addImei", e.toString())
                 uiState.value= DefaultStates.Error(R.string.imei_not_found)
@@ -328,6 +329,7 @@ class DeviceViewModel(
                 )
             }
             else {
+                val registrationPlate = _device.value.imei + randomHash()
                 try {
                     val res = Api.retrofitService.addCar(
                         mapOf(
@@ -335,7 +337,7 @@ class DeviceViewModel(
                             "u_hash" to _hash,
                             "data" to Gson().toJson(
                                 Car(
-                                    registrationPlate = _device.value.imei + randomHash(),
+                                    registrationPlate = registrationPlate,
                                     details = Details(
                                         imei = _device.value.imei,
                                         name = name,
@@ -358,7 +360,8 @@ class DeviceViewModel(
                     id = id,
                     name = name,
                     bindingTime = nowTime,
-                    simei = _device.value.simei
+                    simei = _device.value.simei,
+                    registrationPlate = registrationPlate
                 )
                 _device.value = device
                 _devices.update { currentList ->
@@ -449,7 +452,7 @@ class DeviceViewModel(
                         "u_hash" to _hash,
                         "data" to Gson().toJson(
                             Car(
-                                registrationPlate = device.imei,
+                                registrationPlate = device.registrationPlate,
                                 details = Details(
                                     imei = device.imei,
                                     name = device.name,
