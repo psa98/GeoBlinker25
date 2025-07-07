@@ -76,18 +76,17 @@ import kotlinx.coroutines.delay
 @Composable
 fun MapScreen(
     viewModel: DeviceViewModel,
-    selectMarker: Device? = null,
     toBindingScreen: () -> Unit,
     toDeviceScreen: (Device) -> Unit
 ) {
     val devices by viewModel.devices.collectAsState()
+    val selectedMarker by viewModel.selectedMarker
     val context = LocalContext.current
     val webView = remember { WebView(context) }
     var isDarkTheme by remember { mutableStateOf(false) }
     var isSatellite by remember { mutableStateOf(false) }
     var isShowPopup by remember { mutableStateOf(false) }
     var isShowPopupSearch by remember { mutableStateOf(false) }
-    var selectedMarker by remember { mutableStateOf<Device?>(null) }
     var dontSearch by remember { mutableStateOf(false) }
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
 
@@ -110,12 +109,6 @@ fun MapScreen(
     }
 
     MapFromAssets(webView, viewModel, toDeviceScreen)
-
-    LaunchedEffect(Unit) {
-        selectMarker?.let {
-            selectedMarker = it
-        }
-    }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -319,7 +312,7 @@ fun MapScreen(
                                         dontSearch = true
                                     else {
                                         isShowPopupSearch = false
-                                        selectedMarker = findDevices[0]
+                                        viewModel.setSelectedMarker(findDevices[0])
                                     }
                                 },
                                 typeColor = TypeColor.Green,
@@ -353,7 +346,7 @@ fun MapScreen(
         viewModel,
         selectedMarker,
         webView,
-        { selectedMarker = null },
+        { viewModel.setSelectedMarker() },
         toDeviceScreen
     )
 

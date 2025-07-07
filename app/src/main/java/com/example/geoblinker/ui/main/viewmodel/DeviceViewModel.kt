@@ -75,6 +75,8 @@ class DeviceViewModel(
         private set
     var updateMap = mutableStateOf(true)
         private set
+    var selectedMarker = mutableStateOf<Device?>(null)
+        private set
 
     init {
         viewModelScope.launch {
@@ -187,6 +189,12 @@ class DeviceViewModel(
                 .collect {
                     _news.value = it
                 }
+        }
+    }
+
+    fun setSelectedMarker(device: Device? = null) {
+        viewModelScope.launch {
+            selectedMarker.value = device
         }
     }
 

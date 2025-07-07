@@ -57,7 +57,6 @@ import coil.compose.AsyncImagePainter
 import com.example.geoblinker.R
 import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.data.Repository
-import com.example.geoblinker.model.Device
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.binding.BindingOneScreen
@@ -333,7 +332,6 @@ fun MainScreen(
     var currentRoute by remember { mutableStateOf(MainScreen.Map.name) }
     var previousScreen by remember { mutableStateOf(MainScreen.Map.name) }
     var countNotifications by remember { mutableIntStateOf(0) }
-    var selectedMarker by remember { mutableStateOf<Device?>(null) }
     var isShow by remember { mutableStateOf(false) }
     var frequentQuest by remember { mutableStateOf(FrequentQuestions.CantPaySubscription) }
     var aboutItem by remember { mutableStateOf(AboutCompany.PublicOffer) }
@@ -382,7 +380,6 @@ fun MainScreen(
     ) {
         MapScreen(
             viewModel,
-            selectMarker = selectedMarker,
             { navController.navigate("${MainScreen.Binding.name}/${MainScreen.Map.name}") },
             toDeviceScreen = { device ->
                 viewModel.setDevice(device)
@@ -447,7 +444,7 @@ fun MainScreen(
                     { navController.navigate(MainScreen.BindingOne.name) },
                     { navController.navigate(MainScreen.DeviceTwo.name) },
                     {
-                        selectedMarker = device
+                        viewModel.setSelectedMarker(device)
                         navController.navigate(MainScreen.Map.name)
                     },
                     { navController.navigate(previousScreen) }
@@ -469,7 +466,7 @@ fun MainScreen(
                     { navController.navigate(MainScreen.DeviceTwo.name) },
                     { navController.navigate(MainScreen.DeviceListSignalScreen.name) },
                     {
-                        selectedMarker = device
+                        viewModel.setSelectedMarker(device)
                         navController.navigate(MainScreen.Map.name)
                     },
                     { navController.navigate(MainScreen.DeviceDetachOne.name) },
