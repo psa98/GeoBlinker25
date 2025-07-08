@@ -31,6 +31,8 @@ import com.example.geoblinker.model.imei.PosData
 import com.example.geoblinker.model.imei.RequestImei
 import com.example.geoblinker.network.Api
 import com.example.geoblinker.network.ApiImei
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -117,6 +119,7 @@ class DeviceViewModel(
                         registrationPlate = device.registrationPlate
                     )
                     newDevices.add(newDevice)
+                    Log.d("devices", "name: ${newDevice.name}, IMEI: ${newDevice.imei}, registrationPlate: ${newDevice.registrationPlate}")
                     //repository.insertDevice(newDevice)
                     repository.insertAllTypeSignal(device.details.imei ?: device.registrationPlate)
                 }
@@ -194,6 +197,11 @@ class DeviceViewModel(
                     _news.value = it
                 }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        Firebase.crashlytics.sendUnsentReports()
     }
 
     fun setRemoveAllMarkers(it: Boolean = true) {
@@ -320,6 +328,8 @@ class DeviceViewModel(
 
     fun insertDevice(name: String) {
         viewModelScope.launch {
+            val crashlytics = Firebase.crashlytics
+            crashlytics.log("Попытка привязки IMEI: ${_device.value.imei}. token: $_token. u_hash: $_hash")
             val nowTime = Instant.now().toEpochMilli()
             val id: String
             val foundDevice = _devices.value.find { it.imei == _device.value.imei && !it.isConnected }
@@ -360,6 +370,8 @@ class DeviceViewModel(
                         throw Exception("Code: ${res.code}, message: ${res.message}")
                     id = res.data.createdCar.cId
                 } catch (e: Exception) {
+                    crashlytics.log("Не удалось привязать IMEI: ${_device.value.imei}. registrationPlate: $registrationPlate. token: $_token. u_hash: $_hash Ошибка: $e")
+                    crashlytics.recordException(e)
                     Log.e("addCar", e.toString())
                     uiState.value= DefaultStates.Error(R.string.server_error)
                     return@launch
