@@ -49,6 +49,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
@@ -329,6 +330,7 @@ fun MainScreen(
     val pickSubscription by subscriptionViewModel.pickSubscription.collectAsState()
     val subscription by profileViewModel.subscription.collectAsState()
     val updateMap by viewModel.updateMap
+    val route = navController.currentBackStackEntryAsState().value?.destination?.route
     var currentRoute by remember { mutableStateOf(MainScreen.Map.name) }
     var previousScreen by remember { mutableStateOf(MainScreen.Map.name) }
     var countNotifications by remember { mutableIntStateOf(0) }
@@ -342,6 +344,10 @@ fun MainScreen(
             MainScreen.Binding.name -> Color(0xFFF6F6F6)
             else -> Color(0xFFEFEFEF)
         }
+    }
+
+    LaunchedEffect(route) {
+        viewModel.resetUiState()
     }
 
     LaunchedEffect(Unit) {
