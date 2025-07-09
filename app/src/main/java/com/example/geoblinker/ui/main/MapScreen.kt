@@ -118,7 +118,6 @@ fun MapScreen(
 
     LaunchedEffect(Unit) {
         while (true) {
-            delay(1000)
             devices.forEach { item ->
                 if (item.isConnected)
                     webView.evaluateJavascript(
@@ -140,6 +139,7 @@ fun MapScreen(
                     null
                 )
             }
+            delay(1000)
         }
     }
 

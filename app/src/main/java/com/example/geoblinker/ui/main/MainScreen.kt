@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,6 +45,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -337,6 +341,7 @@ fun MainScreen(
     var isShow by remember { mutableStateOf(false) }
     var frequentQuest by remember { mutableStateOf(FrequentQuestions.CantPaySubscription) }
     var aboutItem by remember { mutableStateOf(AboutCompany.PublicOffer) }
+    val isForeground by AppLifecycleObserver.isAppInForeground
 
     fun BackgroundColor(): Color {
         return when(currentRoute) {
@@ -362,15 +367,21 @@ fun MainScreen(
         isShow = isLogin && Instant.now().toEpochMilli() > subscription
     }
 
-    LaunchedEffect(currentRoute) {
-        if (currentRoute == MainScreen.Map.name) {
-            if (updateMap) {
-                while (true) {
-                    delay(1000)
-                    viewModel.updateLocationDevices()
-                }
-            } else {
+    LaunchedEffect(isForeground, route) {
+        if (isForeground) {
+            if (route == MainScreen.Map.name && !updateMap) {
                 viewModel.updateLocationDevices()
+            }
+            if (route in listOf(
+                    MainScreen.Map.name,
+                    MainScreen.List.name,
+                    MainScreen.DeviceOne.name
+                ) && updateMap
+            ) {
+                while (true) {
+                    viewModel.updateLocationDevices()
+                    delay(1000)
+                }
             }
         }
     }
