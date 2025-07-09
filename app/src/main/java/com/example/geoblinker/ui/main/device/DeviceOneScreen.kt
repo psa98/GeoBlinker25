@@ -169,7 +169,13 @@ fun DeviceOneScreen(
                             }
                             Spacer(Modifier.width(11.sdp()))
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
+                                imageVector = ImageVector.vectorResource(
+                                    when {
+                                        device.signalRate <= 20 -> R.drawable.signal_low
+                                        device.signalRate <= 60 -> R.drawable.signal_half
+                                        else -> R.drawable.signal_strength
+                                    }
+                                ),
                                 contentDescription = null,
                                 modifier = Modifier.size(24.sdp(), 17.sdp()),
                                 tint = Color.Unspecified
@@ -184,13 +190,19 @@ fun DeviceOneScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Tracker ULTRA 3",
+                                device.modelName,
                                 modifier = Modifier.weight(1f),
                                 color = Color(0xFF737373),
                                 style = MaterialTheme.typography.labelMedium
                             )
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.battery_full),
+                                imageVector = ImageVector.vectorResource(
+                                    when {
+                                        device.powerRate <= 25 -> R.drawable.battery_quarter
+                                        device.powerRate <= 50 -> R.drawable.battery_half
+                                        else -> R.drawable.battery_full
+                                    }
+                                ),
                                 contentDescription = null,
                                 modifier = Modifier.size(24.sdp()),
                                 tint = Color.Unspecified

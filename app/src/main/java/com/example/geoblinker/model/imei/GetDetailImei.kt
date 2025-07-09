@@ -6,6 +6,15 @@ data class GetDetailImei(
     @SerializedName("last_pos")
     val posString: String?,
 
+    @SerializedName("power")
+    val powerRate: Int,
+
+    @SerializedName("signal_rate")
+    val signalRate: Int,
+
+    @SerializedName("ver")
+    val modelName: String,
+
     @SerializedName("error_message")
     val error: String
 )

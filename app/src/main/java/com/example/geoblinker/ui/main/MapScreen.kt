@@ -524,7 +524,13 @@ fun CustomDevicePopup(
                                             )
                                         }
                                         Icon(
-                                            imageVector = ImageVector.vectorResource(R.drawable.signal_strength),
+                                            imageVector = ImageVector.vectorResource(
+                                                when {
+                                                    item.signalRate <= 20 -> R.drawable.signal_low
+                                                    item.signalRate <= 60 -> R.drawable.signal_half
+                                                    else -> R.drawable.signal_strength
+                                                }
+                                            ),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.sdp(), 17.sdp()),
                                             tint = Color.Unspecified
@@ -542,12 +548,18 @@ fun CustomDevicePopup(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            "Tracker ULTRA 3",
+                                            item.modelName,
                                             modifier = Modifier.weight(1f),
                                             style = MaterialTheme.typography.labelMedium
                                         )
                                         Icon(
-                                            imageVector = ImageVector.vectorResource(R.drawable.battery_full),
+                                            imageVector = ImageVector.vectorResource(
+                                                when {
+                                                    item.powerRate <= 25 -> R.drawable.battery_quarter
+                                                    item.powerRate <= 50 -> R.drawable.battery_half
+                                                    else -> R.drawable.battery_full
+                                                }
+                                            ),
                                             contentDescription = null,
                                             modifier = Modifier.size(24.sdp()),
                                             tint = Color.Unspecified

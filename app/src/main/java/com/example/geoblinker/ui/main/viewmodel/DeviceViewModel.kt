@@ -3,7 +3,6 @@ package com.example.geoblinker.ui.main.viewmodel
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import android.webkit.WebView
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -258,7 +257,10 @@ class DeviceViewModel(
                 val pos = Gson().fromJson(res.posString, PosData::class.java)
                 return@map device.copy(
                     lat = (pos.lat) / 1e6,
-                    lng = (pos.lon) / 1e6
+                    lng = (pos.lon) / 1e6,
+                    modelName = res.modelName,
+                    powerRate = res.powerRate,
+                    signalRate = res.signalRate
                 )
             }
         }
