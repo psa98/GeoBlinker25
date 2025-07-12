@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,8 +38,10 @@ import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
+import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
+import com.example.geoblinker.ui.main.viewmodel.DefaultStates
 import com.example.geoblinker.ui.theme.sdp
 
 private const val MAX_THEME_REQUEST = 64
@@ -49,12 +52,16 @@ fun MakeRequestScreen(
     viewModel: ChatsViewModel,
     toBack: () -> Unit
 ) {
+    val uiState by viewModel.uiState
     var themeRequest by remember { mutableStateOf("") }
     var request by remember { mutableStateOf("") }
-    var isSend by remember { mutableStateOf(false) }
     // Создаем референсы для фокуса
     val focusRequester1 = remember { FocusRequester() }
     val focusRequester2 = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        viewModel.resetUiState()
+    }
 
     Column(
         modifier = Modifier.width(330.sdp()),
@@ -66,138 +73,156 @@ fun MakeRequestScreen(
                 fontWeight = FontWeight.Bold
             )
         )
-        Spacer(Modifier.height(20.sdp()))
-        if (isSend) {
-            Spacer(Modifier.height(83.sdp()))
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.green_tick),
-                contentDescription = null,
-                modifier = Modifier.size(27.sdp(), 20.sdp()),
-                tint = Color.Unspecified
-            )
-            Spacer(Modifier.height(39.sdp()))
-            Text(
-                stringResource(R.string.received_request),
-                color = Color(0xFF12CD4A),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        else {
-            Box(
-                modifier = Modifier.height(50.sdp())
-            ) {
-                TextField(
-                    themeRequest,
-                    { themeRequest = it.take(MAX_THEME_REQUEST) },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(
-                            1.sdp(),
-                            Color(0xFFC0C0C0),
-                            RoundedCornerShape(10.sdp())
-                        )
-                        .focusRequester(focusRequester1),
-                    placeholder = {
-                        Text(
-                            stringResource(R.string.theme_request),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Next
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusRequester2.requestFocus() }
-                    ),
-                    singleLine = true,
-                    shape = RoundedCornerShape(10.sdp()),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    )
+        HSpacer(20)
+        when (uiState) {
+            is DefaultStates.Success -> {
+                HSpacer(83)
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.green_tick),
+                    contentDescription = null,
+                    modifier = Modifier.size(27.sdp(), 20.sdp()),
+                    tint = Color.Unspecified
                 )
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    Text(
-                        "${themeRequest.length}/$MAX_THEME_REQUEST",
-                        modifier = Modifier.offset(x = (-10).sdp(), y = (-1).sdp()),
-                        color = Color(0xFF747474),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
+                HSpacer(39)
+                Text(
+                    stringResource(R.string.received_request),
+                    color = Color(0xFF12CD4A),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
-            Spacer(Modifier.height(10.sdp()))
-            Box(
-                modifier = Modifier.height(300.sdp())
-            ) {
-                TextField(
-                    request,
-                    { request = it.take(MAX_REQUEST) },
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .border(
-                            1.sdp(),
-                            Color(0xFFC0C0C0),
-                            RoundedCornerShape(10.sdp())
+
+            is DefaultStates.Error -> {
+                HSpacer(83)
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.triangle_warning),
+                    contentDescription = null,
+                    modifier = Modifier.size(27.sdp(), 20.sdp()),
+                    tint = Color.Unspecified
+                )
+                HSpacer(39)
+                Text(
+                    stringResource((uiState as DefaultStates.Error).message),
+                    color = Color(0xFF12CD4A),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+
+            else -> {
+                Box(
+                    modifier = Modifier.height(50.sdp())
+                ) {
+                    TextField(
+                        themeRequest,
+                        { themeRequest = it.take(MAX_THEME_REQUEST) },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .border(
+                                1.sdp(),
+                                Color(0xFFC0C0C0),
+                                RoundedCornerShape(10.sdp())
+                            )
+                            .focusRequester(focusRequester1),
+                        placeholder = {
+                            Text(
+                                stringResource(R.string.theme_request),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Next
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onNext = { focusRequester2.requestFocus() }
+                        ),
+                        singleLine = true,
+                        shape = RoundedCornerShape(10.sdp()),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
                         )
-                        .focusRequester(focusRequester2),
-                    placeholder = {
+                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomEnd
+                    ) {
                         Text(
-                            stringResource(R.string.your_request),
-                            style = MaterialTheme.typography.bodySmall
+                            "${themeRequest.length}/$MAX_THEME_REQUEST",
+                            modifier = Modifier.offset(x = (-10).sdp(), y = (-1).sdp()),
+                            color = Color(0xFF747474),
+                            style = MaterialTheme.typography.labelMedium
                         )
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Send
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onSend = {
-                            if (themeRequest.isNotEmpty() && request.isNotEmpty()) {
-                                isSend = true
-                                viewModel.addRequest(themeRequest, request)
+                    }
+                }
+                HSpacer(10)
+                Box(
+                    modifier = Modifier.height(300.sdp())
+                ) {
+                    TextField(
+                        request,
+                        { request = it.take(MAX_REQUEST) },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .border(
+                                1.sdp(),
+                                Color(0xFFC0C0C0),
+                                RoundedCornerShape(10.sdp())
+                            )
+                            .focusRequester(focusRequester2),
+                        placeholder = {
+                            Text(
+                                stringResource(R.string.your_request),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Text,
+                            imeAction = ImeAction.Send
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onSend = {
+                                if (themeRequest.isNotEmpty() && request.isNotEmpty()) {
+                                    viewModel.addRequest(themeRequest, request)
+                                }
                             }
-                        } // TODO: Добавить отправку обращения по апи
-                    ),
-                    shape = RoundedCornerShape(10.sdp()),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(10.sdp()),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent
+                        )
                     )
-                )
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    Text(
-                        "${request.length}/$MAX_REQUEST",
-                        modifier = Modifier.offset(x = (-10).sdp(), y = (-1).sdp()),
-                        color = Color(0xFF747474),
-                        style = MaterialTheme.typography.labelMedium
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.BottomEnd
+                    ) {
+                        Text(
+                            "${request.length}/$MAX_REQUEST",
+                            modifier = Modifier.offset(x = (-10).sdp(), y = (-1).sdp()),
+                            color = Color(0xFF747474),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
                 }
+                HSpacer(10)
+                CustomButton(
+                    text = stringResource(R.string.send),
+                    onClick = {
+                        viewModel.addRequest(themeRequest, request)
+                    },
+                    typeColor = TypeColor.Green,
+                    enabled = themeRequest.isNotEmpty() && request.isNotEmpty(),
+                    height = 55,
+                    radius = 10,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
-            Spacer(Modifier.height(10.sdp()))
-            CustomButton(
-                text = stringResource(R.string.send),
-                onClick = {
-                    isSend = true
-                    viewModel.addRequest(themeRequest, request)
-                },
-                typeColor = TypeColor.Green,
-                enabled = themeRequest.isNotEmpty() && request.isNotEmpty(),
-                height = 55,
-                radius = 10,
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
     }
 

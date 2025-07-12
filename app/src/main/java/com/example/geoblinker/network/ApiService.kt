@@ -70,6 +70,12 @@ interface ApiService {
         @Path("c_id") cId: String,
         @FieldMap request: Map<String, String>
     ): Code
+
+    @FormUrlEncoded
+    @POST("mail/1/send/")
+    suspend fun sendEmailTechSupport(
+        @FieldMap request: Map<String, String>
+    ): Code
 }
 
 object Api {

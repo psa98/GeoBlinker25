@@ -2,13 +2,20 @@ package com.example.geoblinker.ui.main.viewmodel
 
 import android.app.Application
 import android.net.Uri
+import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.geoblinker.R
 import com.example.geoblinker.data.techsupport.ChatTechSupport
 import com.example.geoblinker.data.techsupport.MessageTechSupport
 import com.example.geoblinker.data.techsupport.TechSupportRepository
+import com.example.geoblinker.network.Api
 import com.example.geoblinker.ui.main.profile.techsupport.MediaItem
 import com.example.geoblinker.ui.main.profile.techsupport.MediaType
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -22,12 +29,15 @@ class ChatsViewModel(
     private val repository: TechSupportRepository,
     private val application: Application
 ): ViewModel() {
+    private val crashlytics = Firebase.crashlytics
     private val _chats = MutableStateFlow<List<ChatTechSupport>>(emptyList())
     private val _selectedChat = MutableStateFlow(DEFAULT_CHAT)
     private val _messages = MutableStateFlow<List<MessageTechSupport>>(emptyList())
     val chats = _chats.asStateFlow()
     val selectedChat = _selectedChat.asStateFlow()
     val messages = _messages.asStateFlow()
+    var uiState: MutableState<DefaultStates> = mutableStateOf(DefaultStates.Input)
+        private set
 
     init {
         viewModelScope.launch {
@@ -39,24 +49,32 @@ class ChatsViewModel(
         }
     }
 
+    fun resetUiState() {
+        uiState.value = DefaultStates.Input
+    }
+
     fun addRequest(
         theme: String,
         content: String
     ) {
         viewModelScope.launch {
-            val time = Instant.now().toEpochMilli()
-            repository.insertRequest(
-                ChatTechSupport(
-                    title = theme,
-                    lastMessageTime = time,
-                    lastChecked = time
-                ),
-                MessageTechSupport(
-                    chatId = 0, // ChatId объявляется в транзакции
-                    content = content,
-                    timeStamp = time
+            try {
+                val res = Api.retrofitService.sendEmailTechSupport(
+                    mapOf(
+                        "subject" to theme,
+                        "body" to content
+                    )
                 )
-            )
+                if (res.code != "200")
+                    throw Exception("Code: ${res.code}, message: ${res.message}")
+            } catch (e: Exception) {
+                Log.e("addRequest", e.toString())
+                crashlytics.log(e.toString())
+                crashlytics.recordException(e)
+                uiState.value = DefaultStates.Error(R.string.server_error)
+                return@launch
+            }
+            uiState.value = DefaultStates.Success
         }
     }
 
