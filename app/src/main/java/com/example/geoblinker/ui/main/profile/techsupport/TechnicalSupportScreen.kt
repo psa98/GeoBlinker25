@@ -1,5 +1,9 @@
 package com.example.geoblinker.ui.main.profile.techsupport
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -12,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,6 +33,8 @@ fun TechSupport(
     toChatWithTechSupport: () -> Unit,
     toBack: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -64,7 +71,9 @@ fun TechSupport(
         Spacer(Modifier.height(15.sdp()))
         CustomButton(
             text = stringResource(R.string.chat_with_tech_support),
-            onClick = toChatWithTechSupport,
+            onClick = {
+                openTelegramBot(context, "PumpDump_ScreenerBot")
+            },
             typeColor = TypeColor.Black,
             rightIcon = R.drawable.chat,
             height = 55,
@@ -75,4 +84,20 @@ fun TechSupport(
     BackButton(
         onClick = toBack
     )
+}
+
+fun openTelegramBot(context: Context, botUsername: String) {
+    val intent = Intent(Intent.ACTION_VIEW).apply {
+        data = Uri.parse("https://t.me/$botUsername")
+        setPackage("org.telegram.messenger") // Пытаемся открыть в приложении
+    }
+
+    try {
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        // Если приложение Telegram не установлено, открываем в браузере
+        context.startActivity(
+            Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$botUsername"))
+        )
+    }
 }
