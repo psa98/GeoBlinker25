@@ -274,11 +274,13 @@ class DeviceViewModel(
                 uiState.value = DefaultStates.Error(R.string.device_with_this_imei_already_linked)
                 return@launch
             }
+            /*
             if (imei.length != 15) {
                 Log.e("addImei", "Неверный IMEI: $imei")
                 uiState.value = DefaultStates.Error(R.string.imei_input_error)
                 return@launch
             }
+             */
             try {
                 val res = ApiImei.retrofitService.add(
                     sid = _sid,
