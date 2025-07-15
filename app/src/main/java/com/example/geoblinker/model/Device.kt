@@ -1,7 +1,5 @@
 package com.example.geoblinker.model
 
-import kotlin.random.Random
-
 data class Device(
     val imei: String,
     val id: String,
@@ -13,8 +11,9 @@ data class Device(
     val modelName: String = "",
     val powerRate: Int = 0,
     val signalRate: Int = 0,
-    val lat: Double = Random.nextDouble(-90.0, 90.0),
-    val lng: Double = Random.nextDouble(-180.0, 180.0),
+    val speed: Double = 0.0,
+    val lat: Double = -999999999.9,
+    val lng: Double = -999999999.9,
     val typeStatus: TypeStatus = TypeStatus.Available,
     val breakdownForecast: String? = null,
     val maintenanceRecommendations: String? = null

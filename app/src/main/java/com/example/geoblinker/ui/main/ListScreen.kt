@@ -263,7 +263,7 @@ fun ListScreen(
                                                 verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
-                                                    formatSpeed(10.0, unitsDistance),
+                                                    formatSpeed(item.speed, unitsDistance),
                                                     modifier = Modifier.weight(1f),
                                                     style = MaterialTheme.typography.labelMedium
                                                 )

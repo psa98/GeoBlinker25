@@ -265,7 +265,7 @@ fun DeviceOneScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                formatSpeed(10.0, unitsDistance),
+                                formatSpeed(device.speed, unitsDistance),
                                 modifier = Modifier.weight(1f),
                                 style = MaterialTheme.typography.labelMedium
                             )

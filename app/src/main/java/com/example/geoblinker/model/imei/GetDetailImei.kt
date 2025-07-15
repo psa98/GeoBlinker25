@@ -25,6 +25,9 @@ data class PosData(
 
     @SerializedName("lon")
     val lon: Long,
+
+    @SerializedName("speed")
+    val speed: Int
 )
 
 data class GetDetailParamsImei(

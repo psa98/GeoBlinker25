@@ -81,7 +81,6 @@ fun MapScreen(
 ) {
     val devices by viewModel.devices.collectAsState()
     val selectedMarker by viewModel.selectedMarker
-    val removeAllMarkers by viewModel.removeAllMarkers
     val context = LocalContext.current
     val webView = remember { WebView(context) }
     var isDarkTheme by remember { mutableStateOf(false) }
@@ -102,11 +101,6 @@ fun MapScreen(
         }
     }
 
-    LaunchedEffect(removeAllMarkers) {
-        webView.evaluateJavascript("removeAllMarkers()", null)
-        viewModel.setRemoveAllMarkers(false)
-    }
-
     LaunchedEffect(Unit) {
         delay(2000)
         if (!viewModel.checkDevices()) {
@@ -119,9 +113,14 @@ fun MapScreen(
     LaunchedEffect(Unit) {
         while (true) {
             devices.forEach { item ->
-                if (item.isConnected)
+                if (item.isConnected && item.lat != -999999999.9 && item.lng != -999999999.9)
                     webView.evaluateJavascript(
                         "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons})",
+                        null
+                    )
+                else
+                    webView.evaluateJavascript(
+                        "removeMarker('${item.imei}')",
                         null
                     )
             }
@@ -139,7 +138,7 @@ fun MapScreen(
                     null
                 )
             }
-            delay(1000)
+            delay(5000)
         }
     }
 
@@ -577,7 +576,7 @@ fun CustomDevicePopup(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Text(
-                                            formatSpeed(10.0, unitsDistance),
+                                            formatSpeed(item.speed, unitsDistance),
                                             modifier = Modifier.weight(1f),
                                             style = MaterialTheme.typography.labelMedium
                                         )

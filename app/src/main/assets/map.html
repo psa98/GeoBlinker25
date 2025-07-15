@@ -102,6 +102,13 @@
             .addTo(map);
     }
 
+    function removeMarker(imei) {
+        if (markers[imei]) {
+            map.removeLayer(markers[imei]); // Удалить маркер с карты
+            delete markers[imei];           // Удалить запись из объекта markers
+        }
+    }
+
     function removeAllMarkers() {
         // Перебираем все маркеры и удаляем их с карты
         Object.values(markers).forEach(marker => {

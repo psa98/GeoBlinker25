@@ -79,8 +79,6 @@ class DeviceViewModel(
         private set
     var selectedMarker = mutableStateOf<Device?>(null)
         private set
-    var removeAllMarkers = mutableStateOf(false)
-        private set
 
     init {
         viewModelScope.launch {
@@ -203,12 +201,6 @@ class DeviceViewModel(
         Firebase.crashlytics.sendUnsentReports()
     }
 
-    fun setRemoveAllMarkers(it: Boolean = true) {
-        viewModelScope.launch {
-            removeAllMarkers.value = it
-        }
-    }
-
     fun setSelectedMarker(device: Device? = null) {
         viewModelScope.launch {
             selectedMarker.value = device
@@ -260,7 +252,8 @@ class DeviceViewModel(
                     lng = (pos.lon) / 1e6,
                     modelName = res.modelName,
                     powerRate = res.powerRate,
-                    signalRate = res.signalRate
+                    signalRate = res.signalRate,
+                    speed = pos.speed / 3.6 // Перевод из км/ч в м/с
                 )
             }
         }
