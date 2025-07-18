@@ -89,6 +89,7 @@ fun MapScreen(
     var isShowPopupSearch by remember { mutableStateOf(false) }
     var dontSearch by remember { mutableStateOf(false) }
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
+    val isForeground by AppLifecycleObserver.isAppInForeground
 
     val scaleIcons = sc()
     val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -98,6 +99,15 @@ fun MapScreen(
             LocationHelper(context) { location ->
                 currentLocation = location
             }.getLastLocation()
+        }
+    }
+
+    LaunchedEffect(isForeground) {
+        if (!isForeground) {
+            webView.evaluateJavascript(
+                "clearAllLayers()",
+                null
+            )
         }
     }
 
@@ -115,7 +125,7 @@ fun MapScreen(
             devices.forEach { item ->
                 if (item.isConnected && item.lat != -999999999.9 && item.lng != -999999999.9)
                     webView.evaluateJavascript(
-                        "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons})",
+                        "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons}, ${26 * scaleIcons})",
                         null
                     )
                 else
@@ -134,7 +144,7 @@ fun MapScreen(
                 }.getLastLocation()
             currentLocation?.let {
                 webView.evaluateJavascript(
-                    "addSvgMarker('myLocation', ${it.latitude}, ${it.longitude}, 'my_marker.svg', ${26 * scaleIcons})",
+                    "addSvgMarker('myLocation', ${it.latitude}, ${it.longitude}, 'my_marker.svg', ${26 * scaleIcons}, ${26 * scaleIcons})",
                     null
                 )
             }

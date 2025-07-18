@@ -45,6 +45,12 @@
         })
     };
     var currentZoom = 10;
+    var markerPrevPos = {};
+    var markerColor   = {};
+
+    function randomColor() {
+        return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+    }
 
     function initMap() {
         map = L.map('map', {
@@ -83,15 +89,28 @@
     function addSvgMarker(imei, lat, lng, svgFileName, width, height) {
         if (markers[imei]) {
             markers[imei].setLatLng([lat, lng]);
+            if (imei == 'myLocation')
+                return;
+
+            markerPrevPos[imei] = markers[imei].getLatLng();
+
+            if (markerPrevPos[imei]) {
+                var line = L.polyline(
+                    [markerPrevPos[imei], [lat, lng]],
+                    { color: markerColor[imei], weight: 5, opacity: 1 }
+                ).addTo(map);
+            }
             return;
         }
+
+        markerColor[imei] = randomColor();
 
         if (!customIcons[svgFileName]) {
             customIcons[svgFileName] = L.icon({
                 iconUrl: 'file:///android_asset/' + svgFileName,
                 iconSize: [width, height],
-                iconAnchor: [width/2, height],
-                popupAnchor: [0, -height/2]
+                iconAnchor: [width/2, height/2],
+                popupAnchor: [0, 0]
             });
         }
 
@@ -100,6 +119,20 @@
                 AndroidInterface.onMarkerClicked(imei);
             })
             .addTo(map);
+
+        markerPrevPos[imei] = [lat, lng];
+    }
+
+    function clearAllLayers() {
+        removeAllMarkers()
+
+        map.eachLayer(layer => {
+            if (layer instanceof L.Polyline || layer instanceof L.Marker) {
+                map.removeLayer(layer);
+            }
+        });
+
+        markerPrevPos = {};
     }
 
     function removeMarker(imei) {
