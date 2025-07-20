@@ -122,7 +122,7 @@ fun NameSettingsScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
-        is DefaultStates.Input -> {}
+        else -> {}
     }
 
     BackButton(

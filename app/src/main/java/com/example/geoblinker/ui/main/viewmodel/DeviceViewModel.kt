@@ -26,8 +26,10 @@ import com.example.geoblinker.model.imei.GetDeviceListImei
 import com.example.geoblinker.model.imei.GetDeviceListParamsImei
 import com.example.geoblinker.model.imei.LoginImei
 import com.example.geoblinker.model.imei.LoginParamsImei
+import com.example.geoblinker.model.imei.ParamsTrajectoryImei
 import com.example.geoblinker.model.imei.PosData
 import com.example.geoblinker.model.imei.RequestImei
+import com.example.geoblinker.model.imei.TrajectoryImeiItem
 import com.example.geoblinker.network.Api
 import com.example.geoblinker.network.ApiImei
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -71,7 +73,7 @@ class DeviceViewModel(
     val signalsDevice: StateFlow<List<Signal>> = _signalsDevice.asStateFlow()
     val signals: StateFlow<List<Signal>> = _signals.asStateFlow()
     val news: StateFlow<List<News>> = _news.asStateFlow()
-    var unitsDistance by mutableStateOf(true) // true - км / м, false - мили / футы
+    var unitsDistance = mutableStateOf(true) // true - км / м, false - мили / футы
         private set
     var uiState: MutableState<DefaultStates> = mutableStateOf(DefaultStates.Input)
         private set
@@ -79,13 +81,15 @@ class DeviceViewModel(
         private set
     var selectedMarker = mutableStateOf<Device?>(null)
         private set
+    var trajectory = mutableStateOf<List<TrajectoryImeiItem>>(emptyList())
+        private set
 
     init {
         viewModelScope.launch {
             _token = _profilePrefs.getString("token", null) ?: ""
             _hash = _profilePrefs.getString("hash", null) ?: ""
             Log.d("tokenAndHash", "token: $_token, hash: $_hash")
-            unitsDistance = _prefs.getBoolean("unitsDistance", true)
+            unitsDistance.value = _prefs.getBoolean("unitsDistance", true)
             updateMap.value = _prefs.getBoolean("updateMap", true)
             //repository.clearDevice()
             var res: Cars
@@ -199,6 +203,39 @@ class DeviceViewModel(
     override fun onCleared() {
         super.onCleared()
         Firebase.crashlytics.sendUnsentReports()
+    }
+
+    fun clearTrajectoryDevice() {
+        viewModelScope.launch {
+            trajectory.value = emptyList()
+        }
+    }
+
+    fun getTrajectoryDevice() {
+        uiState.value = DefaultStates.Loading
+        viewModelScope.launch {
+            try {
+                val res = ApiImei.retrofitService.getTrajectory(
+                    sid = _sid,
+                    RequestImei(
+                        module = "location",
+                        func = "QueryLocation",
+                        params = ParamsTrajectoryImei(
+                            simei = _device.value.simei
+                        )
+                    )
+                )
+                if (res.code != 0)
+                    throw Exception(res.toString())
+                trajectory.value = res.data
+            } catch (e: Exception) {
+                Log.e("queryLocation", e.toString())
+                uiState.value = DefaultStates.Error(R.string.server_error)
+                return@launch
+            }
+            Log.i("getTrajectory", trajectory.value.toString())
+            uiState.value = DefaultStates.Success
+        }
     }
 
     fun setSelectedMarker(device: Device? = null) {
@@ -546,7 +583,7 @@ class DeviceViewModel(
             _prefs.edit().putBoolean("unitsDistance", it).apply()
 
             withContext(Dispatchers.Main) {
-                unitsDistance = it
+                unitsDistance.value = it
             }
         }
     }

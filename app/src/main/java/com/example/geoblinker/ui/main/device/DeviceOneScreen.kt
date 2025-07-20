@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -71,11 +72,12 @@ fun DeviceOneScreen(
     toTwo: () -> Unit,
     toListSignal: () -> Unit,
     toMap: () -> Unit,
+    toTrajectory: () -> Unit,
     toDetach: () -> Unit,
     toBack: () -> Unit
 ) {
     val device by viewModel.device.collectAsState()
-    val unitsDistance = viewModel.unitsDistance
+    val unitsDistance by viewModel.unitsDistance
     var isShow by remember { mutableStateOf(false) }
     var isShowDiagnosis by remember { mutableStateOf(false) }
     var isShowComments by remember { mutableStateOf(false) }
@@ -352,7 +354,7 @@ fun DeviceOneScreen(
                     text = stringResource(R.string.configure_the_signals),
                     onClick = toTwo,
                     typeColor = TypeColor.Black,
-                    rightIcon = R.drawable.bell,
+                    rightIcon = ImageVector.vectorResource(R.drawable.bell),
                     iconSize = 18,
                     height = 55,
                     radius = 10
@@ -362,7 +364,7 @@ fun DeviceOneScreen(
                     text = stringResource(R.string.signal_log),
                     onClick = toListSignal,
                     typeColor = TypeColor.Black,
-                    rightIcon = R.drawable.rectangle_list,
+                    rightIcon = ImageVector.vectorResource(R.drawable.rectangle_list),
                     iconSize = 18,
                     height = 55,
                     radius = 10
@@ -372,7 +374,20 @@ fun DeviceOneScreen(
                     text = stringResource(R.string.view_on_the_map),
                     onClick = toMap,
                     typeColor = TypeColor.Green,
-                    rightIcon = R.drawable.gps_navigation_black,
+                    rightIcon = ImageVector.vectorResource(R.drawable.gps_navigation_black),
+                    iconSize = 18,
+                    height = 55,
+                    radius = 10
+                )
+                HSpacer(15)
+                CustomButton(
+                    text = stringResource(R.string.view_trajectory_device),
+                    onClick = {
+                        viewModel.getTrajectoryDevice()
+                        toTrajectory()
+                    },
+                    typeColor = TypeColor.Green,
+                    rightIcon = Icons.Filled.Timeline,
                     iconSize = 18,
                     height = 55,
                     radius = 10

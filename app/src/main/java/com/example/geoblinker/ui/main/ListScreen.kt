@@ -73,7 +73,7 @@ fun ListScreen(
     val context = LocalContext.current
     var currentLocation by remember { mutableStateOf<LatLng?>(null) }
     val device by viewModel.device.collectAsState()
-    val unitsDistance = viewModel.unitsDistance
+    val unitsDistance by viewModel.unitsDistance
 
     LaunchedEffect(Unit) {
         LocationHelper(context) { location ->
@@ -412,7 +412,7 @@ fun ListScreen(
             text = stringResource(R.string.link_device),
             onClick = toBindingScreen,
             typeColor = TypeColor.Green,
-            leftIcon = R.drawable.plus
+            leftIcon = ImageVector.vectorResource(R.drawable.plus)
         )
     }
 

@@ -187,4 +187,5 @@
     <string name="linked">Привязано:</string>
     <string name="imei_input_error">IMEI должен содержать 15 цифр</string>
     <string name="device_with_this_imei_already_linked">Уже привязано устройство с таким IMEI</string>
+    <string name="view_trajectory_device">Посмотреть траекторию</string>
 </resources>

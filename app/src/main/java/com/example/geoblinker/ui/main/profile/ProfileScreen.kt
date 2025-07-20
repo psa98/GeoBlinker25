@@ -187,7 +187,7 @@ fun ProfileScreen(
             text = stringResource(R.string.settings),
             onClick = toSettings,
             typeColor = TypeColor.Black,
-            rightIcon = R.drawable.settings,
+            rightIcon = ImageVector.vectorResource(R.drawable.settings),
             iconSize = 19,
             height = 55,
             radius = 10,

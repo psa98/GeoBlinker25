@@ -47,6 +47,7 @@
     var currentZoom = 10;
     var markerPrevPos = {};
     var markerColor   = {};
+    var trackLines = [];
 
     function randomColor() {
         return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
@@ -99,6 +100,7 @@
                     [markerPrevPos[imei], [lat, lng]],
                     { color: markerColor[imei], weight: 5, opacity: 1 }
                 ).addTo(map);
+                trackLines.push(line);
             }
             return;
         }
@@ -121,6 +123,21 @@
             .addTo(map);
 
         markerPrevPos[imei] = [lat, lng];
+    }
+
+    function addTrackLine(color, lat1, lng1, lat2, lng2) {
+        var line = L.polyline(
+            [[lat1, lng1], [lat2, lng2]],
+            { color: color, weight: 5, opacity: 1 }
+        ).addTo(map);
+        trackLines.push(line);
+    }
+
+    function undoLastTrackLine() {
+        if (trackLines.length === 0) return;
+
+        var lastLine = trackLines.pop();
+        map.removeLayer(lastLine);
     }
 
     function clearAllLayers() {

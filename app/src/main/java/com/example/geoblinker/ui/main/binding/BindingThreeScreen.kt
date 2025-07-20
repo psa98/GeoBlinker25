@@ -125,7 +125,7 @@ fun BindingThreeScreen(
             text = stringResource(R.string.configure_the_signals),
             onClick = toConfigureSignals,
             typeColor = TypeColor.Black,
-            rightIcon = R.drawable.bell,
+            rightIcon = ImageVector.vectorResource(R.drawable.bell),
             iconSize = 18,
             height = 55,
             radius = 10
@@ -135,7 +135,7 @@ fun BindingThreeScreen(
             text = stringResource(R.string.view_on_the_map),
             onClick = toMap,
             typeColor = TypeColor.Black,
-            rightIcon = R.drawable.gps_navigation,
+            rightIcon = ImageVector.vectorResource(R.drawable.gps_navigation),
             iconSize = 18,
             height = 55,
             radius = 10
@@ -145,7 +145,7 @@ fun BindingThreeScreen(
             text = stringResource(R.string.link_device_again),
             onClick = toBindingScreen,
             typeColor = TypeColor.Green,
-            leftIcon = R.drawable.plus,
+            leftIcon = ImageVector.vectorResource(R.drawable.plus),
             height = 55,
             radius = 10
         )

@@ -418,7 +418,7 @@ fun CustomEmptyDevicesPopup(
                         text = stringResource(R.string.link_device),
                         onClick = toBindingScreen,
                         typeColor = TypeColor.Green,
-                        leftIcon = R.drawable.plus
+                        leftIcon = ImageVector.vectorResource(R.drawable.plus)
                     )
                     HSpacer(20)
                     Text(

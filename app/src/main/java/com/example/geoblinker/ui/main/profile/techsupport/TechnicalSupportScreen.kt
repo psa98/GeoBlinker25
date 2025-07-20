@@ -64,7 +64,7 @@ fun TechSupport(
             text = stringResource(R.string.make_request),
             onClick = toMakeRequest,
             typeColor = TypeColor.Black,
-            rightIcon = R.drawable.request,
+            rightIcon = ImageVector.vectorResource(R.drawable.request),
             height = 55,
             radius = 10
         )
@@ -75,7 +75,7 @@ fun TechSupport(
                 openTelegramBot(context, "PumpDump_ScreenerBot")
             },
             typeColor = TypeColor.Black,
-            rightIcon = R.drawable.chat,
+            rightIcon = ImageVector.vectorResource(R.drawable.chat),
             height = 55,
             radius = 10
         )

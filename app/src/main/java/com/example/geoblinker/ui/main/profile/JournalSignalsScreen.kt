@@ -229,7 +229,7 @@ fun JournalSignalsScreen(
                     text = "Скачать журнал",
                     onClick = { journalViewModel.downloadJournal(devices, signals) },
                     typeColor = TypeColor.Black,
-                    rightIcon = R.drawable.download,
+                    rightIcon = ImageVector.vectorResource(R.drawable.download),
                     iconSize = 16
                 )
             }

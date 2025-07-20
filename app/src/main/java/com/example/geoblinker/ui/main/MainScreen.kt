@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -66,6 +67,7 @@ import com.example.geoblinker.ui.main.binding.BindingTwoScreen
 import com.example.geoblinker.ui.main.device.DeviceListSignalScreen
 import com.example.geoblinker.ui.main.device.DeviceOneScreen
 import com.example.geoblinker.ui.main.device.DeviceThreeScreen
+import com.example.geoblinker.ui.main.device.DeviceTrajectory
 import com.example.geoblinker.ui.main.device.DeviceTwoScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
@@ -94,6 +96,7 @@ import com.example.geoblinker.ui.main.profile.techsupport.MakeRequestScreen
 import com.example.geoblinker.ui.main.profile.techsupport.TechSupport
 import com.example.geoblinker.ui.main.viewmodel.AvatarViewModel
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
+import com.example.geoblinker.ui.main.viewmodel.DefaultStates
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModelFactory
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
@@ -147,7 +150,8 @@ enum class MainScreen {
     About,
     AboutApp,
     AboutCompany,
-    AboutCompanyItem
+    AboutCompanyItem,
+    DeviceTrajectory
 }
 
 @Composable
@@ -323,6 +327,7 @@ fun MainScreen(
     val avatarViewModel = AvatarViewModel(application)
     val scope = rememberCoroutineScope()
 
+    val uiState by viewModel.uiState
     val device by viewModel.device.collectAsState()
     val signals by viewModel.signals.collectAsState()
     val news by viewModel.news.collectAsState()
@@ -482,6 +487,7 @@ fun MainScreen(
                         viewModel.setSelectedMarker(device)
                         navController.navigate(MainScreen.Map.name)
                     },
+                    { navController.navigate(MainScreen.DeviceTrajectory.name) },
                     { navController.navigate(MainScreen.DeviceDetachOne.name) },
                     { navController.navigate(previousScreen) }
                 )
@@ -507,6 +513,11 @@ fun MainScreen(
                 DeviceListSignalScreen(
                     viewModel,
                     { navController.navigateUp() }
+                )
+            }
+            composable(route = MainScreen.DeviceTrajectory.name) {
+                DeviceTrajectory(
+                    viewModel
                 )
             }
         }
@@ -806,6 +817,19 @@ fun MainScreen(
         countNotifications,
         avatarViewModel
     )
+
+    if (uiState is DefaultStates.Loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.2f))
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(64.sdp()),
+                color = Color.White
+            )
+        }
+    }
 
     if (isShow && currentRoute != MainScreen.Subscription.name) {
         Dialog(

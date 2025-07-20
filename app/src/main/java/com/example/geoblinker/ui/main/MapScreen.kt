@@ -442,7 +442,7 @@ fun CustomDevicePopup(
     onChangeValueToNull: () -> Unit,
     toDeviceScreen: (Device) -> Unit
 ) {
-    val unitsDistance = viewModel.unitsDistance
+    val unitsDistance by viewModel.unitsDistance
 
     selectedMarker?.let { item ->
         //var isShowAdd by remember { mutableStateOf(false) }

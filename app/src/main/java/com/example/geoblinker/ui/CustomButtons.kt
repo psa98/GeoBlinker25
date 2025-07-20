@@ -1,6 +1,5 @@
 package com.example.geoblinker.ui
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -80,8 +79,8 @@ fun CustomButton(
     text: String,
     onClick: () -> Unit,
     typeColor: TypeColor,
-    @DrawableRes leftIcon: Int? = null,
-    @DrawableRes rightIcon: Int? = null,
+    leftIcon: ImageVector? = null,
+    rightIcon: ImageVector? = null,
     iconSize: Int = 13,
     enabled: Boolean = true,
     height: Int = 65,
@@ -140,7 +139,7 @@ fun CustomButton(
         ) {
             leftIcon?.let {
                 Icon(
-                    imageVector = ImageVector.vectorResource(it),
+                    imageVector = it,
                     contentDescription = null,
                     modifier = Modifier
                         .width(iconSize.hdp())
@@ -157,7 +156,7 @@ fun CustomButton(
             rightIcon?.let {
                 Spacer(Modifier.width(17.hdp()))
                 Icon(
-                    imageVector = ImageVector.vectorResource(it),
+                    imageVector = it,
                     contentDescription = null,
                     modifier = Modifier
                         .width(iconSize.hdp())
