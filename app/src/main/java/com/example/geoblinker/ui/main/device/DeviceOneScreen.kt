@@ -568,6 +568,6 @@ fun calculateDistance(point1: LatLng, point2: LatLng): Double {
 
 fun formatSpeed(value: Double, unitsDistance: Boolean = true): String {
     if (unitsDistance)
-        return "${"%.1f".format(value * 3.6)} км/ч"
-    return "${"%.1f".format(value * 2.24)} мили/ч"
+        return "${"%.1f".format(value / 10 * 3.6)} км/ч" // / 10 из-за особенностей апи
+    return "${"%.1f".format(value / 10 * 2.24)} мили/ч"
 }
