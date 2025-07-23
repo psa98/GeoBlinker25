@@ -1,5 +1,10 @@
 package com.example.geoblinker.ui.main.device
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,11 +31,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.core.content.ContextCompat
 import com.example.geoblinker.R
-import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomLinkEmailPopup
@@ -47,10 +53,15 @@ fun DeviceThreeScreen(
     toLinkEmail: () -> Unit,
     toBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val device by viewModel.device.collectAsState()
     val typeSignal by viewModel.typeSignal.collectAsState()
     val email by profileViewModel.email.collectAsState()
     var isShow by remember { mutableStateOf(false) }
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
 
     Column(
         modifier = Modifier.requiredWidth(330.sdp()),
@@ -75,13 +86,7 @@ fun DeviceThreeScreen(
         }
         Spacer(Modifier.height(10.sdp()))
         Text(
-            when(typeSignal.type) {
-                SignalType.MovementStarted -> "Начато движение"
-                SignalType.Stop -> "Остановка"
-                SignalType.LowCharge -> "Низкий заряд"
-                SignalType.DoorOpen -> "Дверь открыта"
-                SignalType.ReachedLocation -> "Достиг локации"
-            },
+            stringResource(typeSignal.type.description),
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyLarge
         )
@@ -105,11 +110,27 @@ fun DeviceThreeScreen(
                     Switch(
                         checked = typeSignal.checkedPush,
                         onCheckedChange = {
-                            viewModel.updateTypeSignal(
-                                typeSignal.copy(
-                                    checkedPush = it
+                            if (Build.VERSION.SDK_INT >= 33) {
+                                if (ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.POST_NOTIFICATIONS
+                                    ) != PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.updateTypeSignal(
+                                        typeSignal.copy(
+                                            checkedPush = it
+                                        )
+                                    )
+                                }
+                            } else {
+                                viewModel.updateTypeSignal(
+                                    typeSignal.copy(
+                                        checkedPush = it
+                                    )
                                 )
-                            )
+                            }
                         },
                         modifier = Modifier.size(40.sdp(), 20.sdp()),
                         colors = SwitchDefaults.colors(

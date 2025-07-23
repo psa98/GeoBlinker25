@@ -2,21 +2,24 @@ package com.example.geoblinker.data
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TypeSignalDao {
-    @Insert
-    suspend fun insertAll(typesSignals: List<TypeSignal>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertAll(vararg typesSignals: TypeSignal)
 
-    @Query("SELECT * FROM type_signals WHERE deviceId = :imei")
-    fun getTypesSignalsDevice(imei: String): Flow<List<TypeSignal>>
+    @Query("SELECT * FROM type_signals WHERE deviceId = :id")
+    suspend fun getTypesSignalsDevice(id: String): List<TypeSignal>
 
     @Update
     suspend fun update(typeSignal: TypeSignal)
 
-    @Query("DELETE FROM type_signals")
-    suspend fun clear()
+    @Query("SELECT * FROM type_signals")
+    suspend fun getAll(): List<TypeSignal>
+
+    @Query("SELECT * FROM type_signals WHERE deviceId = :id AND type = :type LIMIT 1")
+    suspend fun getTypesSignal(id: String, type: String): TypeSignal
 }

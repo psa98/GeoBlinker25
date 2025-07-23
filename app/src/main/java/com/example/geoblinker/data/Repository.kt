@@ -3,22 +3,49 @@ package com.example.geoblinker.data
 import kotlinx.coroutines.flow.Flow
 
 class Repository(
+    private val deviceDao: DeviceDao,
     private val typeSignalDao: TypeSignalDao,
     private val signalDao: SignalDao,
     private val newsDao: NewsDao
 ) {
-    suspend fun insertAllTypeSignal(imei: String) {
-        val listTypeSignal = listOf(
-            TypeSignal(deviceId = imei, type = SignalType.MovementStarted),
-            TypeSignal(deviceId = imei, type = SignalType.Stop),
-            TypeSignal(deviceId = imei, type = SignalType.LowCharge),
-            TypeSignal(deviceId = imei, type = SignalType.DoorOpen),
-            TypeSignal(deviceId = imei, type = SignalType.ReachedLocation),
-        )
-        typeSignalDao.insertAll(listTypeSignal)
+    suspend fun insertAllDevices(devices: List<Device>) {
+        deviceDao.insert(*devices.toTypedArray())
+        devices.forEach { device ->
+            insertAllTypeSignal(device.id)
+        }
     }
 
-    fun getTypeSignal(imei: String): Flow<List<TypeSignal>> = typeSignalDao.getTypesSignalsDevice(imei)
+    suspend fun insertDevice(device: Device) {
+        deviceDao.insert(device)
+        insertAllTypeSignal(device.id)
+    }
+
+    suspend fun updateDevice(device: Device) {
+        deviceDao.update(device)
+    }
+
+    suspend fun updateAllDevices(devices: List<Device>) {
+        deviceDao.updateALl(devices)
+    }
+
+    suspend fun clearAllDevices() {
+        deviceDao.deleteAll()
+    }
+
+    fun getAllDevices(): Flow<List<Device>> = deviceDao.getAll()
+
+    private suspend fun insertAllTypeSignal(id: String) {
+        val listTypeSignal = listOf(
+            TypeSignal(deviceId = id, type = SignalType.MovementStarted),
+            TypeSignal(deviceId = id, type = SignalType.Stop),
+            TypeSignal(deviceId = id, type = SignalType.LowCharge),
+            TypeSignal(deviceId = id, type = SignalType.DoorOpen),
+            TypeSignal(deviceId = id, type = SignalType.VibrationAlarm),
+        )
+        typeSignalDao.insertAll(*listTypeSignal.toTypedArray())
+    }
+
+    suspend fun getTypeSignal(imei: String): List<TypeSignal> = typeSignalDao.getTypesSignalsDevice(imei)
 
     suspend fun updateTypeSignal(typeSignal: TypeSignal) {
         typeSignalDao.update(typeSignal)

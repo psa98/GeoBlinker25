@@ -12,10 +12,11 @@ import com.example.geoblinker.data.techsupport.MessageTechSupport
 import com.example.geoblinker.data.techsupport.MessageTechSupportDao
 
 @Database(
-    entities = [TypeSignal::class, Signal::class, News::class, ChatTechSupport::class, MessageTechSupport::class],
-    version = 13
+    entities = [Device::class, TypeSignal::class, Signal::class, News::class, ChatTechSupport::class, MessageTechSupport::class],
+    version = 15
 )
 abstract class AppDatabase : RoomDatabase() {
+    abstract fun deviceDao(): DeviceDao
     abstract fun typeSignalDao(): TypeSignalDao
     abstract fun signalDao(): SignalDao
     abstract fun newsDao(): NewsDao
@@ -23,6 +24,61 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun MessageTechSupportDao(): MessageTechSupportDao
 
     companion object {
+        private val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("DROP TABLE type_signals")
+
+                db.execSQL(
+                    """
+                        CREATE TABLE type_signals (
+                            id INTEGER PRIMARY KEY NOT NULL,
+                            deviceId TEXT NOT NULL,
+                            type TEXT NOT NULL,
+                            checked INTEGER NOT NULL,
+                            checkedPush INTEGER NOT NULL,
+                            checkedEmail INTEGER NOT NULL,
+                            checkedAlarm INTEGER NOT NULL,
+                            soundUri TEXT
+                        )
+                    """.trimIndent()
+                )
+
+                db.execSQL(
+                    """
+                        CREATE UNIQUE INDEX index_type_signals_deviceId_type
+                        ON type_signals(deviceId, type)
+                    """.trimIndent()
+                )
+            }
+        }
+
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                        CREATE TABLE 'devices' (
+                            'imei' TEXT NOT NULL,
+                            'id' TEXT NOT NULL PRIMARY KEY,
+                            'name' TEXT NOT NULL,
+                            'isConnected' INTEGER NOT NULL DEFAULT 1,
+                            'bindingTime' INTEGER NOT NULL,
+                            'simei' TEXT NOT NULL DEFAULT '',
+                            'registrationPlate' TEXT NOT NULL,
+                            'modelName' TEXT NOT NULL DEFAULT '',
+                            'powerRate' INTEGER NOT NULL DEFAULT 0,
+                            'signalRate' INTEGER NOT NULL DEFAULT 0,
+                            'speed' REAL NOT NULL DEFAULT 0,
+                            'lat' REAL NOT NULL,
+                            'lng' REAL NOT NULL,
+                            'breakdownForecast' TEXT,
+                            'maintenanceRecommendations' TEXT,
+                            'typeStatus' TEXT NOT NULL DEFAULT 'Available'
+                        )
+                    """.trimIndent()
+                )
+            }
+        }
+
         private val MIGRATION_12_13 = object : Migration(12, 13) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("DROP TABLE signals")
@@ -51,7 +107,8 @@ abstract class AppDatabase : RoomDatabase() {
                             'checkedPush' INTEGER NOT NULL,
                             'checkedEmail' INTEGER NOT NULL,
                             'checkedAlarm' INTEGER NOT NULL,
-                            'soundUri' TEXT
+                            'soundUri' TEXT,
+                            FOREIGN KEY (deviceId) REFERENCES devices(id) ON DELETE CASCADE
                         )
                     """.trimIndent()
                 )
@@ -247,7 +304,17 @@ abstract class AppDatabase : RoomDatabase() {
                         MIGRATION_9_10,
                         MIGRATION_10_11,
                         MIGRATION_11_12,
-                        MIGRATION_12_13)
+                        MIGRATION_12_13,
+                        MIGRATION_13_14,
+                        MIGRATION_14_15)
+                    /*
+                    .setQueryCallback(
+                        { sqlQuery, bindArgs ->
+                            Log.d("RoomSQL", "SQL: $sqlQuery | Args: $bindArgs")
+                        },
+                        Executors.newSingleThreadExecutor() // или Dispatchers.IO.asExecutor()
+                    )
+                     */
                     .build()
                 INSTANCE = instance
                 instance

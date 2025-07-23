@@ -19,7 +19,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,13 +42,6 @@ fun DeviceTwoScreen(
 ) {
     val device by viewModel.device.collectAsState()
     val typesSignals by viewModel.typesSignals.collectAsState()
-
-    LaunchedEffect(Unit) {
-        typesSignals.forEach { item->
-            if (item.checked && !(item.checkedPush || item.checkedEmail || item.checkedAlarm))
-                viewModel.updateTypeSignal(item.copy(checked = false))
-        }
-    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally

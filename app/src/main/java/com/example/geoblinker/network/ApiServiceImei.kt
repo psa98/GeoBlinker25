@@ -4,6 +4,7 @@ import com.example.geoblinker.model.imei.AddImei
 import com.example.geoblinker.model.imei.GetDetailImei
 import com.example.geoblinker.model.imei.GetDeviceListImei
 import com.example.geoblinker.model.imei.LoginImei
+import com.example.geoblinker.model.imei.NotificationList
 import com.example.geoblinker.model.imei.RequestImei
 import com.example.geoblinker.model.imei.TrajectoryImei
 import retrofit2.Retrofit
@@ -42,6 +43,12 @@ interface ApiServiceImei {
         @Query("sid") sid: String,
         @Body request: RequestImei
     ): GetDetailImei
+
+    @POST("mapi")
+    suspend fun getSignalList(
+        @Query("sid") sid: String,
+        @Body request: RequestImei
+    ): NotificationList
 
     @POST("mapi")
     suspend fun getTrajectory(

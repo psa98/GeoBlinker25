@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -83,7 +84,7 @@ fun NotificationsScreen(
 
     LaunchedEffect(devices) {
         devices.forEach {
-            namesSignals[it.imei] = it.name
+            namesSignals[it.id] = it.name.ifEmpty { it.imei }
         }
     }
 
@@ -160,7 +161,7 @@ fun NotificationsScreen(
         }
         Spacer(Modifier.height(15.sdp()))
         Surface(
-            modifier = Modifier.width(330.sdp()),
+            modifier = Modifier.width(330.sdp()).padding(bottom = 120.sdp()),
             shape = RoundedCornerShape(10.sdp()),
             color = Color.White
         ) {
@@ -200,23 +201,14 @@ fun NotificationsScreen(
                 itemsIndexed(sortedSignals) { index, item ->
                     if (keyFilter != R.string.news_promotions_only) {
                         Column {
-                            if (namesSignals.getOrDefault(item.deviceId, "Ошибка").isNotEmpty())
-                                Text(
-                                    namesSignals.getOrDefault(item.deviceId, "Ошибка"),
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            Text(
+                                namesSignals.getOrDefault(item.deviceId, "Ошибка"),
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold
                                 )
-                            else
-                                Text(
-                                    stringResource(R.string.an_unnamed_device),
-                                    color = Color(0xFF737373),
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                )
+                            )
                             Spacer(Modifier.height(7.sdp()))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),

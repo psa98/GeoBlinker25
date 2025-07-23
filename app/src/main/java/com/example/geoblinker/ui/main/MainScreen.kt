@@ -316,6 +316,7 @@ fun MainScreen(
     val context = LocalContext.current
     val application = context.applicationContext as Application
     val repository = remember { Repository(
+        AppDatabase.getInstance(application).deviceDao(),
         AppDatabase.getInstance(application).typeSignalDao(),
         AppDatabase.getInstance(application).signalDao(),
         AppDatabase.getInstance(application).newsDao())
@@ -356,10 +357,6 @@ fun MainScreen(
         viewModel.resetUiState()
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.clearDevice()
-    }
-
     LaunchedEffect(signals, news) {
         countNotifications = signals.size + news.size - (signals.count { it.isSeen } + news.count { it.isSeen })
     }
@@ -379,7 +376,7 @@ fun MainScreen(
                     MainScreen.DeviceOne.name
                 ) && updateMap
             ) {
-                while (true) {
+                while (updateMap) {
                     viewModel.updateLocationDevices()
                     delay(5000)
                 }

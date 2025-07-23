@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.R
+import com.example.geoblinker.data.Device
 import com.example.geoblinker.data.News
 import com.example.geoblinker.data.Repository
 import com.example.geoblinker.data.Signal
@@ -18,7 +19,6 @@ import com.example.geoblinker.data.TypeSignal
 import com.example.geoblinker.model.Car
 import com.example.geoblinker.model.Cars
 import com.example.geoblinker.model.Details
-import com.example.geoblinker.model.Device
 import com.example.geoblinker.model.imei.AddParamsImei
 import com.example.geoblinker.model.imei.GetDetailImei
 import com.example.geoblinker.model.imei.GetDetailParamsImei
@@ -32,6 +32,7 @@ import com.example.geoblinker.model.imei.RequestImei
 import com.example.geoblinker.model.imei.TrajectoryImeiItem
 import com.example.geoblinker.network.Api
 import com.example.geoblinker.network.ApiImei
+import com.example.geoblinker.worker.NotificationPollWorker
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
@@ -86,12 +87,12 @@ class DeviceViewModel(
 
     init {
         viewModelScope.launch {
+            repository.clearAllDevices()
             _token = _profilePrefs.getString("token", null) ?: ""
             _hash = _profilePrefs.getString("hash", null) ?: ""
-            Log.d("tokenAndHash", "token: $_token, hash: $_hash")
+            Log.i("tokenAndHash", "token: $_token, hash: $_hash")
             unitsDistance.value = _prefs.getBoolean("unitsDistance", true)
             updateMap.value = _prefs.getBoolean("updateMap", true)
-            //repository.clearDevice()
             var res: Cars
             var next = false
             while (!next && isActive) {
@@ -120,11 +121,9 @@ class DeviceViewModel(
                         registrationPlate = device.registrationPlate
                     )
                     newDevices.add(newDevice)
-                    Log.d("devices", "name: ${newDevice.name}, IMEI: ${newDevice.imei}, registrationPlate: ${newDevice.registrationPlate}")
-                    //repository.insertDevice(newDevice)
-                    repository.insertAllTypeSignal(device.details.imei ?: device.registrationPlate)
+                    Log.d("devices", "name: ${newDevice.name}, id: ${newDevice.id}, IMEI: ${newDevice.imei}, registrationPlate: ${newDevice.registrationPlate}")
                 }
-                _devices.update { newDevices }
+                repository.insertAllDevices(newDevices)
                 next = true
             }
             var resImei: LoginImei
@@ -144,6 +143,7 @@ class DeviceViewModel(
                 }
                 _sid = resImei.sid
                 _sidFamily = resImei.family[0]["sid"] as String
+                _profilePrefs.edit().putString("sid", _sid).putString("sidFamily", _sidFamily).apply()
                 Log.d("LoginImei", "sid: $_sid, sidFamily: $_sidFamily")
                 next = true
             }
@@ -166,22 +166,20 @@ class DeviceViewModel(
                     continue
                 }
                 _sgid = resDeviceListImei.items[0].sgid
-                _devices.update { currentList ->
-                    currentList.map { device ->
-                        resDeviceListImei.items.forEach {
-                            if (it.imei.toString() == device.imei) {
-                                Log.i(
-                                    "getDeviceListImei",
-                                    "name: ${device.name}, simei: ${it.simei}"
-                                )
-                                return@map device.copy(
-                                    simei = it.simei
-                                )
-                            }
-                        }
-                        device
+                // собираем Map<imei, simei>
+                val imeiToSimei = resDeviceListImei.items.associateBy({ it.imei.toString() }, { it.simei })
+
+                // делаем копию списка с проставленным simei
+                val newList = _devices.value.map { device ->
+                    val newSimei = imeiToSimei[device.imei] ?: device.simei
+                    if (newSimei != device.simei) {
+                        Log.i("getDeviceListImei", "name: ${device.name}, simei: $newSimei")
                     }
+                    device.copy(simei = newSimei)
                 }
+                _devices.value = newList
+                repository.updateAllDevices(newList)
+                NotificationPollWorker.schedule(application)
                 next = true
             }
             updateLocationDevices()
@@ -196,6 +194,12 @@ class DeviceViewModel(
             repository.getAllNews()
                 .collect {
                     _news.value = it
+                }
+        }
+        viewModelScope.launch {
+            repository.getAllDevices()
+                .collect {
+                    _devices.value = it
                 }
         }
     }
@@ -256,44 +260,43 @@ class DeviceViewModel(
     }
 
     suspend fun updateLocationDevices() {
-        _devices.update { currentList ->
-            currentList.map { device ->
-                if (device.simei == "" || _sid == "")
-                    return@map device
-                val res: GetDetailImei
-                try {
-                    res = ApiImei.retrofitService.getDetail(
-                        sid = _sid,
-                        RequestImei(
-                            module = "device",
-                            func = "GetDetail",
-                            params = GetDetailParamsImei(
-                                simei = device.simei
-                            )
+        val currentList = _devices.value.map { device ->
+            if (device.simei == "" || _sid == "")
+                return@map device
+            val res: GetDetailImei
+            try {
+                res = ApiImei.retrofitService.getDetail(
+                    sid = _sid,
+                    RequestImei(
+                        module = "device",
+                        func = "GetDetail",
+                        params = GetDetailParamsImei(
+                            simei = device.simei
                         )
                     )
-                } catch (e: Exception) {
-                    Log.e("getDetailImei", e.toString())
-                    return@map device
-                }
-                //Log.i("getDetailImei", _sid)
-                //Log.i("getDetailImei", device.name)
-                //Log.i("getDetailImei", device.simei)
-                //Log.e("getDetailImei", res.error)
-                //Log.i("getDetailImei", res.posString)
-                if (res.posString == null)
-                    return@map device
-                val pos = Gson().fromJson(res.posString, PosData::class.java)
-                return@map device.copy(
-                    lat = (pos.lat) / 1e6,
-                    lng = (pos.lon) / 1e6,
-                    modelName = res.modelName,
-                    powerRate = res.powerRate,
-                    signalRate = res.signalRate,
-                    speed = pos.speed / 3.6 // Перевод из км/ч в м/с
                 )
+            } catch (e: Exception) {
+                Log.e("getDetailImei", e.toString())
+                return@map device
             }
+            //Log.i("getDetailImei", _sid)
+            //Log.i("getDetailImei", device.name)
+            //Log.i("getDetailImei", device.simei)
+            //Log.e("getDetailImei", res.error)
+            //Log.i("getDetailImei", res.posString)
+            if (res.posString == null)
+                return@map device
+            val pos = Gson().fromJson(res.posString, PosData::class.java)
+            return@map device.copy(
+                lat = (pos.lat) / 1e6,
+                lng = (pos.lon) / 1e6,
+                modelName = res.modelName,
+                powerRate = res.powerRate,
+                signalRate = res.signalRate,
+                speed = pos.speed / 3.6 // Перевод из км/ч в м/с
+            )
         }
+        repository.updateAllDevices(currentList)
         Log.d("updateLocationDevices", "Update")
     }
 
@@ -419,26 +422,20 @@ class DeviceViewModel(
                     registrationPlate = registrationPlate
                 )
                 _device.value = device
-                _devices.update { currentList ->
-                    currentList.plus(device)
-                }
+                repository.insertDevice(device)
                 launch {
-                    repository.insertAllTypeSignal(_device.value.imei)
-                    repository.getTypeSignal(_device.value.imei)
-                        .collect {
-                            _typesSignals.value = it
-                        }
+                    _typesSignals.value = repository.getTypeSignal(_device.value.id)
                 }
             }
             launch {
                 repository.insertSignal(
                     Signal(
-                        deviceId = _device.value.imei,
+                        deviceId = _device.value.id,
                         name = "Устройство привязано",
                         dateTime = nowTime
                     )
                 )
-                repository.getAllDeviceSignals(_device.value.imei)
+                repository.getAllDeviceSignals(_device.value.id)
                     .collect {
                         _signalsDevice.value = it
                     }
@@ -447,6 +444,7 @@ class DeviceViewModel(
         }
     }
 
+    /*
     fun clearDevice() {
         viewModelScope.launch {
             // repository.clearDevice()
@@ -480,6 +478,7 @@ class DeviceViewModel(
             }
         }
     }
+     */
 
     fun getDevice(imei: String) {
         viewModelScope.launch {
@@ -492,13 +491,7 @@ class DeviceViewModel(
 
     fun updateDevice(device: Device) {
         viewModelScope.launch {
-            _devices.update { currentList ->
-                currentList.map {
-                    if (it.imei == device.imei)
-                        return@map device
-                    it
-                }
-            }
+            repository.updateDevice(device)
             try {
                 val res = Api.retrofitService.updateCar(
                     device.id,
@@ -538,13 +531,10 @@ class DeviceViewModel(
         _device.value = device
         viewModelScope.launch {
             launch {
-                repository.getTypeSignal(device.imei)
-                    .collect {
-                        _typesSignals.value = it
-                    }
+                _typesSignals.value = repository.getTypeSignal(device.id)
             }
             launch {
-                repository.getAllDeviceSignals(device.imei)
+                repository.getAllDeviceSignals(device.id)
                     .collect {
                         _signalsDevice.value = it
                     }
@@ -562,7 +552,7 @@ class DeviceViewModel(
         }
         _typeSignal.value = typeSignal
         _typesSignals.update { typesSignals ->
-            typesSignals.map { if (it.type == typeSignal.type) typeSignal else it }
+            typesSignals.map { if (it.id == typeSignal.id) typeSignal else it }
         }
     }
 

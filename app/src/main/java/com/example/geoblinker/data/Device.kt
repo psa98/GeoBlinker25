@@ -1,8 +1,12 @@
-package com.example.geoblinker.model
+package com.example.geoblinker.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "devices")
 data class Device(
     val imei: String,
-    val id: String,
+    @PrimaryKey val id: String,
     val name: String,
     val isConnected: Boolean = true,
     val bindingTime: Long,

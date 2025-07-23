@@ -103,7 +103,7 @@ fun JournalSignalsScreen(
 
     LaunchedEffect(devices) {
         devices.forEach {
-            namesSignals[it.imei] = it.name
+            namesSignals[it.id] = it.name.ifEmpty { it.imei }
         }
     }
 
@@ -150,7 +150,7 @@ fun JournalSignalsScreen(
             }
             Spacer(Modifier.height(15.sdp()))
             Surface(
-                modifier = Modifier.width(330.sdp()),
+                modifier = Modifier.width(330.sdp()).padding(bottom = 120.sdp()),
                 shape = RoundedCornerShape(10.sdp()),
                 color = Color.White
             ) {
@@ -159,23 +159,14 @@ fun JournalSignalsScreen(
                 ) {
                     itemsIndexed(sortedSignals) { index, item ->
                         Column {
-                            if (namesSignals.getOrDefault(item.deviceId, "Ошибка").isNotEmpty())
-                                Text(
-                                    namesSignals.getOrDefault(item.deviceId, "Ошибка"),
-                                    overflow = TextOverflow.Ellipsis,
-                                    maxLines = 1,
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
+                            Text(
+                                namesSignals.getOrDefault(item.deviceId, "Ошибка"),
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold
                                 )
-                            else
-                                Text(
-                                    stringResource(R.string.an_unnamed_device),
-                                    color = Color(0xFF737373),
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                )
+                            )
                             Spacer(Modifier.height(7.sdp()))
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
