@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
@@ -95,7 +96,7 @@ class NotificationPollWorker(
                 }
             }
             val next = OneTimeWorkRequestBuilder<NotificationPollWorker>()
-                .setInitialDelay(1, TimeUnit.MINUTES)
+                .setInitialDelay(5, TimeUnit.MINUTES)
                 .build()
 
             WorkManager.getInstance(applicationContext)
@@ -109,11 +110,19 @@ class NotificationPollWorker(
     }
 
     companion object {
+        private const val WORK_NAME = "NotificationPollWorker"
+
         fun schedule(context: Context) {
             val first = OneTimeWorkRequestBuilder<NotificationPollWorker>()
-                .setInitialDelay(1, TimeUnit.SECONDS)
+                .setInitialDelay(1, TimeUnit.MINUTES)
                 .build()
-            WorkManager.getInstance(context).enqueue(first)
+
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(
+                    WORK_NAME,
+                    ExistingWorkPolicy.KEEP,
+                    first
+                )
         }
     }
 }
