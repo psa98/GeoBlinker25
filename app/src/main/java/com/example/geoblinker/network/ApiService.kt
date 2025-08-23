@@ -5,6 +5,13 @@ import com.example.geoblinker.model.Cars
 import com.example.geoblinker.model.Code
 import com.example.geoblinker.model.ResponseCreateCar
 import com.example.geoblinker.model.Token
+import com.example.geoblinker.model.SubscriptionRequest
+import com.example.geoblinker.model.SubscriptionResponse
+import com.example.geoblinker.model.SubscriptionListResponse
+import com.example.geoblinker.model.PaymentRequest
+import com.example.geoblinker.model.PaymentResponse
+import com.example.geoblinker.model.PaymentInfoResponse
+import com.example.geoblinker.model.TariffResponse
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Field
@@ -15,7 +22,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-private const val BASE_URL = "https://ibronevik.ru/taxi/api/v1/"
+private const val BASE_URL = "https://ibronevik.ru/taxi/c/0/api/v1/"
 
 private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
@@ -76,6 +83,36 @@ interface ApiService {
     suspend fun sendEmailTechSupport(
         @FieldMap request: Map<String, String>
     ): Code
+
+    // Subscription API endpoints
+    @FormUrlEncoded
+    @POST("subscription/create")
+    suspend fun createSubscription(
+        @FieldMap request: Map<String, String>
+    ): SubscriptionResponse
+
+    @FormUrlEncoded
+    @POST("subscription/get")
+    suspend fun getSubscription(
+        @FieldMap request: Map<String, String>
+    ): SubscriptionListResponse
+
+    // Payment API endpoints  
+    @FormUrlEncoded
+    @POST("payment/create")
+    suspend fun createPayment(
+        @FieldMap request: Map<String, String>
+    ): PaymentResponse
+
+    @FormUrlEncoded
+    @POST("payment/get")
+    suspend fun getPayment(
+        @FieldMap request: Map<String, String>
+    ): PaymentInfoResponse
+
+    // Get tariffs
+    @GET("data")
+    suspend fun getTariffs(): TariffResponse
 }
 
 object Api {

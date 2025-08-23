@@ -606,13 +606,7 @@ fun MainScreen(
                 SubscriptionTwoScreen(
                     subscriptionViewModel,
                     {
-                        if (subscriptionViewModel.paySubscription()) {
-                            profileViewModel.addMonthsSubscription(pickSubscription.period.toLong())
-                            navController.navigate(MainScreen.SubscriptionReady.name)
-                        }
-                        else {
-                            // TODO: добавить экран об ошибке оплаты
-                        }
+                        subscriptionViewModel.paySubscription()
                     },
                     { navController.navigateUp() }
                 )

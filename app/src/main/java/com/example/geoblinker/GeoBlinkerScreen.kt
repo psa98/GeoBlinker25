@@ -67,7 +67,7 @@ fun GeoBlinkerScreen(
             }
             composable(route = GeoBlinkerScreen.Main.name) {
                 MainScreen(
-                    SubscriptionViewModel(),
+                    SubscriptionViewModel(application),
                     JournalViewModel(application),
                     NotificationViewModel(application),
                     ChatsViewModel(

@@ -1,12 +1,22 @@
 package com.example.geoblinker.ui.main.viewmodel
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.R
+import com.example.geoblinker.network.SubscriptionRepository
+import com.example.geoblinker.ui.main.viewmodel.Subscription
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-class SubscriptionViewModel: ViewModel() {
+class SubscriptionViewModel(application: Application): AndroidViewModel(application) {
+    private val subscriptionRepository = SubscriptionRepository(application)
+    
     val subscriptionOptions = listOf(
         Subscription(600, 1, "1 месяц", R.drawable.one_month),
         Subscription(1100, 3, "3 месяца", R.drawable.three_months),
@@ -17,16 +27,136 @@ class SubscriptionViewModel: ViewModel() {
     private val _pickSubscription = MutableStateFlow(subscriptionOptions[0])
     val pickSubscription: StateFlow<Subscription> = _pickSubscription.asStateFlow()
 
+    private val _paymentUrl = MutableStateFlow<String?>(null)
+    val paymentUrl: StateFlow<String?> = _paymentUrl.asStateFlow()
+
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _paymentSuccess = MutableStateFlow(false)
+    val paymentSuccess: StateFlow<Boolean> = _paymentSuccess.asStateFlow()
+
     fun setPickSubscription(index: Int) {
         _pickSubscription.value = subscriptionOptions[index]
     }
 
     /**
-     * Возвращает вердикт о выполении оплаты: true - успешно, false - ошибка
-     * @return Boolean
+     * Создает подписку и инициирует оплату через YuKassa
      */
-    fun paySubscription(): Boolean {
-        // TODO: Добавить оплату
-        return true
+    fun paySubscription() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            
+            try {
+                val selectedSubscription = _pickSubscription.value
+                
+                // Получаем тарифы с сервера
+                val tariffsResult = subscriptionRepository.getTariffs()
+                if (tariffsResult.isFailure) {
+                    _errorMessage.value = "Ошибка получения тарифов"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                val tariffs = tariffsResult.getOrNull()
+                val tariffId = findTariffIdByPrice(tariffs, selectedSubscription.price)
+                
+                if (tariffId == null) {
+                    _errorMessage.value = "Тариф не найден"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                // Создаем подписку
+                val subscriptionResult = subscriptionRepository.createSubscription(tariffId)
+                if (subscriptionResult.isFailure) {
+                    _errorMessage.value = "Ошибка создания подписки"
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                val subsId = subscriptionResult.getOrNull()
+                
+                // Создаем платеж
+                val paymentResult = subscriptionRepository.createPayment(
+                    amount = selectedSubscription.price,
+                    subsId = subsId,
+                    appUrl = createAppUrl()
+                )
+                
+                if (paymentResult.isSuccess) {
+                    val paymentData = paymentResult.getOrNull()
+                    _paymentUrl.value = paymentData?.confirmationUrl
+                    
+                    // Открываем браузер для оплаты
+                    paymentData?.confirmationUrl?.let { url ->
+                        openPaymentUrl(url)
+                    }
+                    _paymentSuccess.value = true
+                } else {
+                    _errorMessage.value = "Ошибка создания платежа"
+                    _paymentSuccess.value = false
+                }
+                
+            } catch (e: Exception) {
+                Log.e("SubscriptionViewModel", "Payment error", e)
+                _errorMessage.value = "Произошла ошибка: ${e.message}"
+                _paymentSuccess.value = false
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private fun findTariffIdByPrice(tariffs: Map<String, com.example.geoblinker.model.TariffItem>?, price: Int): String? {
+        return tariffs?.entries?.find { it.value.price == price }?.key
+    }
+
+    private fun createAppUrl(): String {
+        return """{"succeeded":"geoblinker://payment/success","canceled":"geoblinker://payment/canceled"}"""
+    }
+
+    private fun openPaymentUrl(url: String) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            getApplication<Application>().startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("SubscriptionViewModel", "Error opening payment URL", e)
+            _errorMessage.value = "Не удалось открыть страницу оплаты"
+        }
+    }
+
+    fun checkPaymentStatus(paymentId: String) {
+        viewModelScope.launch {
+            try {
+                val result = subscriptionRepository.getPaymentStatus(paymentId)
+                if (result.isSuccess) {
+                    val payment = result.getOrNull()
+                    when (payment?.paymentStatus) {
+                        SubscriptionRepository.PAYMENT_SUCCEEDED -> {
+                            _paymentSuccess.value = true
+                        }
+                        SubscriptionRepository.PAYMENT_CANCELED -> {
+                            _errorMessage.value = "Оплата отменена"
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("SubscriptionViewModel", "Error checking payment status", e)
+            }
+        }
+    }
+
+    fun clearError() {
+        _errorMessage.value = null
+    }
+
+    fun clearPaymentUrl() {
+        _paymentUrl.value = null
     }
 }
