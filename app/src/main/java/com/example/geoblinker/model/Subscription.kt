@@ -31,8 +31,8 @@ data class SubscriptionResponse(
 )
 
 data class SubscriptionResponseData(
-    @SerializedName("p_id")
-    val pId: String
+    @SerializedName("subs_id")
+    val subsId: String
 )
 
 data class SubscriptionInfo(
@@ -86,13 +86,13 @@ data class PaymentData(
     @SerializedName("sum")
     val sum: Int,
     @SerializedName("currency")
-    val currency: String = "RUB",
+    val currency: String,
     @SerializedName("payment_service")
-    val paymentService: Int = 1,
+    val paymentService: Int,
     @SerializedName("subs_id")
     val subsId: String? = null,
     @SerializedName("payment_way")
-    val paymentWay: Int = 2
+    val paymentWay: Int
 )
 
 data class PaymentResponse(
@@ -168,7 +168,7 @@ data class TariffItem(
     @SerializedName("name")
     val name: String,
     @SerializedName("price")
-    val price: Int,
+    val price: Double,
     @SerializedName("period")
     val period: Int
 )

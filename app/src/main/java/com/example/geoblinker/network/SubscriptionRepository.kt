@@ -16,7 +16,7 @@ class SubscriptionRepository(private val context: Context) {
     suspend fun createSubscription(tariffId: String): Result<String> = withContext(Dispatchers.IO) {
         try {
             val token = prefs.getString("token", "") ?: ""
-            val uHash = prefs.getString("u_hash", "") ?: ""
+            val uHash = prefs.getString("hash", "") ?: ""
             
             if (token.isEmpty() || uHash.isEmpty()) {
                 return@withContext Result.failure(Exception("No authentication tokens"))
@@ -36,8 +36,8 @@ class SubscriptionRepository(private val context: Context) {
             val response = Api.retrofitService.createSubscription(request)
             
             if (response.code == "200") {
-                Log.d("SubscriptionRepo", "Subscription created: ${response.data.pId}")
-                Result.success(response.data.pId)
+                Log.d("SubscriptionRepo", "Subscription created: ${response.data.subsId}")
+                Result.success(response.data.subsId)
             } else {
                 Result.failure(Exception("Failed to create subscription: ${response.code}"))
             }
@@ -54,7 +54,7 @@ class SubscriptionRepository(private val context: Context) {
     ): Result<PaymentResponseData> = withContext(Dispatchers.IO) {
         try {
             val token = prefs.getString("token", "") ?: ""
-            val uHash = prefs.getString("u_hash", "") ?: ""
+            val uHash = prefs.getString("hash", "") ?: ""
             
             if (token.isEmpty() || uHash.isEmpty()) {
                 return@withContext Result.failure(Exception("No authentication tokens"))
@@ -93,7 +93,7 @@ class SubscriptionRepository(private val context: Context) {
     suspend fun getPaymentStatus(paymentId: String): Result<PaymentInfo> = withContext(Dispatchers.IO) {
         try {
             val token = prefs.getString("token", "") ?: ""
-            val uHash = prefs.getString("u_hash", "") ?: ""
+            val uHash = prefs.getString("hash", "") ?: ""
             
             val request = mapOf(
                 "token" to token,
@@ -117,7 +117,7 @@ class SubscriptionRepository(private val context: Context) {
     suspend fun getUserSubscriptions(): Result<List<SubscriptionInfo>> = withContext(Dispatchers.IO) {
         try {
             val token = prefs.getString("token", "") ?: ""
-            val uHash = prefs.getString("u_hash", "") ?: ""
+            val uHash = prefs.getString("hash", "") ?: ""
             
             val request = mapOf(
                 "token" to token,
@@ -139,11 +139,15 @@ class SubscriptionRepository(private val context: Context) {
 
     suspend fun getTariffs(): Result<Map<String, TariffItem>> = withContext(Dispatchers.IO) {
         try {
+            Log.d("SubscriptionRepo", "Making getTariffs API call...")
             val response = Api.retrofitService.getTariffs()
+            Log.d("SubscriptionRepo", "getTariffs response code: ${response.code}")
             
             if (response.code == "200") {
+                Log.d("SubscriptionRepo", "Tariffs received: ${response.data.data.tariffs.size} items")
                 Result.success(response.data.data.tariffs)
             } else {
+                Log.e("SubscriptionRepo", "Failed to get tariffs: ${response.code}")
                 Result.failure(Exception("Failed to get tariffs: ${response.code}"))
             }
         } catch (e: Exception) {

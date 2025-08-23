@@ -47,59 +47,73 @@ class SubscriptionViewModel(application: Application): AndroidViewModel(applicat
      * Создает подписку и инициирует оплату через YuKassa
      */
     fun paySubscription() {
+        Log.d("SubscriptionViewModel", "paySubscription() called")
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
             
             try {
                 val selectedSubscription = _pickSubscription.value
+                Log.d("SubscriptionViewModel", "Selected subscription: $selectedSubscription")
                 
                 // Получаем тарифы с сервера
+                Log.d("SubscriptionViewModel", "Getting tariffs from server...")
                 val tariffsResult = subscriptionRepository.getTariffs()
                 if (tariffsResult.isFailure) {
+                    Log.e("SubscriptionViewModel", "Failed to get tariffs: ${tariffsResult.exceptionOrNull()}")
                     _errorMessage.value = "Ошибка получения тарифов"
                     _isLoading.value = false
                     return@launch
                 }
                 
                 val tariffs = tariffsResult.getOrNull()
+                Log.d("SubscriptionViewModel", "Tariffs loaded: ${tariffs?.size} items")
                 val tariffId = findTariffIdByPrice(tariffs, selectedSubscription.price)
+                Log.d("SubscriptionViewModel", "Found tariff ID: $tariffId for price: ${selectedSubscription.price}")
                 
                 if (tariffId == null) {
+                    Log.e("SubscriptionViewModel", "Tariff not found for price: ${selectedSubscription.price}")
                     _errorMessage.value = "Тариф не найден"
                     _isLoading.value = false
                     return@launch
                 }
                 
                 // Создаем подписку
+                Log.d("SubscriptionViewModel", "Creating subscription with tariff ID: $tariffId")
                 val subscriptionResult = subscriptionRepository.createSubscription(tariffId)
                 if (subscriptionResult.isFailure) {
+                    Log.e("SubscriptionViewModel", "Failed to create subscription: ${subscriptionResult.exceptionOrNull()}")
                     _errorMessage.value = "Ошибка создания подписки"
                     _isLoading.value = false
                     return@launch
                 }
                 
                 val subsId = subscriptionResult.getOrNull()
+                Log.d("SubscriptionViewModel", "Subscription created with ID: $subsId")
                 
                 // Создаем платеж
+                Log.d("SubscriptionViewModel", "Creating payment for amount: ${selectedSubscription.price}")
                 val paymentResult = subscriptionRepository.createPayment(
                     amount = selectedSubscription.price,
                     subsId = subsId,
                     appUrl = createAppUrl()
                 )
                 
-                if (paymentResult.isSuccess) {
-                    val paymentData = paymentResult.getOrNull()
-                    _paymentUrl.value = paymentData?.confirmationUrl
-                    
-                    // Открываем браузер для оплаты
-                    paymentData?.confirmationUrl?.let { url ->
-                        openPaymentUrl(url)
-                    }
-                    _paymentSuccess.value = true
-                } else {
+                if (paymentResult.isFailure) {
+                    Log.e("SubscriptionViewModel", "Failed to create payment: ${paymentResult.exceptionOrNull()}")
                     _errorMessage.value = "Ошибка создания платежа"
-                    _paymentSuccess.value = false
+                    _isLoading.value = false
+                    return@launch
+                }
+                
+                val paymentData = paymentResult.getOrNull()
+                Log.d("SubscriptionViewModel", "Payment created: ${paymentData?.pId}")
+                Log.d("SubscriptionViewModel", "Opening payment URL: ${paymentData?.confirmationUrl}")
+                
+                // Открываем URL для оплаты
+                paymentData?.confirmationUrl?.let { url ->
+                    openPaymentUrl(url)
+                    _paymentSuccess.value = true
                 }
                 
             } catch (e: Exception) {
@@ -113,7 +127,23 @@ class SubscriptionViewModel(application: Application): AndroidViewModel(applicat
     }
 
     private fun findTariffIdByPrice(tariffs: Map<String, com.example.geoblinker.model.TariffItem>?, price: Int): String? {
-        return tariffs?.entries?.find { it.value.price == price }?.key
+        val selectedSubscription = _pickSubscription.value
+        Log.d("SubscriptionViewModel", "Looking for tariff with price: $price, period: ${selectedSubscription.period}")
+        tariffs?.forEach { (key, tariff) ->
+            Log.d("SubscriptionViewModel", "Tariff $key: name=${tariff.name}, price=${tariff.price}, period=${tariff.period}")
+        }
+        
+        // Since API tariffs all have period=0, use mapping based on subscription period
+        val tariffId = when (selectedSubscription.period) {
+            1 -> "6"    // 1 month -> cheapest tariff (0.5)
+            3 -> "5"    // 3 months -> tariff 5 (2.0)
+            6 -> "2"    // 6 months -> tariff 2 (4.0)
+            12 -> "1"   // 12 months -> tariff 1 (10.0)
+            else -> tariffs?.keys?.firstOrNull()
+        }
+        
+        Log.d("SubscriptionViewModel", "Mapped period ${selectedSubscription.period} to tariff ID: $tariffId")
+        return tariffId
     }
 
     private fun createAppUrl(): String {

@@ -31,7 +31,8 @@ enum class GeoBlinkerScreen {
 @SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun GeoBlinkerScreen(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    paymentSuccess: Boolean = false
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
