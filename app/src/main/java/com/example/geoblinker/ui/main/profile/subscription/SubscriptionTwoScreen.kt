@@ -19,8 +19,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import android.content.Context
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +33,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
@@ -44,6 +48,108 @@ fun SubscriptionTwoScreen(
     toBack: () -> Unit
 ) {
     val pickSubscription by viewModel.pickSubscription.collectAsState()
+    val paymentSuccess by viewModel.paymentSuccess.collectAsState()
+    
+    // Проверяем статус при каждом возврате на экран
+    LaunchedEffect(Unit) {
+        viewModel.checkPaymentStatus()
+    }
+    
+    // Также проверяем при каждой перекомпозиции
+    LaunchedEffect(paymentSuccess) {
+        viewModel.refreshPaymentStatus()
+    }
+    
+    // Получаем сообщения из SharedPreferences
+    val context = LocalContext.current
+    val prefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+    val successMessage = prefs.getString("success_message", null)
+    val errorMessage = prefs.getString("error_message", null)
+    
+    // Получаем статус подписки
+    val subscriptionActive by viewModel.subscriptionActive.collectAsState()
+    
+    // Показываем сообщение об успешной оплате
+    if (paymentSuccess || successMessage != null || subscriptionActive) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+        ) {
+            Text(
+                "✅ Успешно оплачено!",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color(0xFF4CAF50),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                successMessage ?: "Подписка ${pickSubscription.labelPeriod} активирована",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Вы приобрели подписку на ${pickSubscription.period} ${if(pickSubscription.period == 1) "месяц" else "месяцев"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            CustomButton(
+                text = "Продолжить",
+                typeColor = TypeColor.Green,
+                onClick = {
+                    viewModel.clearPaymentSuccess()
+                    toBack()
+                }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Показываем статус подписки
+            Text(
+                "Статус подписки: ${if(subscriptionActive) "АКТИВНА" else "НЕ АКТИВНА"}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = if(subscriptionActive) Color(0xFF4CAF50) else Color(0xFFFF5722),
+                textAlign = TextAlign.Center
+            )
+        }
+        return
+    }
+    
+    // Показываем сообщение об ошибке
+    if (errorMessage != null) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+        ) {
+            Text(
+                "❌ Ошибка оплаты",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color(0xFFE53E3E),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                errorMessage,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            CustomButton(
+                text = "Попробовать еще раз",
+                typeColor = TypeColor.Green,
+                onClick = {
+                    prefs.edit().remove("error_message").apply()
+                    // Остаемся на экране оплаты
+                }
+            )
+        }
+        return
+    }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally

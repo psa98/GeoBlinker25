@@ -74,7 +74,10 @@ class SubscriptionRepository(private val context: Context) {
                 "data" to gson.toJson(paymentData)
             )
             
-            appUrl?.let { requestMap["appUrl"] = it }
+            appUrl?.let { 
+                Log.d("SubscriptionRepo", "Adding appUrl to payment request: $it")
+                requestMap["appUrl"] = it 
+            }
 
             val response = Api.retrofitService.createPayment(requestMap)
             

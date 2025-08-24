@@ -18,6 +18,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +35,8 @@ fun SubscriptionOneScreen(
     toPaySubscription: () -> Unit,
     toBack: () -> Unit
 ) {
+    val subscriptionOptions by viewModel.subscriptionOptions.collectAsState()
+    
     LazyColumn(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -43,7 +47,7 @@ fun SubscriptionOneScreen(
             )
             Spacer(Modifier.height(25.sdp()))
         }
-        itemsIndexed(viewModel.subscriptionOptions) { index, subscription ->
+        itemsIndexed(subscriptionOptions) { index, subscription ->
             Surface(
                 modifier = Modifier.size(330.sdp(), 120.sdp()).clickable {
                     viewModel.setPickSubscription(index)
