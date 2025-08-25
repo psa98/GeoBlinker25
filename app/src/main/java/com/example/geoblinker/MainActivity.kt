@@ -112,10 +112,46 @@ class MainActivity : ComponentActivity() {
                                         editor.putString("success_message", "Успешно оплачено! Подписка активирована")
                                         editor.putBoolean("subscription_active", true)
                                         
-                                        // Устанавливаем дату окончания подписки на 1 месяц вперед
+                                        // Tanlangan tarifga qarab podpiska davomini hisoblaymiz
                                         val currentTime = System.currentTimeMillis() / 1000
-                                        val oneMonthInSeconds = 30 * 24 * 60 * 60L
-                                        val endDate = currentTime + oneMonthInSeconds
+                                        val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
+                                        
+                                        Log.d("MainActivity", "🔍 BEFORE CALCULATION: selectedTariffId = $selectedTariffId")
+                                        
+                                        // Tarif ID ga qarab davomni belgilaymiz (ANIQ VAQTLAR)
+                                        val durationInSeconds = when (selectedTariffId) {
+                                            1 -> {
+                                                Log.d("MainActivity", "⏰ Tariff 1: 30 days")
+                                                30 * 24 * 60 * 60L    // "Год на месяц" - 30 kun
+                                            }
+                                            2 -> {
+                                                Log.d("MainActivity", "⏰ Tariff 2: 1 day")
+                                                24 * 60 * 60L         // "Год на день" - 24 soat (1 kun)
+                                            }
+                                            3 -> {
+                                                Log.d("MainActivity", "⏰ Tariff 3: 1 HOUR")
+                                                60 * 60L              // "Год на час" - 60 minut (1 soat)
+                                            }
+                                            4 -> {
+                                                Log.d("MainActivity", "⏰ Tariff 4: 30 days")
+                                                30 * 24 * 60 * 60L    // "Сильвер на месяц" - 30 kun
+                                            }
+                                            5 -> {
+                                                Log.d("MainActivity", "⏰ Tariff 5: 1 day")
+                                                24 * 60 * 60L         // "Сильвер на день" - 24 soat (1 kun)
+                                            }
+                                            6 -> {
+                                                Log.d("MainActivity", "⏰ Tariff 6: 1 HOUR")
+                                                60 * 60L              // "Сильвер на час" - 60 minut (1 soat)
+                                            }
+                                            else -> {
+                                                Log.d("MainActivity", "⏰ Default: 30 days")
+                                                30 * 24 * 60 * 60L // Default: 30 kun
+                                            }
+                                        }
+                                        
+                                        val endDate = currentTime + durationInSeconds
+                                        Log.d("MainActivity", "📅 FINAL: Tariff ID: $selectedTariffId, Duration: ${durationInSeconds}s (${durationInSeconds/3600} hours), End date: $endDate")
                                         editor.putLong("max_subscription_end_date", endDate)
                                         
                                         // MUHIM: ProfileViewModel uchun ham subscription ni yangilaymiz
@@ -247,10 +283,23 @@ class MainActivity : ComponentActivity() {
                         editor.putBoolean("subscription_active", true)
                         editor.putString("success_message", "Успешно оплачено! Подписка активирована")
                         
-                        // Устанавливаем дату окончания подписки на 1 месяц вперед
+                        // Tanlangan tarifga qarab podpiska davomini hisoblaymiz
                         val currentTime = System.currentTimeMillis() / 1000
-                        val oneMonthInSeconds = 30 * 24 * 60 * 60L
-                        val endDate = currentTime + oneMonthInSeconds
+                        val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
+                        
+                        // Tarif ID ga qarab davomni belgilaymiz (ANIQ VAQTLAR)
+                        val durationInSeconds = when (selectedTariffId) {
+                            1 -> 30 * 24 * 60 * 60L    // "Год на месяц" - 30 kun
+                            2 -> 24 * 60 * 60L         // "Год на день" - 24 soat (1 kun)  
+                            3 -> 60 * 60L              // "Год на час" - 60 minut (1 soat)
+                            4 -> 30 * 24 * 60 * 60L    // "Сильвер на месяц" - 30 kun
+                            5 -> 24 * 60 * 60L         // "Сильвер на день" - 24 soat (1 kun)
+                            6 -> 60 * 60L              // "Сильвер на час" - 60 minut (1 soat)
+                            else -> 30 * 24 * 60 * 60L // Default: 30 kun
+                        }
+                        
+                        val endDate = currentTime + durationInSeconds
+                        Log.d("PaymentCallback", "📅 Deep link - Tariff ID: $selectedTariffId, Duration: ${durationInSeconds}s")
                         editor.putLong("max_subscription_end_date", endDate)
                         
                         // MUHIM: ProfileViewModel uchun ham subscription ni yangilaymiz

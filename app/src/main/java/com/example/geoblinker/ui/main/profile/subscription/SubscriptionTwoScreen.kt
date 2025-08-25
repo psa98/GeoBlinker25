@@ -90,8 +90,23 @@ fun SubscriptionTwoScreen(
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(8.dp))
+            // Tanlangan tarifga qarab to'g'ri matnni ko'rsatamiz
+            val context = LocalContext.current
+            val prefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+            val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
+            
+            val subscriptionText = when (selectedTariffId) {
+                1 -> "Вы приобрели подписку: Год на месяц (30 дней)"
+                2 -> "Вы приобрели подписку: Год на день (1 день)"  
+                3 -> "Вы приобрели подписку: Год на час (1 час)"
+                4 -> "Вы приобрели подписку: Сильвер на месяц (30 дней)"
+                5 -> "Вы приобрели подписку: Сильвер на день (1 день)"
+                6 -> "Вы приобрели подписку: Сильвер на час (1 час)"
+                else -> "Вы приобрели подписку: ${pickSubscription.labelPeriod}"
+            }
+            
             Text(
-                "Вы приобрели подписку на ${pickSubscription.period} ${if(pickSubscription.period == 1) "месяц" else "месяцев"}",
+                subscriptionText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center

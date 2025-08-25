@@ -197,8 +197,8 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
                     val tariffs = result.getOrNull() ?: emptyMap()
                     Log.d("SubscriptionViewModel", "Loaded ${tariffs.size} tariffs from DB")
                     
-                    // Преобразуем тарифы в опции подписки
-                    val options = tariffs.map { (id, tariff) ->
+                    // Преобразуем тарифы в опции подписки с сохранением tariff ID
+                    val optionsWithIds = tariffs.map { (id, tariff) ->
                         val drawable = when (id.toString()) {
                             "1" -> R.drawable.one_month    // 10 USD - месяц
                             "2" -> R.drawable.three_months // 4 USD - день  
@@ -231,13 +231,24 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
                         // Конвертируем USD в рубли (примерно 1 USD = 90 RUB)
                         val priceInRub = (tariff.price * 90).toInt()
                         
-                        Subscription(
+                        Pair(id, Subscription(
                             price = priceInRub,
                             period = periodDays, // используем дни как период
                             labelPeriod = periodName,
                             draw = drawable
-                        )
-                    }.sortedBy { it.price }
+                        ))
+                    }.sortedBy { it.second.price }
+                    
+                    // Сохраняем mapping между индексом и tariff ID
+                    val tariffIdMapping = optionsWithIds.mapIndexed { index, (tariffId, _) -> 
+                        index to tariffId 
+                    }.toMap()
+                    
+                    // Сохраняем mapping в SharedPreferences для использования в setPickSubscription
+                    val mappingJson = tariffIdMapping.entries.joinToString(",") { "${it.key}:${it.value}" }
+                    prefs.edit().putString("tariff_id_mapping", mappingJson).apply()
+                    
+                    val options = optionsWithIds.map { it.second }
                     
                     _subscriptionOptions.value = options
                     
@@ -261,6 +272,44 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
         val options = _subscriptionOptions.value
         if (index < options.size) {
             _pickSubscription.value = options[index]
+            
+            // Используем динамический mapping из SharedPreferences
+            val mappingJson = prefs.getString("tariff_id_mapping", "")
+            val tariffId = if (mappingJson.isNullOrEmpty()) {
+                // Fallback к старому mapping если нет нового
+                when (index) {
+                    0 -> 6  // Eng arzon (0.5 USD) - 1 soat
+                    1 -> 5  // 2 USD - 1 kun  
+                    2 -> 3  // 1 USD - 1 soat (lekin UI da 6 oy ko'rsatiladi)
+                    3 -> 2  // 4 USD - 1 kun (lekin UI da 6 oy ko'rsatiladi)
+                    4 -> 4  // 5 USD - 30 kun
+                    5 -> 1  // 10 USD - 30 kun
+                    else -> 1
+                }
+            } else {
+                // Парсим mapping и находим tariff ID для данного индекса
+                val mapping = mappingJson.split(",").associate { pair ->
+                    val (idx, tariffId) = pair.split(":")
+                    idx.toInt() to tariffId.toInt()
+                }
+                mapping[index] ?: 1
+            }
+            
+            prefs.edit().putInt("selected_tariff_id", tariffId).apply()
+            
+            val selectedOption = options[index]
+            Log.d("SubscriptionViewModel", "📋 TARIFF SELECTION:")
+            Log.d("SubscriptionViewModel", "   Index: $index")
+            Log.d("SubscriptionViewModel", "   Tariff ID: $tariffId")
+            Log.d("SubscriptionViewModel", "   UI Label: ${selectedOption.labelPeriod}")
+            Log.d("SubscriptionViewModel", "   UI Period: ${selectedOption.period}")
+            Log.d("SubscriptionViewModel", "   Price: ${selectedOption.price}")
+            Log.d("SubscriptionViewModel", "   Mapping JSON: $mappingJson")
+            
+            // Soatlik tariflarni alohida log qilamiz
+            if (tariffId == 3 || tariffId == 6) {
+                Log.d("SubscriptionViewModel", "🕐 HOURLY TARIFF SELECTED: ID=$tariffId")
+            }
         }
     }
 
