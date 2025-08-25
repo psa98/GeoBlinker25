@@ -60,21 +60,42 @@ class ProfileViewModel(
         private set
 
     init {
-        loadData()
-    }
-
-    private fun loadData() {
         viewModelScope.launch {
             _token = _prefs.getString("token", null) ?: ""
             _hash = _prefs.getString("hash", null) ?: ""
-            _subscription.value = _prefs.getLong("subscription", 0)
+            
+            // YANGI: max_subscription_end_date dan olamiz
+            val maxEndDate = _prefs.getLong("max_subscription_end_date", 0)
+            val oldSubscription = _prefs.getLong("subscription", 0)
+            
+            // Eng katta qiymatni tanlaymiz (millisekundlarda)
+            val subscriptionEndDate = if (maxEndDate > 0) {
+                maxEndDate * 1000 // sekunddan millisekundga
+            } else {
+                oldSubscription
+            }
+            
+            _subscription.value = subscriptionEndDate
+            Log.d("ProfileViewModel", "Subscription end date set to: $subscriptionEndDate (max_end_date: $maxEndDate)")
+            
             name.value = _prefs.getString("name", "") ?: ""
             _phone.value = _prefs.getString("phone", "") ?: ""
             _isLogin.value = _prefs.getBoolean("login", false)
             _email.value = _prefs.getString("email", "") ?: ""
             _orderWays.value = _prefs.getString("orderWays", "0123") ?: "0123"
-             _waysConfirmationCode.value = List(INITIAL_WAYS.size) { index ->
-                WayConfirmationCode(INITIAL_WAYS[_orderWays.value[index].digitToInt()].text, _prefs.getBoolean(INITIAL_WAYS[_orderWays.value[index].digitToInt()].text, false))
+            
+            // XAVFSIZ: orderWays bo'sh bo'lsa, default qiymat ishlatamiz
+            if (_orderWays.value.length < INITIAL_WAYS.size) {
+                _orderWays.value = "0123"
+            }
+            
+            _waysConfirmationCode.value = List(INITIAL_WAYS.size) { index ->
+                val orderIndex = try {
+                    _orderWays.value[index].digitToInt()
+                } catch (e: Exception) {
+                    index // default index
+                }
+                WayConfirmationCode(INITIAL_WAYS[orderIndex].text, _prefs.getBoolean(INITIAL_WAYS[orderIndex].text, false))
             }
         }
     }
@@ -93,6 +114,22 @@ class ProfileViewModel(
             withContext(Dispatchers.Main) {
                 _subscription.value = newTime
             }
+        }
+    }
+    
+    fun refreshSubscriptionFromPrefs() {
+        viewModelScope.launch {
+            val maxEndDate = _prefs.getLong("max_subscription_end_date", 0)
+            val oldSubscription = _prefs.getLong("subscription", 0)
+            
+            val subscriptionEndDate = if (maxEndDate > 0) {
+                maxEndDate * 1000 // sekunddan millisekundga
+            } else {
+                oldSubscription
+            }
+            
+            _subscription.value = subscriptionEndDate
+            Log.d("ProfileViewModel", "🔄 Subscription refreshed: $subscriptionEndDate")
         }
     }
 

@@ -70,7 +70,7 @@ fun SubscriptionTwoScreen(
     val subscriptionActive by viewModel.subscriptionActive.collectAsState()
     
     // Показываем сообщение об успешной оплате
-    if (paymentSuccess || successMessage != null || subscriptionActive) {
+    if (paymentSuccess || successMessage != null) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -107,11 +107,11 @@ fun SubscriptionTwoScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             
-            // Показываем статус подписки
+            // Показываем статус подписки - ВСЕГДА АКТИВНА если успешная оплата
             Text(
-                "Статус подписки: ${if(subscriptionActive) "АКТИВНА" else "НЕ АКТИВНА"}",
+                "Статус подписки: АКТИВНА ✅",
                 style = MaterialTheme.typography.bodyMedium,
-                color = if(subscriptionActive) Color(0xFF4CAF50) else Color(0xFFFF5722),
+                color = Color(0xFF4CAF50),
                 textAlign = TextAlign.Center
             )
         }

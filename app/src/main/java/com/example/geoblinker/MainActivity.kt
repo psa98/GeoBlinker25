@@ -59,8 +59,19 @@ class MainActivity : ComponentActivity() {
         // Проверяем deep link
         handlePaymentDeepLink(intent)
         
-        // МГНОВЕННАЯ проверка оплаты при входе в приложение
+        // DARHOL ProfileViewModel ni yangilaymiz
         val prefs = getSharedPreferences("profile_prefs", MODE_PRIVATE)
+        val maxEndDate = prefs.getLong("max_subscription_end_date", 0)
+        if (maxEndDate > 0) {
+            Log.d("MainActivity", "🔄 Found active subscription, updating ProfileViewModel")
+            // ProfileViewModel ni yangilash kerak, lekin u yerda access yo'q
+            // Shuning uchun subscription qiymatini to'g'ridan-to'g'ri yangilaymiz
+            val subscriptionEndDateMs = maxEndDate * 1000
+            prefs.edit().putLong("subscription", subscriptionEndDateMs).apply()
+            Log.d("MainActivity", "✅ Updated subscription in prefs: $subscriptionEndDateMs")
+        }
+        
+        // МГНОВЕННАЯ проверка оплаты при входе в приложение
         val paymentId = prefs.getString("current_payment_id", null)
         if (paymentId != null) {
             Log.d("MainActivity", "⚡ INSTANT payment check for ID: $paymentId")
@@ -82,24 +93,53 @@ class MainActivity : ComponentActivity() {
                         6 -> {
                             Log.d("MainActivity", "✅ PAYMENT SUCCESS - Creating subscription")
                             
-                            // СРАЗУ устанавливаем все флаги
-                            val editor = prefs.edit()
-                            editor.putBoolean("payment_success", true)
-                            editor.putString("success_message", "Успешно оплачено! Подписка активирована")
-                            editor.putBoolean("subscription_active", true)
-                            
-                            // Устанавливаем дату окончания подписки на 1 месяц вперед (для теста)
-                            val currentTime = System.currentTimeMillis() / 1000
-                            val oneMonthInSeconds = 30 * 24 * 60 * 60L
-                            val endDate = currentTime + oneMonthInSeconds
-                            editor.putLong("max_subscription_end_date", endDate)
-                            
-                            editor.apply()
-                            
-                            Log.d("MainActivity", "🎯 ALL FLAGS SET: payment_success=true, subscription_active=true, end_date=$endDate")
-                            
-                            // Также вычисляем реальную дату из API
-                            calculateAndSaveMaxSubscriptionDate()
+                            // СНАЧАЛА создаем подписку в базе данных
+                            lifecycleScope.launch {
+                                try {
+                                    val repository = com.example.geoblinker.network.SubscriptionRepository(application)
+                                    val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
+                                    
+                                    Log.d("MainActivity", "🏗️ Creating subscription with tariff ID: $selectedTariffId")
+                                    val subscriptionResult = repository.createSubscription(selectedTariffId.toString())
+                                    
+                                    if (subscriptionResult.isSuccess) {
+                                        val subscriptionId = subscriptionResult.getOrNull()
+                                        Log.d("MainActivity", "✅ Subscription created in DB with ID: $subscriptionId")
+                                        
+                                        // ТЕПЕРЬ устанавливаем все флаги
+                                        val editor = prefs.edit()
+                                        editor.putBoolean("payment_success", true)
+                                        editor.putString("success_message", "Успешно оплачено! Подписка активирована")
+                                        editor.putBoolean("subscription_active", true)
+                                        
+                                        // Устанавливаем дату окончания подписки на 1 месяц вперед
+                                        val currentTime = System.currentTimeMillis() / 1000
+                                        val oneMonthInSeconds = 30 * 24 * 60 * 60L
+                                        val endDate = currentTime + oneMonthInSeconds
+                                        editor.putLong("max_subscription_end_date", endDate)
+                                        
+                                        // MUHIM: ProfileViewModel uchun ham subscription ni yangilaymiz
+                                        val subscriptionEndDateMs = endDate * 1000
+                                        editor.putLong("subscription", subscriptionEndDateMs)
+                                        
+                                        editor.apply()
+                                        
+                                        Log.d("MainActivity", "🎯 SUBSCRIPTION FULLY ACTIVATED: ID=$subscriptionId, end_date=$endDate")
+                                        
+                                        // Также вычисляем реальную дату из API
+                                        calculateAndSaveMaxSubscriptionDate()
+                                        
+                                        // YANGI: ProfileViewModel ni ham yangilaymiz
+                                        // Bu popup ni yashirish uchun kerak
+                                    } else {
+                                        Log.e("MainActivity", "❌ Failed to create subscription in DB")
+                                        prefs.edit().putString("error_message", "Ошибка создания подписки").apply()
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("MainActivity", "💥 Error creating subscription", e)
+                                    prefs.edit().putString("error_message", "Ошибка активации подписки").apply()
+                                }
+                            }
                         }
                         3 -> {
                             Log.d("MainActivity", "❌ PAYMENT CANCELED")
@@ -212,6 +252,10 @@ class MainActivity : ComponentActivity() {
                         val oneMonthInSeconds = 30 * 24 * 60 * 60L
                         val endDate = currentTime + oneMonthInSeconds
                         editor.putLong("max_subscription_end_date", endDate)
+                        
+                        // MUHIM: ProfileViewModel uchun ham subscription ni yangilaymiz
+                        val subscriptionEndDateMs = endDate * 1000
+                        editor.putLong("subscription", subscriptionEndDateMs)
                         
                         editor.remove("current_payment_id")
                         editor.apply()

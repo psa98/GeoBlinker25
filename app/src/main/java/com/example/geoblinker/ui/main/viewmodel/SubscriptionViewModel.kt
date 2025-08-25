@@ -159,7 +159,28 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
     }
     
     fun hasActiveSubscription(): Boolean {
-        return prefs.getBoolean("subscription_active", false)
+        // BIRINCHI payment_success flagini tekshiramiz
+        val paymentSuccess = prefs.getBoolean("payment_success", false)
+        if (paymentSuccess) {
+            Log.d("SubscriptionVM", "✅ hasActiveSubscription: payment_success=true")
+            return true
+        }
+        
+        // KEYIN subscription_active flagini tekshiramiz
+        val subscriptionActive = prefs.getBoolean("subscription_active", false)
+        if (subscriptionActive) {
+            Log.d("SubscriptionVM", "✅ hasActiveSubscription: subscription_active=true")
+            return true
+        }
+        
+        // NIHOYAT max_subscription_end_date ni tekshiramiz
+        val maxEndDate = prefs.getLong("max_subscription_end_date", 0L)
+        val currentTime = System.currentTimeMillis() / 1000
+        val isActive = maxEndDate > currentTime
+        
+        Log.d("SubscriptionVM", "🔍 hasActiveSubscription: maxEndDate=$maxEndDate, currentTime=$currentTime, active=$isActive")
+        
+        return isActive
     }
     
     fun getSubscriptionEndDate(): Long {
