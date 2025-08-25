@@ -201,7 +201,7 @@ fun SubscriptionTwoScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            "${pickSubscription.price} руб.",
+                            "${if (pickSubscription.price % 1.0 == 0.0) pickSubscription.price.toInt() else pickSubscription.price} USD",
                             style = MaterialTheme.typography.displaySmall
                         )
                         Spacer(Modifier.width(17.sdp()))
@@ -258,7 +258,7 @@ fun SubscriptionTwoScreen(
             style = MaterialTheme.typography.headlineSmall
         )
         Text(
-            "${pickSubscription.price} руб.",
+            "${if (pickSubscription.price % 1.0 == 0.0) pickSubscription.price.toInt() else pickSubscription.price} USD",
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(Modifier.height(54.sdp()))

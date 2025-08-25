@@ -80,7 +80,7 @@ fun SubscriptionOneScreen(
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            "${subscription.price} руб.",
+                            "${if (subscription.price % 1.0 == 0.0) subscription.price.toInt() else subscription.price} USD",
                             style = MaterialTheme.typography.displaySmall
                         )
                         Text(

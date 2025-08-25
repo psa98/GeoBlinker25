@@ -22,7 +22,7 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
     private val _subscriptionOptions = MutableStateFlow<List<Subscription>>(emptyList())
     val subscriptionOptions: StateFlow<List<Subscription>> = _subscriptionOptions.asStateFlow()
 
-    private val _pickSubscription = MutableStateFlow<Subscription>(Subscription(600, 1, "1 месяц", R.drawable.one_month))
+    private val _pickSubscription = MutableStateFlow<Subscription>(Subscription(600.0, 1, "1 месяц", R.drawable.one_month))
     val pickSubscription: StateFlow<Subscription> = _pickSubscription.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -228,11 +228,11 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
                             else -> 30
                         }
                         
-                        // Конвертируем USD в рубли (примерно 1 USD = 90 RUB)
-                        val priceInRub = (tariff.price * 90).toInt()
+                        // Используем оригинальную цену из тарифа в USD
+                        val priceInUsd = tariff.price
                         
                         Pair(id, Subscription(
-                            price = priceInRub,
+                            price = priceInUsd,
                             period = periodDays, // используем дни как период
                             labelPeriod = periodName,
                             draw = drawable
@@ -338,7 +338,7 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
                 
                 val tariffs = tariffsResult.getOrNull()
                 Log.d("SubscriptionViewModel", "Tariffs loaded: ${tariffs?.size} items")
-                val tariffId = findTariffIdByPrice(tariffs, selectedSubscription.price)
+                val tariffId = findTariffIdByPrice(tariffs, selectedSubscription.price.toInt())
                 Log.d("SubscriptionViewModel", "Found tariff ID: $tariffId for price: ${selectedSubscription.price}")
                 
                 if (tariffId == null) {
@@ -363,8 +363,10 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
                 
                 // Создаем платеж
                 Log.d("SubscriptionViewModel", "Creating payment for amount: ${selectedSubscription.price}")
+                // Конвертируем USD в рубли для оплаты (1 USD = 90 RUB)
+                val amountInRubles = (selectedSubscription.price * 90).toInt()
                 val paymentResult = subscriptionRepository.createPayment(
-                    amount = selectedSubscription.price,
+                    amount = amountInRubles,
                     subsId = subsId,
                     appUrl = createAppUrl()
                 )
