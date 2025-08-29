@@ -30,7 +30,8 @@ enum class AuthorizationScreen {
 fun AuthorizationScreen(
     navController: NavHostController = rememberNavController(),
     registrationScreen: () -> Unit,
-    mainScreen: () -> Unit
+    mainScreen: () -> Unit,
+    faqScreen: () -> Unit
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
@@ -49,7 +50,7 @@ fun AuthorizationScreen(
                 modifier = Modifier.width(310.sdp())
             ) {
                 composable(route = AuthorizationScreen.One.name) {
-                    OneScreen({ navController.navigate(AuthorizationScreen.Two.name) }, registrationScreen)
+                    OneScreen({ navController.navigate(AuthorizationScreen.Two.name) }, registrationScreen, faqScreen)
                 }
                 composable(route = AuthorizationScreen.Two.name) {
                     TwoScreen(

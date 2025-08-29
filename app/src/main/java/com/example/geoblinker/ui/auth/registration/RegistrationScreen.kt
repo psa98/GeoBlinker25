@@ -31,7 +31,8 @@ enum class RegistrationScreen {
 fun RegistrationScreen(
     navController: NavHostController = rememberNavController(),
     authorizationScreen: () -> Unit,
-    mainScreen: () -> Unit
+    mainScreen: () -> Unit,
+    faqScreen: () -> Unit
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
@@ -54,7 +55,8 @@ fun RegistrationScreen(
                         OneScreen(
                             viewModel,
                             { navController.navigate(RegistrationScreen.Two.name) },
-                            { authorizationScreen() }
+                            { authorizationScreen() },
+                            faqScreen
                         )
                     }
                 }

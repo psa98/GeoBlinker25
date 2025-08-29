@@ -1,6 +1,7 @@
 package com.example.geoblinker.ui.auth.registration
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -35,7 +36,8 @@ import com.example.geoblinker.ui.theme.sdp
 fun OneScreen(
     viewModel: RegistrationViewModel,
     twoScreen: () -> Unit,
-    toBack: () -> Unit
+    toBack: () -> Unit,
+    faqScreen: () -> Unit
 ) {
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -92,6 +94,15 @@ fun OneScreen(
             height = 81,
             radius = 24,
             style = MaterialTheme.typography.headlineMedium
+        )
+        HSpacer(20)
+        Text(
+            text = "Проблемы со входом в приложение?",
+            color = Color(0xFF666666),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.clickable {
+                faqScreen()
+            }
         )
     }
 

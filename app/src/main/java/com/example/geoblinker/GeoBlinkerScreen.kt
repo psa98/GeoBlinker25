@@ -16,6 +16,7 @@ import com.example.geoblinker.data.techsupport.TechSupportRepository
 import com.example.geoblinker.ui.auth.LoginViewModel
 import com.example.geoblinker.ui.auth.authorization.AuthorizationScreen
 import com.example.geoblinker.ui.auth.registration.RegistrationScreen
+import com.example.geoblinker.ui.faq.FaqScreen
 import com.example.geoblinker.ui.main.MainScreen
 import com.example.geoblinker.ui.main.viewmodel.ChatsViewModel
 import com.example.geoblinker.ui.main.viewmodel.JournalViewModel
@@ -25,7 +26,8 @@ import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 enum class GeoBlinkerScreen {
     Authorization,
     Registration,
-    Main
+    Main,
+    Faq
 }
 
 @SuppressLint("ViewModelConstructorInComposable")
@@ -53,7 +55,8 @@ fun GeoBlinkerScreen(
                         viewModel.setInitialSubscription()
                         viewModel.setIsLogin(true)
                         navController.navigate(GeoBlinkerScreen.Main.name)
-                    }
+                    },
+                    faqScreen = { navController.navigate(GeoBlinkerScreen.Faq.name) }
                 )
             }
             composable(route = GeoBlinkerScreen.Registration.name) {
@@ -63,7 +66,8 @@ fun GeoBlinkerScreen(
                         viewModel.setInitialSubscription()
                         viewModel.setIsLogin(true)
                         navController.navigate(GeoBlinkerScreen.Main.name)
-                    }
+                    },
+                    faqScreen = { navController.navigate(GeoBlinkerScreen.Faq.name) }
                 )
             }
             composable(route = GeoBlinkerScreen.Main.name) {
@@ -79,6 +83,11 @@ fun GeoBlinkerScreen(
                         application
                     ),
                     toBeginning = { navController.navigate(GeoBlinkerScreen.Authorization.name) }
+                )
+            }
+            composable(route = GeoBlinkerScreen.Faq.name) {
+                FaqScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
         }

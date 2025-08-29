@@ -161,7 +161,9 @@ data class TariffData(
 
 data class TariffInfo(
     @SerializedName("tariffs")
-    val tariffs: Map<String, TariffItem>
+    val tariffs: Map<String, TariffItem>?,
+    @SerializedName("lang_vls")
+    val langValues: Map<String, LanguageValue>?
 )
 
 data class TariffItem(
@@ -171,4 +173,26 @@ data class TariffItem(
     val price: Double,
     @SerializedName("period")
     val period: Int
+)
+
+// Language translation models
+data class LanguageResponse(
+    @SerializedName("code")
+    val code: String,
+    @SerializedName("data")
+    val data: LanguageData
+)
+
+data class LanguageData(
+    @SerializedName("lang_vls")
+    val langValues: Map<String, LanguageValue>
+)
+
+data class LanguageValue(
+    @SerializedName("id_lang")
+    val idLang: Int,
+    @SerializedName("name")
+    val name: String,
+    @SerializedName("value")
+    val value: String?
 )

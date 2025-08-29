@@ -147,8 +147,9 @@ class SubscriptionRepository(private val context: Context) {
             Log.d("SubscriptionRepo", "getTariffs response code: ${response.code}")
             
             if (response.code == "200") {
-                Log.d("SubscriptionRepo", "Tariffs received: ${response.data.data.tariffs.size} items")
-                Result.success(response.data.data.tariffs)
+                val tariffs = response.data.data.tariffs ?: emptyMap()
+                Log.d("SubscriptionRepo", "Tariffs received: ${tariffs.size} items")
+                Result.success(tariffs)
             } else {
                 Log.e("SubscriptionRepo", "Failed to get tariffs: ${response.code}")
                 Result.failure(Exception("Failed to get tariffs: ${response.code}"))

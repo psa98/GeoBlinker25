@@ -1,6 +1,7 @@
 package com.example.geoblinker.ui.auth.authorization
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -23,7 +24,8 @@ import com.example.geoblinker.ui.theme.sdp
 @Composable
 fun OneScreen(
     twoScreen: () -> Unit,
-    registrationScreen: () -> Unit
+    registrationScreen: () -> Unit,
+    faqScreen: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -66,7 +68,10 @@ fun OneScreen(
         HSpacer(50)
         Text(
             stringResource(R.string.problems_logging),
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.clickable {
+                faqScreen()
+            }
         )
     }
 }

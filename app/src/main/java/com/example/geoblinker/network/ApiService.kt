@@ -113,6 +113,12 @@ interface ApiService {
     // Get tariffs
     @GET("data")
     suspend fun getTariffs(): TariffResponse
+
+    // Get language translations
+    @GET("data")
+    suspend fun getData(
+        @Query("data.lang_vls") langId: String
+    ): TariffResponse
 }
 
 object Api {
