@@ -79,8 +79,11 @@ fun SubscriptionOneScreen(
                         ),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
+                        val priceString = if (subscription.price == subscription.price.toInt().toDouble())
+                            subscription.price.toInt().toString() else subscription.price
+
                         Text(
-                            "${if (subscription.price % 1.0 == 0.0) subscription.price.toInt() else subscription.price} USD",
+                            "$priceString ${subscription.currencyName}",
                             style = MaterialTheme.typography.displaySmall
                         )
                         Text(

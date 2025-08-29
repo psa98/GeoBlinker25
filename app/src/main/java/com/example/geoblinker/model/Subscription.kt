@@ -1,5 +1,6 @@
 package com.example.geoblinker.model
 
+import androidx.lifecycle.Observer
 import com.google.gson.annotations.SerializedName
 
 // Subscription API Models
@@ -154,6 +155,13 @@ data class TariffResponse(
     val data: TariffData
 )
 
+data class TariffResponseMap(
+    @SerializedName("code")
+    val code: String,
+    @SerializedName("data")
+    val data: TariffDataMap
+)
+
 data class LangResponse(
     @SerializedName("code")
     val code: String,
@@ -168,6 +176,11 @@ data class TariffData(
     val data: TariffInfo
 )
 
+data class TariffDataMap(
+    @SerializedName("data")
+    val data: TariffInfoMap
+)
+
 
 data class LangData(
     @SerializedName("data")
@@ -179,11 +192,14 @@ data class LangData(
 data class TariffInfo(
     @SerializedName("tariffs")
     val tariffs: Map<String, TariffItem>?,
-    @SerializedName("lang_vls")
-    val langValues: Map<String, LanguageValue>?
+
 )
 
+data class TariffInfoMap(
+    @SerializedName("tariffs")
+    val tariffs: Map<String, Map<String,Object>>?,
 
+    )
 
 data class LangInfo(
     @SerializedName("lang_vls")

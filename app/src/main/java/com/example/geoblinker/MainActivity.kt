@@ -218,7 +218,7 @@ class MainActivity : ComponentActivity() {
                     if (subscription.subsStatus == "1" && subscription.paid == true) {
                         val tariff = tariffs[subscription.tariff]
                         if (tariff != null) {
-                            val durationInSeconds = tariff.period * 30 * 24 * 60 * 60L
+                            val durationInSeconds = tariff["period"].toString().toInt()  * 30 * 24 * 60 * 60L
                             val endDate = subscription.startDate + durationInSeconds
                             
                             if (endDate > maxEndDate) {

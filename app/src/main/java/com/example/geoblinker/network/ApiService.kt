@@ -11,6 +11,7 @@ import com.example.geoblinker.model.ResponseCreateCar
 import com.example.geoblinker.model.SubscriptionListResponse
 import com.example.geoblinker.model.SubscriptionResponse
 import com.example.geoblinker.model.TariffResponse
+import com.example.geoblinker.model.TariffResponseMap
 import com.example.geoblinker.model.Token
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -115,7 +116,7 @@ interface ApiService {
 
     // Get tariffs
     @GET("data")
-    suspend fun getTariffs(): TariffResponse
+    suspend fun getTariffs(): TariffResponseMap
 
     // Get language translations
     @GET("data")

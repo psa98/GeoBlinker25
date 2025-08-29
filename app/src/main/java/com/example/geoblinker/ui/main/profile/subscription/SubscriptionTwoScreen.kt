@@ -200,8 +200,11 @@ fun SubscriptionTwoScreen(
                     Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val priceString = (if (pickSubscription.price == pickSubscription.price.toInt().toDouble())
+                            pickSubscription.price.toInt().toString() else pickSubscription.price.toString()) +
+                                "  " + pickSubscription.currencyName
                         Text(
-                            "${if (pickSubscription.price % 1.0 == 0.0) pickSubscription.price.toInt() else pickSubscription.price} USD",
+                            priceString,
                             style = MaterialTheme.typography.displaySmall
                         )
                         Spacer(Modifier.width(17.sdp()))
@@ -257,8 +260,12 @@ fun SubscriptionTwoScreen(
             "Итого к оплате:",
             style = MaterialTheme.typography.headlineSmall
         )
+        val priceString = (if (pickSubscription.price == pickSubscription.price.toInt().toDouble())
+            pickSubscription.price.toInt().toString() else pickSubscription.price.toString()) +
+        "  " + pickSubscription.currencyName
+
         Text(
-            "${if (pickSubscription.price % 1.0 == 0.0) pickSubscription.price.toInt() else pickSubscription.price} USD",
+            priceString ,
             style = MaterialTheme.typography.titleMedium
         )
         Spacer(Modifier.height(54.sdp()))

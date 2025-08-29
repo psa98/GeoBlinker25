@@ -22,7 +22,7 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
     private val _subscriptionOptions = MutableStateFlow<List<Subscription>>(emptyList())
     val subscriptionOptions: StateFlow<List<Subscription>> = _subscriptionOptions.asStateFlow()
 
-    private val _pickSubscription = MutableStateFlow<Subscription>(Subscription(600.0, 1, "1 месяц", R.drawable.one_month))
+    private val _pickSubscription = MutableStateFlow<Subscription>(Subscription(600.0, 1, "1 месяц", "","",R.drawable.one_month))
     val pickSubscription: StateFlow<Subscription> = _pickSubscription.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
@@ -200,42 +200,51 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
                     // Преобразуем тарифы в опции подписки с сохранением tariff ID
                     val optionsWithIds = tariffs.map { (id, tariff) ->
                         val drawable = when (id.toString()) {
-                            "1" -> R.drawable.one_month    // 10 USD - месяц
-                            "2" -> R.drawable.three_months // 4 USD - день  
-                            "3" -> R.drawable.six_months   // 1 USD - час
-                            "4" -> R.drawable.twelve_months // 5 USD - месяц
-                            "5" -> R.drawable.one_month    // 2 USD - день
-                            "6" -> R.drawable.three_months // 0.5 USD - час
+                            // todo - c каратинками надо разобраться, мне неочевидно какую когда показывать.
+                            "1" -> R.drawable.one_month    // 10 USD - месяц todo - в описании металл не указан
+                            "2" -> R.drawable.three_months // 4 USD - день  todo - в описании Голд
+                            "3" -> R.drawable.six_months   // 1 USD - час todo - в описании Голд
+                            "4" -> R.drawable.twelve_months // 5 USD - месяц todo - в Описании Силвер
+                            "5" -> R.drawable.one_month    // 2 USD - день todo - в описании Силвер
+                            "6" -> R.drawable.three_months // 0.5 USD - час todo - в описании Силвер
                             else -> R.drawable.one_month
                         }
                         
                         // Определяем период и название на основе name_ru из БД
-                        val periodName = when (id.toString()) {
-                            "1" -> "Год на месяц"
-                            "2" -> "Год на день" 
-                            "3" -> "Год на час"
-                            "4" -> "Сильвер на месяц"
-                            "5" -> "Сильвер на день"
-                            "6" -> "Сильвер на час"
-                            else -> "Подписка"
-                        }
+                        val periodName = tariff["ru"].toString()
                         
                         // Определяем период для расчетов
-                        val periodDays = when (id.toString()) {
-                            "1", "4" -> 30  // месяц
-                            "2", "5" -> 1   // день
-                            "3", "6" -> 1   // час (считаем как 1 день для простоты)
+                        val durationClass = tariff["duration_class"].toString()
+                        val durationString = when (durationClass){
+                            "1"-> "месяц"
+                            "2"-> "день"
+                            "3"-> "час"
+                            "4"-> "3 месяца"
+                            "5"-> "6 месяцев"
+                            "6"-> "12 месяцев"
+                            else -> "неизвестно"
+                        }
+                        val periodDays = when (durationClass) {
+                            "1"-> 30
+                            "2"-> 1
+                            "3"-> 1 // todo - необходимо понять как поддерживать часовую подписку
+                            "4"-> 90
+                            "5"-> 180
+                            "6"-> 365
                             else -> 30
                         }
                         
                         // Используем оригинальную цену из тарифа в USD
-                        val priceInUsd = tariff.price
-                        
+                        val priceInUsd = tariff["price"].toString().toDouble()
+                        val curCode =  tariff["currency"].toString()
+                        val curName =  if (curCode=="USD") "USD" else "руб."
                         Pair(id, Subscription(
                             price = priceInUsd,
                             period = periodDays, // используем дни как период
                             labelPeriod = periodName,
-                            draw = drawable
+                            draw = drawable,
+                            currencyCode = curCode,
+                            currencyName = curName
                         ))
                     }.sortedBy { it.second.price }
                     
@@ -364,9 +373,11 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
                 // Создаем платеж
                 Log.d("SubscriptionViewModel", "Creating payment for amount: ${selectedSubscription.price}")
                 // Конвертируем USD в рубли для оплаты (1 USD = 90 RUB)
-                val amountInRubles = (selectedSubscription.price * 90).toInt()
+                val amountInRubles = if (selectedSubscription.currencyCode=="USD" ) (selectedSubscription.price * 90).toInt()
+                else selectedSubscription.price.toInt()
+                // todo - сейчас зафиксирован курс, надо брать его с базы
                 val paymentResult = subscriptionRepository.createPayment(
-                    amount = amountInRubles,
+                    amount = amountInRubles, //todo - рубли всегда целые, это так и задумано?
                     subsId = subsId,
                     appUrl = createAppUrl()
                 )
@@ -401,11 +412,11 @@ class SubscriptionViewModel(private val application: Application) : AndroidViewM
         }
     }
 
-    private fun findTariffIdByPrice(tariffs: Map<String, com.example.geoblinker.model.TariffItem>?, price: Int): String? {
+    private fun findTariffIdByPrice(tariffs: Map<String, Map<String,Any>>?, price: Int): String? {
         val selectedSubscription = _pickSubscription.value
         Log.d("SubscriptionViewModel", "Looking for tariff with price: $price, period: ${selectedSubscription.period}")
         tariffs?.forEach { (key, tariff) ->
-            Log.d("SubscriptionViewModel", "Tariff $key: name=${tariff.name}, price=${tariff.price}, period=${tariff.period}")
+            Log.d("SubscriptionViewModel", "Tariff $key: name=${tariff["name"]}, price=${tariff["price"]}, period=${tariff["period"]}")
         }
         
         // Since API tariffs all have period=0, use mapping based on subscription period

@@ -3,10 +3,12 @@ package com.example.geoblinker.network
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
+import androidx.room.InvalidationTracker
 import com.example.geoblinker.model.*
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.util.Objects
 
 class SubscriptionRepository(private val context: Context) {
     private val prefs: SharedPreferences = 
@@ -140,7 +142,7 @@ class SubscriptionRepository(private val context: Context) {
         }
     }
 
-    suspend fun getTariffs(): Result<Map<String, TariffItem>> = withContext(Dispatchers.IO) {
+    suspend fun getTariffs(): Result<Map<String, Map<String,Any>>> = withContext(Dispatchers.IO) {
         try {
             Log.d("SubscriptionRepo", "Making getTariffs API call...")
             val response = Api.retrofitService.getTariffs()
