@@ -154,10 +154,27 @@ data class TariffResponse(
     val data: TariffData
 )
 
+data class LangResponse(
+    @SerializedName("code")
+    val code: String,
+    @SerializedName("data")
+    val data: LangData
+)
+
+
+
 data class TariffData(
     @SerializedName("data")
     val data: TariffInfo
 )
+
+
+data class LangData(
+    @SerializedName("data")
+    val data: LangInfo
+)
+
+
 
 data class TariffInfo(
     @SerializedName("tariffs")
@@ -165,6 +182,16 @@ data class TariffInfo(
     @SerializedName("lang_vls")
     val langValues: Map<String, LanguageValue>?
 )
+
+
+
+data class LangInfo(
+    @SerializedName("lang_vls")
+    val langValues: Map<String, Map<Int,String>>?
+    // изменен тип данных на реально отдаваемый сервером
+)
+
+
 
 data class TariffItem(
     @SerializedName("name")
@@ -185,7 +212,7 @@ data class LanguageResponse(
 
 data class LanguageData(
     @SerializedName("lang_vls")
-    val langValues: Map<String, LanguageValue>
+    val langValues: Map<String, Map<Int,String>>
 )
 
 data class LanguageValue(

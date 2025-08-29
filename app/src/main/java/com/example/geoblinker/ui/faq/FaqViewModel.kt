@@ -36,17 +36,17 @@ class FaqViewModel : ViewModel() {
                     Log.d("FaqViewModel", "📋 response.data: ${response.data}")
                     Log.d("FaqViewModel", "📋 response.data.data: ${response.data.data}")
                     
-                    val langValues = response.data.data?.langValues
+                    val langValues = response.data.data.langValues
                     if (langValues != null) {
                         Log.d("FaqViewModel", "📋 Найдено langValues, размер: ${langValues.size}")
                         Log.d("FaqViewModel", "📋 Все ключи: ${langValues.keys}")
                         
                         val faqEntry = langValues["geo_blinker_faq"]
                         Log.d("FaqViewModel", "📋 Поиск 'geo_blinker_faq': $faqEntry")
-                        
-                        if (faqEntry != null && !faqEntry.value.isNullOrBlank()) {
-                            Log.d("FaqViewModel", "✅ FAQ найдено: ${faqEntry.value}")
-                            _faqContent.value = faqEntry.value
+                        // тип faqEntry теперь Map (Int,String), где int = код языка, ниже захардкожена 1 для русского языка
+                        if (faqEntry != null && !faqEntry[1].isNullOrBlank()) {
+                            Log.d("FaqViewModel", "✅ FAQ найдено: ${faqEntry[1]}")
+                            _faqContent.value = faqEntry[1]
                         } else {
                             Log.w("FaqViewModel", "❌ FAQ не найдено или пустое")
                             _errorMessage.value = "FAQ не найдено в ответе API"

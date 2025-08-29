@@ -3,15 +3,15 @@ package com.example.geoblinker.network
 import com.example.geoblinker.model.Authorization
 import com.example.geoblinker.model.Cars
 import com.example.geoblinker.model.Code
-import com.example.geoblinker.model.ResponseCreateCar
-import com.example.geoblinker.model.Token
-import com.example.geoblinker.model.SubscriptionRequest
-import com.example.geoblinker.model.SubscriptionResponse
-import com.example.geoblinker.model.SubscriptionListResponse
-import com.example.geoblinker.model.PaymentRequest
-import com.example.geoblinker.model.PaymentResponse
+import com.example.geoblinker.model.LangResponse
+import com.example.geoblinker.model.LanguageResponse
 import com.example.geoblinker.model.PaymentInfoResponse
+import com.example.geoblinker.model.PaymentResponse
+import com.example.geoblinker.model.ResponseCreateCar
+import com.example.geoblinker.model.SubscriptionListResponse
+import com.example.geoblinker.model.SubscriptionResponse
 import com.example.geoblinker.model.TariffResponse
+import com.example.geoblinker.model.Token
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Field
@@ -22,12 +22,15 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
+
 private const val BASE_URL = "https://ibronevik.ru/taxi/c/0/api/v1/"
 
 private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
+
     .addConverterFactory(GsonConverterFactory.create())
     .build()
+
 
 interface ApiService {
     @FormUrlEncoded
@@ -118,7 +121,8 @@ interface ApiService {
     @GET("data")
     suspend fun getData(
         @Query("data.lang_vls") langId: String
-    ): TariffResponse
+    ): LangResponse
+    // теперь возвращается другой тип
 }
 
 object Api {
