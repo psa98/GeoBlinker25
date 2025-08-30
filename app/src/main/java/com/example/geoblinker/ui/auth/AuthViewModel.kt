@@ -67,6 +67,12 @@ abstract class AuthViewModel(
                         "type" to "whatsapp"
                     )
                 ).code
+                "SMS" -> Api.retrofitService.auth(
+                    mapOf(
+                        "login" to "7${phone.value}", // 7 999 999 99 99
+                        "type" to "phone_code"
+                    )
+                ).code
                 else -> {}
             }
         }
@@ -98,7 +104,13 @@ abstract class AuthViewModel(
                             "type" to "whatsapp"
                         )
                     )
-
+                    "SMS" -> Api.retrofitService.auth(
+                        mapOf(
+                            "login" to "7${phone.value}", // 7 999 999 99 99
+                            "password" to code,
+                            "type" to "phone_code"
+                        )
+                    )
                     else -> {
                         Authorization(
                             code = "404"

@@ -13,6 +13,8 @@ import com.example.geoblinker.model.SubscriptionResponse
 import com.example.geoblinker.model.TariffResponse
 import com.example.geoblinker.model.TariffResponseMap
 import com.example.geoblinker.model.Token
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Field
@@ -26,9 +28,12 @@ import retrofit2.http.Query
 
 private const val BASE_URL = "https://ibronevik.ru/taxi/c/0/api/v1/"
 
+
+
+
 private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)
-
+    .client(client)
     .addConverterFactory(GsonConverterFactory.create())
     .build()
 
