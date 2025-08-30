@@ -71,6 +71,8 @@ import androidx.compose.ui.zIndex
 import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
+import com.example.geoblinker.ui.auth.authorization.AuthorizationViewModel
+import com.example.geoblinker.ui.auth.registration.RegistrationViewModel
 import com.example.geoblinker.ui.theme.ColorStar
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
@@ -80,7 +82,9 @@ import kotlinx.coroutines.launch
 fun CustomPopup(
     phone: String,
     onChangeVisible: () -> Unit,
-    sendCode: (List<String>) -> Unit
+    sendCode: (List<String>) -> Unit,
+    authorizationViewModel: AuthorizationViewModel?,
+    registrationViewModel: RegistrationViewModel?
 ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
@@ -365,7 +369,7 @@ fun CustomPopup(
             {
                 isEnterEmail = false
                 email = it
-            },
+                authorizationViewModel?.email?.value=it },
             {
                 isEnterEmail = false
             }

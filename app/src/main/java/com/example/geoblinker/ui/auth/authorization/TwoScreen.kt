@@ -135,7 +135,9 @@ fun TwoScreen(
                 viewModel.setWays(it)
                 viewModel.updatePhone(phone)
                 threeScreen(phone)
-            }
+            },
+            viewModel,
+            null
         )
     }
 }

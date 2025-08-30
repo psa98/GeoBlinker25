@@ -145,7 +145,9 @@ fun OneScreen(
             sendCode = {
                 viewModel.setWays(it)
                 twoScreen()
-            }
+            },
+            null,
+            viewModel
         )
     }
 }

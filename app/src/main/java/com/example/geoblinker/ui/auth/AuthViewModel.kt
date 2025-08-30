@@ -73,6 +73,12 @@ abstract class AuthViewModel(
                         "type" to "phone_code"
                     )
                 ).code
+                "Email" -> Api.retrofitService.auth(
+                    mapOf(
+                        "login" to email.value, // 7 999 999 99 99
+                        "type" to "e-mail_code"
+                    )
+                ).code
                 else -> {}
             }
         }
@@ -109,6 +115,13 @@ abstract class AuthViewModel(
                             "login" to "7${phone.value}", // 7 999 999 99 99
                             "password" to code,
                             "type" to "phone_code"
+                        )
+                    )
+                    "Email" -> Api.retrofitService.auth(
+                        mapOf(
+                            "login" to email.value, // 7 999 999 99 99
+                            "password" to code,
+                            "type" to "e-mail_code"
                         )
                     )
                     else -> {
