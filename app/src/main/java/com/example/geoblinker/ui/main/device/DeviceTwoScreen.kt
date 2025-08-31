@@ -87,7 +87,7 @@ fun DeviceTwoScreen(
 
                         // Первый текст - слева
                         Text(
-                            text = stringResource(item.type.description),
+                            item.type.description,
                             modifier = Modifier.constrainAs(text1) {
                                 start.linkTo(parent.start)
                                 top.linkTo(parent.top)

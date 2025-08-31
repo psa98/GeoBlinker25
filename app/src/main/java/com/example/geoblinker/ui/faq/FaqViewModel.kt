@@ -27,11 +27,13 @@ class FaqViewModel : ViewModel() {
             
             try {
                 Log.d("FaqViewModel", "🔥 Отправляем запрос: GET /data?data.lang_vls=1")
-                val response = Api.retrofitService.getData("1")
-                
+                val response = Api.retrofitService.getLangData("1")
+                val response2 = Api.retrofitService.getDeviceSignalsData()
                 Log.d("FaqViewModel", "📋 Ответ API: code=${response.code}")
                 Log.d("FaqViewModel", "📋 Полный ответ: $response")
-                
+                Log.d("FaqViewModel", "📋 Полный ответ: $response2")
+                val v = response2.data.data.constants.tracker2.getList()
+                Log.d("FaqViewModel", "📋 Полный ответ: $v")
                 if (response.code == "200") {
                     Log.d("FaqViewModel", "📋 response.data: ${response.data}")
                     Log.d("FaqViewModel", "📋 response.data.data: ${response.data.data}")

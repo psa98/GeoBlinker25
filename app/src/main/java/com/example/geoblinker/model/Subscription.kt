@@ -1,7 +1,10 @@
 package com.example.geoblinker.model
 
-import androidx.lifecycle.Observer
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+
+private val gson =Gson()
+
 
 // Subscription API Models
 data class SubscriptionRequest(
@@ -162,13 +165,20 @@ data class TariffResponseMap(
     val data: TariffDataMap
 )
 
-data class LangResponse(
+data class DataLangResponse(
     @SerializedName("code")
     val code: String,
     @SerializedName("data")
-    val data: LangData
+    val data: ServerLangData
 )
 
+
+data class DataResponse(
+    @SerializedName("code")
+    val code: String,
+    @SerializedName("data")
+    val data: ServerCommonData
+)
 
 
 data class TariffData(
@@ -182,11 +192,43 @@ data class TariffDataMap(
 )
 
 
-data class LangData(
+data class ServerLangData(
     @SerializedName("data")
     val data: LangInfo
 )
 
+
+data class ServerCommonData(
+    @SerializedName("data")
+    val data: SiteConstants
+)
+
+data class SiteConstants(
+    @SerializedName("site_constants")
+    val constants: TrackerModes
+)
+
+data class TrackerModes(
+    @SerializedName("tracker_model4")
+    val tracker4: TrackerValue,
+    @SerializedName("tracker_model2")
+    val tracker2: TrackerValue
+
+)
+
+data class TrackerValue(
+    @SerializedName("value")
+    val jsonString: String
+
+){
+
+    fun getList(): EventTypes =gson.fromJson(jsonString,EventTypes::class.java)
+}
+
+class EventTypes() {
+    @SerializedName("type")
+    var list: ArrayList<String>? = null
+}
 
 
 data class TariffInfo(
@@ -197,16 +239,15 @@ data class TariffInfo(
 
 data class TariffInfoMap(
     @SerializedName("tariffs")
-    val tariffs: Map<String, Map<String,Object>>?,
+    val tariffs: Map<String, Map<String,Any>>?,
 
     )
 
 data class LangInfo(
     @SerializedName("lang_vls")
-    val langValues: Map<String, Map<Int,String>>?
+    val langValues: Map<String, Map<Int,String>>
     // изменен тип данных на реально отдаваемый сервером
 )
-
 
 
 data class TariffItem(
@@ -218,24 +259,9 @@ data class TariffItem(
     val period: Int
 )
 
-// Language translation models
-data class LanguageResponse(
-    @SerializedName("code")
-    val code: String,
-    @SerializedName("data")
-    val data: LanguageData
-)
-
 data class LanguageData(
     @SerializedName("lang_vls")
     val langValues: Map<String, Map<Int,String>>
 )
 
-data class LanguageValue(
-    @SerializedName("id_lang")
-    val idLang: Int,
-    @SerializedName("name")
-    val name: String,
-    @SerializedName("value")
-    val value: String?
-)
+

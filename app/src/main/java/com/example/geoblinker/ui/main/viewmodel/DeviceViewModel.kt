@@ -63,7 +63,7 @@ class DeviceViewModel(
     private val _device = MutableStateFlow(Device("", "", "", false, 0, "", ""))
     private val _typesSignals = MutableStateFlow<List<TypeSignal>>(emptyList())
     private val _typeSignal =
-        MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.MovementStarted))
+        MutableStateFlow(TypeSignal(deviceId = "", type = SignalType.ShakeAlarm))
     private val _signalsDevice = MutableStateFlow<List<Signal>>(emptyList())
     private val _signals = MutableStateFlow<List<Signal>>(emptyList())
     private val _news = MutableStateFlow<List<News>>(emptyList())

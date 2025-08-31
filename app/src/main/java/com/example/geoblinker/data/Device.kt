@@ -19,6 +19,7 @@ data class Device(
     val lat: Double = -999999999.9,
     val lng: Double = -999999999.9,
     val typeStatus: TypeStatus = TypeStatus.Available,
+    val deviceType:String = "",
     val breakdownForecast: String? = null,
     val maintenanceRecommendations: String? = null
 ) {

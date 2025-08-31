@@ -13,7 +13,7 @@ import com.example.geoblinker.data.techsupport.MessageTechSupportDao
 
 @Database(
     entities = [Device::class, TypeSignal::class, Signal::class, News::class, ChatTechSupport::class, MessageTechSupport::class],
-    version = 15
+    version = 16
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun deviceDao(): DeviceDao
@@ -24,6 +24,15 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun MessageTechSupportDao(): MessageTechSupportDao
 
     companion object {
+
+        private val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""ALTER TABLE 'devices' ADD COLUMN 'deviceType' TEXT NOT NULL DEFAULT 'tracker_model2'
+                """)
+
+
+            }
+        }
         private val MIGRATION_14_15 = object : Migration(14, 15) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("DROP TABLE type_signals")
@@ -33,7 +42,7 @@ abstract class AppDatabase : RoomDatabase() {
                         CREATE TABLE type_signals (
                             id INTEGER PRIMARY KEY NOT NULL,
                             deviceId TEXT NOT NULL,
-                            type TEXT NOT NULL,
+                            list TEXT NOT NULL,
                             checked INTEGER NOT NULL,
                             checkedPush INTEGER NOT NULL,
                             checkedEmail INTEGER NOT NULL,
@@ -46,7 +55,7 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL(
                     """
                         CREATE UNIQUE INDEX index_type_signals_deviceId_type
-                        ON type_signals(deviceId, type)
+                        ON type_signals(deviceId, list)
                     """.trimIndent()
                 )
             }
@@ -102,7 +111,7 @@ abstract class AppDatabase : RoomDatabase() {
                         CREATE TABLE 'type_signals' (
                             'id' INTEGER NOT NULL PRIMARY KEY,
                             'deviceId' TEXT NOT NULL,
-                            'type' TEXT NOT NULL,
+                            'list' TEXT NOT NULL,
                             'checked' INTEGER NOT NULL,
                             'checkedPush' INTEGER NOT NULL,
                             'checkedEmail' INTEGER NOT NULL,
@@ -269,7 +278,7 @@ abstract class AppDatabase : RoomDatabase() {
                         CREATE TABLE 'type_signals' (
                             'id' INTEGER NOT NULL PRIMARY KEY,
                             'deviceId' TEXT NOT NULL,
-                            'type' TEXT NOT NULL,
+                            'list' TEXT NOT NULL,
                             'checked' INTEGER NOT NULL,
                             'checkedPush' INTEGER NOT NULL,
                             'checkedEmail' INTEGER NOT NULL,
@@ -306,7 +315,8 @@ abstract class AppDatabase : RoomDatabase() {
                         MIGRATION_11_12,
                         MIGRATION_12_13,
                         MIGRATION_13_14,
-                        MIGRATION_14_15)
+                        MIGRATION_14_15,
+                        MIGRATION_15_16)
                     /*
                     .setQueryCallback(
                         { sqlQuery, bindArgs ->

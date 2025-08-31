@@ -1,31 +1,46 @@
 package com.example.geoblinker.data
 
-import androidx.annotation.StringRes
-import com.example.geoblinker.R
+import com.example.geoblinker.ui.main.GeoBlinker
 
 enum class SignalType(
     val rawNames: List<String>,
-    @StringRes val description: Int
+    val description: String
 ) {
-    MovementStarted(
-        listOf("e_alarm_speed", "e_alarm_displacement"),
-        R.string.movement_started
-    ),
-    Stop(
-        listOf("e_alarm_speeding_end"),
-        R.string.stop
-    ),
-    LowCharge(
-        listOf("e_alarm_low_battery"),
-        R.string.low_charge
-    ),
-    DoorOpen(
-        listOf("e_alarm_illegal_open", "e_alarm_door"),
-        R.string.door_open
-    ),
-    VibrationAlarm(
+    ShakeAlarm(
         listOf("e_alarm_shake"),
-        R.string.vibration_alarm
+        GeoBlinker.constants.getNameForEvent("e_alarm_shake")
+    ),
+    InFence(
+        listOf("e_alarm_in_fence"),
+        GeoBlinker.constants.getNameForEvent("e_alarm_in_fence")
+    ),
+    LowPower(
+    listOf("e_alarm_lowpower"),
+    GeoBlinker.constants.getNameForEvent("e_alarm_lowpower")
+    ),
+    OutFence(
+        listOf("e_alarm_out_fence"),
+        GeoBlinker.constants.getNameForEvent("e_alarm_out_fence")
+    ),
+    PowerCut(
+        listOf("e_alarm_power_cut_off"),
+        GeoBlinker.constants.getNameForEvent("e_alarm_power_cut_off")
+    ),
+    AccOff(
+    listOf("e_alarm_acc_off"),
+    GeoBlinker.constants.getNameForEvent("e_alarm_acc_off")
+    ),
+    LowBat(
+        listOf("e_alarm_low_battery"),
+        GeoBlinker.constants.getNameForEvent("e_alarm_low_battery")
+    ),
+    Speeding(
+        listOf("e_alarm_speed"),
+        GeoBlinker.constants.getNameForEvent("e_alarm_speed")
+    ),
+    SpeedingEnd(
+        listOf("e_alarm_speeding_end"),
+        GeoBlinker.constants.getNameForEvent("e_alarm_speeding_end")
     );
 
     companion object {

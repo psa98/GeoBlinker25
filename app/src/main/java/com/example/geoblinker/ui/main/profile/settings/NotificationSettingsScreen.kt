@@ -476,7 +476,7 @@ private fun Types(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    stringResource(typeSignal.type.description),
+                    typeSignal.type.description,
                     style = MaterialTheme.typography.labelMedium
                 )
                 Switch(
@@ -670,7 +670,7 @@ private fun Email(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    stringResource(typeSignal.type.description),
+                    typeSignal.type.description,
                     style = MaterialTheme.typography.labelMedium
                 )
                 Switch(

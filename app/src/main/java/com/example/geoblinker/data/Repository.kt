@@ -11,13 +11,13 @@ class Repository(
     suspend fun insertAllDevices(devices: List<Device>) {
         deviceDao.insert(*devices.toTypedArray())
         devices.forEach { device ->
-            insertAllTypeSignal(device.id)
+            insertAllTypeSignal(device)
         }
     }
 
     suspend fun insertDevice(device: Device) {
         deviceDao.insert(device)
-        insertAllTypeSignal(device.id)
+        insertAllTypeSignal(device)
     }
 
     suspend fun updateDevice(device: Device) {
@@ -34,14 +34,30 @@ class Repository(
 
     fun getAllDevices(): Flow<List<Device>> = deviceDao.getAll()
 
-    private suspend fun insertAllTypeSignal(id: String) {
-        val listTypeSignal = listOf(
-            TypeSignal(deviceId = id, type = SignalType.MovementStarted),
-            TypeSignal(deviceId = id, type = SignalType.Stop),
-            TypeSignal(deviceId = id, type = SignalType.LowCharge),
-            TypeSignal(deviceId = id, type = SignalType.DoorOpen),
-            TypeSignal(deviceId = id, type = SignalType.VibrationAlarm),
+    private suspend fun insertAllTypeSignal(device: Device) {
+        //todo - переделать на список из 7 или 9 элементов в зависимости от типа
+        val listTypeSignal = if (device.deviceType=="tracker_model4") listOf(
+            TypeSignal(deviceId = device.id, type = SignalType.ShakeAlarm),
+            TypeSignal(deviceId = device.id, type = SignalType.InFence),
+            TypeSignal(deviceId = device.id, type = SignalType.LowPower),
+            TypeSignal(deviceId = device.id, type = SignalType.OutFence),
+            TypeSignal(deviceId = device.id, type = SignalType.PowerCut),
+            TypeSignal(deviceId = device.id, type = SignalType.AccOff),
+            TypeSignal(deviceId = device.id, type = SignalType.LowBat),
+            TypeSignal(deviceId = device.id, type = SignalType.Speeding),
+            TypeSignal(deviceId = device.id, type = SignalType.SpeedingEnd),
+            ) else listOf(
+            TypeSignal(deviceId = device.id, type = SignalType.ShakeAlarm),
+            TypeSignal(deviceId = device.id, type = SignalType.InFence),
+            TypeSignal(deviceId = device.id, type = SignalType.LowPower),
+            TypeSignal(deviceId = device.id, type = SignalType.OutFence),
+            TypeSignal(deviceId = device.id, type = SignalType.PowerCut),
+            TypeSignal(deviceId = device.id, type = SignalType.Speeding),
+            TypeSignal(deviceId = device.id, type = SignalType.SpeedingEnd),
         )
+
+
+
         typeSignalDao.insertAll(*listTypeSignal.toTypedArray())
     }
 

@@ -86,7 +86,7 @@ fun DeviceThreeScreen(
         }
         Spacer(Modifier.height(10.sdp()))
         Text(
-            stringResource(typeSignal.type.description),
+            typeSignal.type.description,
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyLarge
         )

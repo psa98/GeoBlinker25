@@ -3,18 +3,15 @@ package com.example.geoblinker.network
 import com.example.geoblinker.model.Authorization
 import com.example.geoblinker.model.Cars
 import com.example.geoblinker.model.Code
-import com.example.geoblinker.model.LangResponse
-import com.example.geoblinker.model.LanguageResponse
+import com.example.geoblinker.model.DataLangResponse
+import com.example.geoblinker.model.DataResponse
 import com.example.geoblinker.model.PaymentInfoResponse
 import com.example.geoblinker.model.PaymentResponse
 import com.example.geoblinker.model.ResponseCreateCar
 import com.example.geoblinker.model.SubscriptionListResponse
 import com.example.geoblinker.model.SubscriptionResponse
-import com.example.geoblinker.model.TariffResponse
 import com.example.geoblinker.model.TariffResponseMap
 import com.example.geoblinker.model.Token
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Field
@@ -125,10 +122,18 @@ interface ApiService {
 
     // Get language translations
     @GET("data")
-    suspend fun getData(
+    suspend fun getLangData(
         @Query("data.lang_vls") langId: String
-    ): LangResponse
+    ): DataLangResponse
     // теперь возвращается другой тип
+
+
+    @GET("data")
+    suspend fun getDeviceSignalsData(
+        @Query("data.site_constants") s:String =""
+    ): DataResponse
+
+
 }
 
 object Api {
