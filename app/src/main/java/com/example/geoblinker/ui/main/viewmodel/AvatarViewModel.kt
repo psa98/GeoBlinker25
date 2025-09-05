@@ -104,7 +104,7 @@ class AvatarViewModel(
         avatarUri = newUri
 
         val base64Photo = "data:image/png;base64," + Base64.encodeToString(outputFile.readBytes(), Base64.DEFAULT)
-        val res = Api.retrofitService.edit(
+        val res = Api.retrofitService.editUser(
             mapOf(
                 "token" to _token,
                 "u_hash" to _hash,
@@ -134,7 +134,7 @@ class AvatarViewModel(
                 errorMessage = null
 
                 if (onServer) {
-                    Api.retrofitService.edit(
+                    Api.retrofitService.editUser(
                         mapOf(
                             "token" to _token,
                             "u_hash" to _hash,

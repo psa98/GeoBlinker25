@@ -31,6 +31,7 @@ import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomPopup
 import com.example.geoblinker.ui.HSpacer
 import com.example.geoblinker.ui.PhoneNumberTextField
+import com.example.geoblinker.ui.PhoneNumberTextFieldPicker
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.formatPhoneNumber
 import com.example.geoblinker.ui.theme.sdp
@@ -65,7 +66,7 @@ fun TwoScreen(
             style = MaterialTheme.typography.titleSmall
         )
         HSpacer(134)
-        PhoneNumberTextField(
+        PhoneNumberTextFieldPicker(
             initial = phone,
             onValueChange = {
                 phone = it
@@ -136,8 +137,7 @@ fun TwoScreen(
                 viewModel.updatePhone(phone)
                 threeScreen(phone)
             },
-            viewModel,
-            null
+            viewModel
         )
     }
 }

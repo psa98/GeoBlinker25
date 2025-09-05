@@ -11,11 +11,12 @@ import kotlinx.coroutines.launch
 import java.lang.reflect.Type
 
 class ConstantsRepository(context: Context) {
+    val langId = 1 //Русский
     private val prefs: SharedPreferences =
         context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
             .also { Log.e("", "!!: =") }
     private val gson = Gson().also { Log.e("", "!!: =") }
-    private var mapType: Type = object : TypeToken<HashMap<String, String>?>() {}.type
+    private val mapType: Type = object : TypeToken<HashMap<String, String>?>() {}.type
     private val eventNameMap: HashMap<String, String> = gson.fromJson(
         prefs.getString("trackerNamesMap", "[]"), mapType
     )
@@ -27,6 +28,14 @@ class ConstantsRepository(context: Context) {
         tracker2EventList.forEach { this.add(getNameForEvent(it)) }}
     var tracker4EventNames: List<String> = mutableListOf<String>().apply {
         tracker4EventList.forEach { this.add(getNameForEvent(it)) }}
+    val faqNamesTagList: List<String> = listOf(
+        "e_faq_1",
+        "e_faq_2",
+        "e_faq_3",
+        "e_faq_4",
+        "e_faq_5"
+    )
+    private val faqTextMap: HashMap<String, String> = HashMap()
 
     fun initConstants() = CoroutineScope(Dispatchers.IO).launch {
         try {
@@ -37,16 +46,16 @@ class ConstantsRepository(context: Context) {
                 tracker4EventList =
                     trackerResponse.data.data.constants.tracker4.getList().list ?: emptyList()
                 if (tracker2EventList.isEmpty() || tracker4EventList.isEmpty()) return@launch
-                 val langResponse = Api.retrofitService.getLangData("1")
+                 val langResponse = Api.retrofitService.getLangData(langId.toString())
                 if (langResponse.code == "200") {
                     val langValues: Map<String, Map<Int, String>> =
                         langResponse.data.data.langValues
                     tracker4EventList.forEach { eventCode ->
-                        val translation = langValues[eventCode]?.get(1)
+                        val translation = langValues[eventCode]?.get(langId)
                         translation?.let { eventNameMap[eventCode] = translation }
                     }
                     tracker2EventList.forEach { eventCode ->
-                        val translation = langValues[eventCode]?.get(1)
+                        val translation = langValues[eventCode]?.get(langId)
                         translation?.let { eventNameMap[eventCode] = translation }
                     }
                     tracker2EventNames=tracker2EventList.map { getNameForEvent(it) }
@@ -54,7 +63,9 @@ class ConstantsRepository(context: Context) {
                     prefs.edit().putStringSet("tracker2EventList", tracker2EventList.toSet()).apply()
                     prefs.edit().putStringSet("tracker4EventList", tracker4EventList.toSet()).apply()
                     prefs.edit().putString("trackerNamesMap", gson.toJson(eventNameMap)).apply()
-
+                    faqNamesTagList.forEach { tag ->
+                        val translation = langValues[tag]?.get(langId)
+                        translation?.let { faqTextMap[tag] = translation  }}
                 }
             }
 
@@ -65,6 +76,10 @@ class ConstantsRepository(context: Context) {
 
     fun getNameForEvent(name: String): String {
         return eventNameMap[name] ?: ""
+    }
+
+    fun getNameForFaq(tag: String): String {
+        return faqTextMap[tag] ?: ""
     }
 
 }

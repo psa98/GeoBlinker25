@@ -68,7 +68,7 @@ class NotificationPollWorker(
                             repository.insertSignal(
                                 Signal(
                                     deviceId = device.id,
-                                    name = type.description,
+                                    name = SignalType.getScreenName(type),
                                     dateTime = notification.time * 1000
                                 )
                             )
@@ -77,7 +77,7 @@ class NotificationPollWorker(
                                 val builder = NotificationCompat.Builder(applicationContext, channelId)
                                     .setSmallIcon(R.drawable.notifications)  // ваш значок
                                     .setContentTitle(device.name.ifEmpty { device.imei })
-                                    .setContentText(type.description)
+                                    .setContentText(SignalType.getScreenName(type))
                                     .setAutoCancel(true)
                                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                                 val id = notification.time.hashCode()

@@ -3,12 +3,15 @@ package com.example.geoblinker.ui.main.device
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,7 +33,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.example.geoblinker.GeoBlinkerScreen
 import com.example.geoblinker.R
+import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.main.viewmodel.DeviceViewModel
 import com.example.geoblinker.ui.theme.sdp
@@ -79,21 +85,16 @@ fun DeviceTwoScreen(
                 contentPadding = PaddingValues(15.sdp())
             ) {
                 itemsIndexed(typesSignals) { index, item ->
-                    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-                        // Создаем направляющую на 3/5 ширины экрана
-                        val guideline = createGuidelineFromStart(0.63f)
-
-                        val (text1, text2, switch) = createRefs()
+                    Row(modifier = Modifier.fillMaxWidth()) {
 
                         // Первый текст - слева
+
+
                         Text(
-                            item.type.description,
-                            modifier = Modifier.constrainAs(text1) {
-                                start.linkTo(parent.start)
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                            },
-                            style = MaterialTheme.typography.labelMedium
+                            SignalType.getScreenName(item.type),
+                            modifier = Modifier.fillMaxWidth(0.60f)
+                            .wrapContentHeight(),
+                            style = MaterialTheme.typography.labelSmall
                         )
 
                         var trigger = "..."
@@ -106,18 +107,13 @@ fun DeviceTwoScreen(
                         // Второй текст - центрирован относительно 3/5 ширины
                         Text(
                             text = trigger,
-                            modifier = Modifier
-                                .constrainAs(text2) {
-                                centerAround(guideline) // Центр текста на направляющей
-                                top.linkTo(parent.top)
-                                bottom.linkTo(parent.bottom)
-                                }
+                            modifier = Modifier.fillParentMaxWidth(0.30f)
                                 .clickable {
                                     viewModel.setTypeSignal(item)
                                     toThree()
                                 },
                             textDecoration = TextDecoration.Underline,
-                            style = MaterialTheme.typography.labelMedium
+                            style = MaterialTheme.typography.labelSmall
                         )
 
                         // Свитч - справа
@@ -133,12 +129,8 @@ fun DeviceTwoScreen(
                                     toThree()
                                 }
                             },
-                            modifier = Modifier.size(40.sdp(), 20.sdp())
-                                .constrainAs(switch) {
-                                    end.linkTo(parent.end)
-                                    top.linkTo(parent.top)
-                                    bottom.linkTo(parent.bottom)
-                                },
+                            modifier = Modifier.fillMaxWidth(0.15f).align(Alignment.Top)
+                                ,
                             colors = SwitchDefaults.colors(
                                 uncheckedThumbColor = Color(0xFFBEBEBE),
                                 uncheckedTrackColor = Color.Unspecified,

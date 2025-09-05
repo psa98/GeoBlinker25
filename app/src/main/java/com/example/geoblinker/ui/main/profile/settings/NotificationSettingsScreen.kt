@@ -57,6 +57,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.geoblinker.R
+import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomLinkEmailPopup
@@ -476,7 +477,7 @@ private fun Types(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    typeSignal.type.description,
+                    SignalType.getScreenName(typeSignal.type),
                     style = MaterialTheme.typography.labelMedium
                 )
                 Switch(
@@ -670,7 +671,7 @@ private fun Email(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    typeSignal.type.description,
+                    SignalType.getScreenName(typeSignal.type),
                     style = MaterialTheme.typography.labelMedium
                 )
                 Switch(

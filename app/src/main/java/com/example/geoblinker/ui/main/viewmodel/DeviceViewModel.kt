@@ -51,6 +51,8 @@ class DeviceViewModel(
     private val repository: Repository,
     private val application: Application
 ) : ViewModel() {
+    private var selectedString = "Тип 2"
+    private var selectedType = getType(selectedString)
     private val _profilePrefs =
         application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
     private var _token by mutableStateOf("")
@@ -97,12 +99,13 @@ class DeviceViewModel(
             var next = false
             while (!next && isActive) {
                 try {
-                    res = Api.retrofitService.getAllCar(
-                        mapOf(
-                            "token" to _token,
-                            "u_hash" to _hash
-                        )
-                    )
+
+                    val params = HashMap<String,String>()
+                    params["token"] = _token
+                    params["u_hash"] = _hash
+                    res = Api.retrofitService.getAllCar( params)
+
+
                     if (res.code != "200")
                         throw Exception("Code: ${res.code}")
                 } catch (e: Exception) {
@@ -118,7 +121,8 @@ class DeviceViewModel(
                         name = device.details.name,
                         isConnected = device.details.isConnected,
                         bindingTime = device.details.bindingTime,
-                        registrationPlate = device.registrationPlate
+                        registrationPlate = device.registrationPlate,
+                        deviceType = device.details.typeName?:"tracker_model2"
                     )
                     newDevices.add(newDevice)
                     Log.d("devices", "name: ${newDevice.name}, id: ${newDevice.id}, IMEI: ${newDevice.imei}, registrationPlate: ${newDevice.registrationPlate}")
@@ -328,7 +332,8 @@ class DeviceViewModel(
                 )
                 if (res.items.isEmpty())
                     throw Exception("Failed attempt to add a device to the server")
-                _device.value = Device(imei, "", "", bindingTime = 0, simei = res.items[0].simei, registrationPlate = "")
+                _device.value = Device(imei, "", "", bindingTime = 0, simei = res.items[0].simei, registrationPlate = "", deviceType = selectedType)
+
             } catch (e: Exception) {
                 Log.e("addImei", e.toString())
                 uiState.value= DefaultStates.Error(R.string.imei_not_found)
@@ -374,14 +379,16 @@ class DeviceViewModel(
                 updateDevice(foundDevice.copy(
                     name = name,
                     bindingTime = nowTime,
-                    isConnected = true
+                    isConnected = true,
+                    deviceType = device.value.deviceType
                 ))
                 if (uiState.value is DefaultStates.Error)
                     return@launch
                 _device.value = foundDevice.copy(
                     name = name,
                     bindingTime = nowTime,
-                    isConnected = true
+                    isConnected = true,
+                    deviceType = device.value.deviceType
                 )
             }
             else {
@@ -391,17 +398,19 @@ class DeviceViewModel(
                         mapOf(
                             "token" to _token,
                             "u_hash" to _hash,
+                            "debug" to "",
                             "data" to Gson().toJson(
                                 Car(
                                     registrationPlate = registrationPlate,
                                     details = Details(
                                         imei = _device.value.imei,
                                         name = name,
-                                        bindingTime = nowTime
+                                        bindingTime = nowTime,
+                                        typeName = _device.value.deviceType
                                     )
                                 )
                             )
-                        )
+                       )
                     )
                     if (res.code != "200")
                         throw Exception("Code: ${res.code}, message: ${res.message}")
@@ -419,7 +428,8 @@ class DeviceViewModel(
                     name = name,
                     bindingTime = nowTime,
                     simei = _device.value.simei,
-                    registrationPlate = registrationPlate
+                    registrationPlate = registrationPlate,
+                    deviceType = selectedType
                 )
                 _device.value = device
                 repository.insertDevice(device)
@@ -505,7 +515,8 @@ class DeviceViewModel(
                                     imei = device.imei,
                                     name = device.name,
                                     isConnected = device.isConnected,
-                                    bindingTime = device.bindingTime
+                                    bindingTime = device.bindingTime,
+                                    typeName = device.deviceType
                                 )
                             )
                         )
@@ -576,5 +587,18 @@ class DeviceViewModel(
                 unitsDistance.value = it
             }
         }
+    }
+
+    fun setType(selected: String) {
+        selectedString = selected
+        selectedType = getType(selected)
+
+    }
+
+    private fun getType (selected:String) = when(selected){
+        "Тип 2" -> "tracker_model2"
+        "Тип 4" -> "tracker_model4"
+
+        else -> "tracker_model2"
     }
 }

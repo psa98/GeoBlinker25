@@ -14,6 +14,7 @@ import com.example.geoblinker.model.Code
 import com.example.geoblinker.model.Profile
 import com.example.geoblinker.network.Api
 import com.example.geoblinker.ui.WayConfirmationCode
+import com.example.geoblinker.ui.main.GeoBlinker.Companion.gson
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,15 +40,20 @@ class ProfileViewModel(
     private val _isLogin = MutableStateFlow(false)
     private val _subscription = MutableStateFlow<Long>(0)
     private val _phone = MutableStateFlow("")
-    private val _email = MutableStateFlow("")
+    private val _email = MutableStateFlow(_prefs.getString("email","")!!)
     private val _orderWays = MutableStateFlow("")
     private val _waysConfirmationCode = MutableStateFlow(
-        listOf(
+        if (_email.value.isNotEmpty()) listOf(
             WayConfirmationCode("Telegram"),
             WayConfirmationCode("WhatsApp"),
             WayConfirmationCode("SMS"),
             WayConfirmationCode("Email")
-        )
+        ) else
+            listOf(WayConfirmationCode("Telegram"),
+        WayConfirmationCode("WhatsApp"),
+        WayConfirmationCode("SMS"),
+    )
+
     )
     val subscription = _subscription.asStateFlow()
     var name = mutableStateOf("Константин Гусевский")
@@ -145,11 +151,11 @@ class ProfileViewModel(
             }
             val res: Code
             try {
-                res = Api.retrofitService.edit(
+                res = Api.retrofitService.editUser(
                     mapOf(
                         "token" to _token,
                         "u_hash" to _hash,
-                        "data" to Gson().toJson(Profile(
+                        "data" to gson.toJson(Profile(
                             name = newName
                         ))
                     )
@@ -170,6 +176,39 @@ class ProfileViewModel(
         }
     }
 
+    fun updateEmail(newMail: String) {
+        viewModelScope.launch {
+            if (newMail.isEmpty()) {
+                uiState.value = DefaultStates.Error(R.string.name_cannot_empty)
+                return@launch
+            }
+            val res: Code
+            try {
+                res = Api.retrofitService.editUser(
+                    mapOf(
+                        "token" to _token,
+                        "u_hash" to _hash,
+                        "data" to gson.toJson(Profile(
+                            email = newMail
+                        ))
+                    )
+                )
+                Log.d("ChangeName", "Code: ${res.code}, message: ${res.message ?: "Unknown"}")
+            } catch(e: Exception) {
+                Log.e("ChangeName", e.toString())
+                uiState.value = DefaultStates.Error(R.string.server_error)
+                return@launch
+            }
+            if (res.code == "200") {
+                _prefs.edit().putString("name", newMail).apply()
+                _email.value = newMail
+                uiState.value = DefaultStates.Success
+            } else {
+                uiState.value = DefaultStates.Error(R.string.server_error)
+            }
+        }
+    }
+
     fun checkPhone(code: String, phone: String): Boolean {
         /**
          * TODO: Необходимо добавить проверку телефона
@@ -183,16 +222,6 @@ class ProfileViewModel(
 
             withContext(Dispatchers.Main) {
                 _phone.value = phone
-            }
-        }
-    }
-
-    fun setEmail(email: String) {
-        viewModelScope.launch {
-            _prefs.edit().putString("email", email).apply()
-
-            withContext(Dispatchers.Main) {
-                _email.value = email
             }
         }
     }
@@ -222,7 +251,29 @@ class ProfileViewModel(
     }
 
     fun logout() {
-        _prefs.edit().clear().apply()
+        val editor = _prefs.edit()
+
+        //_prefs.edit().clear().apply()
+        editor.remove("selected_tariff_id").apply()
+        editor.remove("max_subscription_end_date").apply()
+        editor.remove("current_payment_id").apply()
+        editor.remove("trackerNamesMap").apply()
+        editor.remove("tracker2EventList").apply()
+        editor.remove("tracker4EventList").apply()
+        editor.remove("token").apply()
+        editor.remove("hash").apply()
+        //editor.remove("email")
+        editor.remove("login").apply()
+        editor.remove("success_message").apply()
+        editor.remove("error_message").apply()
+        editor.remove("unitsDistance").apply()
+        editor.remove("updateMap").apply()
+        editor.remove("name").apply()
+        editor.remove("phone").apply()
+        editor.remove("subscription").apply()
+        editor.remove("lastTime").apply()
+        editor.remove("sid").apply()
+        editor.remove("sidFamily").apply()
         _isLogin.value = false
         _subscription.value = 0
         name.value = ""

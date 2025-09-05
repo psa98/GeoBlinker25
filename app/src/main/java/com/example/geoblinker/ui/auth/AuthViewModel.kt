@@ -1,5 +1,6 @@
 package com.example.geoblinker.ui.auth
 
+import android.app.Activity.MODE_PRIVATE
 import android.app.Application
 import android.content.Context
 import android.util.Log
@@ -13,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.geoblinker.R
 import com.example.geoblinker.model.Authorization
 import com.example.geoblinker.network.Api
+import com.example.geoblinker.ui.main.GeoBlinker.Companion.gson
 import kotlinx.coroutines.launch
 
 abstract class AuthViewModel(
@@ -36,7 +38,10 @@ abstract class AuthViewModel(
         private set
     var name = mutableStateOf("")
         private set
-    var email = mutableStateOf("")
+    var email = mutableStateOf(_prefs.getString("email", "") ?: ""
+    )
+    var tgId = mutableStateOf(_prefs.getString("tgId", "") ?: ""
+    )
         private set
     var codeUiState: MutableState<CodeUiState> = mutableStateOf(CodeUiState.Input)
         private set
@@ -64,7 +69,8 @@ abstract class AuthViewModel(
                 "WhatsApp" -> Api.retrofitService.auth(
                     mapOf(
                         "login" to "7${phone.value}", // 7 999 999 99 99
-                        "type" to "whatsapp"
+                        "type" to "whatsapp",
+                        "debug" to ""
                     )
                 ).code
                 "SMS" -> Api.retrofitService.auth(
@@ -77,6 +83,12 @@ abstract class AuthViewModel(
                     mapOf(
                         "login" to email.value, // 7 999 999 99 99
                         "type" to "e-mail_code"
+                    )
+                ).code
+                "Telegram" -> Api.retrofitService.auth(
+                    mapOf(
+                        "login" to "7${phone.value}", // 7 999 999 99 99
+                        "type" to "telegram_id"
                     )
                 ).code
                 else -> {}
@@ -99,6 +111,8 @@ abstract class AuthViewModel(
         return wayTitles[waysGetCode[nowWay]]!!
     }
 
+
+
     fun checkWay(code: String) {
         viewModelScope.launch {
             try {
@@ -107,7 +121,8 @@ abstract class AuthViewModel(
                         mapOf(
                             "login" to "7${phone.value}", // 7 999 999 99 99
                             "password" to code,
-                            "type" to "whatsapp"
+                            "type" to "whatsapp",
+                            "debug" to ""
                         )
                     )
                     "SMS" -> Api.retrofitService.auth(
@@ -122,6 +137,13 @@ abstract class AuthViewModel(
                             "login" to email.value, // 7 999 999 99 99
                             "password" to code,
                             "type" to "e-mail_code"
+                        )
+                    )
+                    "Telegram" -> Api.retrofitService.auth(
+                        mapOf(
+                            "login" to "7${phone.value}", // 7 999 999 99 99
+                            "password" to code,
+                            "type" to "telegram_id"
                         )
                     )
                     else -> {
@@ -139,6 +161,66 @@ abstract class AuthViewModel(
                     val data = Api.retrofitService.getToken(timeHash).data
                     token = data.token
                     hash = data.hash
+                    _prefs.edit().putString("token",token).apply()
+                    _prefs.edit().putString("hash",hash).apply()
+
+                    try {
+                        val repository = com.example.geoblinker.network.SubscriptionRepository(application)
+                        val subscriptionsResult = repository.getUserSubscriptions()
+                        val tariffsResult = repository.getTariffs()
+
+                        val tariffNamesMap = HashMap<String,String>()
+                        tariffsResult.getOrNull()?.forEach{ entry: Map.Entry<String, Map<String, Any>> ->
+                            val num = entry.key
+                            val name = entry.value["ru"]
+                            tariffNamesMap[num] = name.toString()
+                        }
+                        _prefs.edit().putString("tariff_names_map",gson.toJson(tariffNamesMap)).apply()
+                        if (subscriptionsResult.isSuccess && tariffsResult.isSuccess) {
+                            val subscriptions = subscriptionsResult.getOrNull() ?: emptyList()
+                            val tariffs = tariffsResult.getOrNull() ?: emptyMap()
+
+                            var maxEndDate = 0L
+
+                            // Находим максимальную дату окончания всех активных подписок
+                            subscriptions.forEach { subscription ->
+                                if (subscription.subsStatus == "1" && subscription.paid) {
+                                    val tariff = tariffs[subscription.tariff]
+                                    if (tariff != null) {
+                                        val durationClass = tariff["duration_class"].toString()
+
+                                        val durationInSeconds = when (durationClass) {
+                                            "1"-> 30L * 24 * 3600    // 30 дней
+                                            "2"-> 1L * 24 * 3600     // 1 день
+                                            "3"-> 3600L     // 1 час
+                                            "4"-> 90L * 24 * 3600    // 90 дней
+                                            "5"-> 180L * 24 * 3600   // 180 дней
+                                            "6"-> 365L* 24 * 3600   // 365 дней
+                                            else -> 0
+                                        }
+
+                                        val endDate = subscription.startDate + durationInSeconds
+
+                                        if (endDate > maxEndDate) {
+                                            maxEndDate = endDate
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Сохраняем максимальную дату окончания
+
+                            _prefs.edit().putLong("max_subscription_end_date", maxEndDate).apply()
+
+                            // НЕМЕДЛЕННО устанавливаем статус активной подписки
+                            val currentTime = System.currentTimeMillis() / 1000
+                            val isActive = maxEndDate > currentTime
+                            _prefs.edit().putBoolean("subscription_active", isActive).apply()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("MainActivity", "Error calculating max subscription date", e)
+                    }
+
                     CodeUiState.Success
                 } else
                     CodeUiState.Error
@@ -148,6 +230,7 @@ abstract class AuthViewModel(
             }
         }
     }
+
 
     fun saveData() {
         viewModelScope.launch {

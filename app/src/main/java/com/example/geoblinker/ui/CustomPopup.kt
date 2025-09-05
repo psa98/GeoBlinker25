@@ -2,6 +2,8 @@ package com.example.geoblinker.ui
 
 import android.app.Application
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateOffsetAsState
@@ -38,6 +40,8 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionContext
+import androidx.compose.runtime.CompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -72,7 +76,6 @@ import com.example.geoblinker.R
 import com.example.geoblinker.TimeUtils
 import com.example.geoblinker.data.Device
 import com.example.geoblinker.ui.auth.authorization.AuthorizationViewModel
-import com.example.geoblinker.ui.auth.registration.RegistrationViewModel
 import com.example.geoblinker.ui.theme.ColorStar
 import com.example.geoblinker.ui.theme.GeoBlinkerTheme
 import com.example.geoblinker.ui.theme.sdp
@@ -84,24 +87,32 @@ fun CustomPopup(
     onChangeVisible: () -> Unit,
     sendCode: (List<String>) -> Unit,
     authorizationViewModel: AuthorizationViewModel?,
-    registrationViewModel: RegistrationViewModel?
-) {
+
+    ) {
     val context = LocalContext.current
     val application = context.applicationContext as Application
     val scope = rememberCoroutineScope()
     var isEnterEmail by rememberSaveable { mutableStateOf(false) }
-    var email by rememberSaveable { mutableStateOf("") }
+    var isTgPopup by rememberSaveable { mutableStateOf(false) }
+    var email by rememberSaveable { mutableStateOf(authorizationViewModel?.email?.value ?: "") }
+    var tgId by rememberSaveable { mutableStateOf(authorizationViewModel?.tgId?.value ?: "") }
     var checkedChoice by rememberSaveable { mutableStateOf(false) }
 
-    val items = remember { mutableStateListOf(
-        WayConfirmationCode("Telegram"),
-        WayConfirmationCode("WhatsApp"),
-        WayConfirmationCode("SMS"),
-        WayConfirmationCode("Email")
-    ) }
-    val stateWays = remember { mutableStateListOf<Boolean>().apply {
-        addAll(items.map { it.checked })
-    } }
+    val items = remember {
+        mutableStateListOf(
+            WayConfirmationCode("Telegram"),
+            WayConfirmationCode("WhatsApp"),
+            WayConfirmationCode("SMS"),
+
+            ).also {
+            if (email.isNotEmpty()) it.add(WayConfirmationCode("Email"))
+        }
+    }
+    val stateWays = remember {
+        mutableStateListOf<Boolean>().apply {
+            addAll(items.map { it.checked })
+        }
+    }
     var draggedIndex by rememberSaveable { mutableIntStateOf(-1) }
     // Смещение для анимации
     var draggedOffset by remember { mutableStateOf(Offset.Zero) }
@@ -186,7 +197,9 @@ fun CustomPopup(
                                 color = Color.Unspecified,
                                 border = BorderStroke(1.sdp(), Color(0xFFBEBEBE))
                             ) {
-                                if (draggableItem.text == "Email") {
+                                val emailInProfile = authorizationViewModel?.email?.value ?: ""
+
+                                if (draggableItem.text == "Email" && emailInProfile.isNotEmpty()) {
                                     Row(
                                         modifier = Modifier
                                             .padding(10.sdp())
@@ -195,15 +208,19 @@ fun CustomPopup(
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         HSpacer(72)
-                                        Text(
-                                            email,
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .clickable { isEnterEmail = true },
-                                            overflow = TextOverflow.Ellipsis,
-                                            textDecoration = TextDecoration.Underline,
-                                            style = MaterialTheme.typography.bodyLarge
-                                        )
+
+                                        /*Text(
+                                        emailInProfile,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            //.clickable { isEnterEmail = true }
+                                        ,
+                                        overflow = TextOverflow.Ellipsis,
+                                        textDecoration = TextDecoration.Underline,
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+
+                                         */
                                         HSpacer(52)
                                     }
                                 }
@@ -221,6 +238,7 @@ fun CustomPopup(
                                         },
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+
                                     Icon(
                                         imageVector = ImageVector.vectorResource(R.drawable.burger),
                                         contentDescription = null,
@@ -242,10 +260,11 @@ fun CustomPopup(
 
                                                         val targetIndex =
                                                             (draggedIndex + round(draggedOffset.y / 100))
-                                                        if (targetIndex in 0 until 4 && targetIndex != draggedIndex) {
+                                                        if (targetIndex in 0 until items.size && targetIndex != draggedIndex) {
                                                             val item = items.removeAt(draggedIndex)
                                                             items.add(targetIndex, item)
-                                                            stateWays[draggedIndex] = stateWays[targetIndex]
+                                                            stateWays[draggedIndex] =
+                                                                stateWays[targetIndex]
                                                             stateWays[targetIndex] = item.checked
                                                             draggedIndex = targetIndex
                                                             draggedOffset = Offset.Zero
@@ -259,8 +278,11 @@ fun CustomPopup(
                                             },
                                         tint = Color.Unspecified
                                     )
+
+
                                     Spacer(Modifier.width(9.sdp()))
                                     Text(
+                                        //if (draggableItem.text=="Email") "" else
                                         draggableItem.text,
                                         modifier = Modifier.weight(1f),
                                         style = MaterialTheme.typography.bodyLarge
@@ -271,10 +293,14 @@ fun CustomPopup(
                                             items[index].checked = it
                                             stateWays[index] = it
 
-                                            if (draggableItem.text == "Email") {
-                                                isEnterEmail = it
-                                                email = ""
+                                            if (draggableItem.text == "Telegram" && tgId.isEmpty()) {
+                                                isTgPopup = it
                                             }
+
+                                            //if (draggableItem.text == "Email") {
+                                            //isEnterEmail = it
+                                            //email = ""
+                                            //}
                                         },
                                         modifier = Modifier.size(40.sdp(), 20.sdp()),
                                         colors = SwitchDefaults.colors(
@@ -328,10 +354,13 @@ fun CustomPopup(
                             if (ways.isNotEmpty()) {
                                 if (checkedChoice) {
                                     scope.launch {
-                                        val prefs = application.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+                                        val prefs = application.getSharedPreferences(
+                                            "profile_prefs",
+                                            Context.MODE_PRIVATE
+                                        )
                                         var orderWays = ""
                                         items.forEach {
-                                            orderWays += when(it.text) {
+                                            orderWays += when (it.text) {
                                                 "Telegram" -> '0'
                                                 "WhatsApp" -> '1'
                                                 "SMS" -> '2'
@@ -369,9 +398,24 @@ fun CustomPopup(
             {
                 isEnterEmail = false
                 email = it
-                authorizationViewModel?.email?.value=it },
+                authorizationViewModel?.email?.value = it
+            },
             {
                 isEnterEmail = false
+            }
+        )
+    }
+
+    if (isTgPopup) {
+        CustomTgPopup(
+            phone,
+            {
+                //isEnterEmail = false
+                //email = it
+                //authorizationViewModel?.email?.value = it
+            },
+            {
+                isTgPopup = false
             }
         )
     }
@@ -617,7 +661,7 @@ fun CustomDiagnosisPopup(
                         }
                         Spacer(Modifier.height(15.sdp()))
                         CustomButton(
-                            text ="Обратиться в сервис",
+                            text = "Обратиться в сервис",
                             onClick = {},
                             typeColor = TypeColor.Green,
                             height = 55
@@ -876,6 +920,84 @@ fun CustomEmailPopup(
     }
 }
 
+
+@Composable
+fun CustomTgPopup(
+    phone: String,
+    onDone: (String) -> Unit,
+    onCancel: () -> Unit,
+    isError: Boolean = false
+) {
+    var value by remember { mutableStateOf(phone) }
+    val context = LocalContext.current
+    Dialog({}) {
+        Surface(
+            modifier = Modifier.width(350.sdp()),
+            shape = MaterialTheme.shapes.large,
+            color = Color.White
+        ) {
+            Column(
+                modifier = Modifier.padding(30.sdp()),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    "Перейдите по ссылке ниже, затем вернитесь в приложение " +
+                            "и нажмите кнопку \"Отправить код\" ",Modifier.clickable {
+
+                    },
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(Modifier.height(10.sdp()))
+                val url = "https://t.me/gfp_telegram_authenticator_bot?start=${phone}_0"
+                val intent = Intent(Intent.ACTION_VIEW).also{it.data= Uri.parse(url)}
+
+                Text(
+                    url, Modifier.clickable {
+                        context.startActivity(intent)
+                    },
+
+                    textDecoration = TextDecoration.Underline,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Blue,
+
+
+                )
+                Spacer(Modifier.height(40.sdp()))
+                /*EmailTextField(
+                    email = value,
+                    placeholder = stringResource(R.string.your_email),
+                    onValueChange = { value = it },
+                    onDone = { onDone(value) },
+                    isError = isError
+                )
+
+
+                Spacer(Modifier.height(25.sdp()))
+                CustomButton(
+                    text = stringResource(R.string.confirm),
+                    onClick = { onDone(value) },
+                    typeColor = TypeColor.Green,
+                    height = 81,
+                    radius = 24,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                         */
+
+                Spacer(Modifier.height(10.sdp()))
+                CustomButton(
+                    text = "Вернуться",
+                    onClick = onCancel,
+                    typeColor = TypeColor.White,
+                    height = 81,
+                    radius = 24,
+                    style = MaterialTheme.typography.headlineMedium
+                )
+            }
+        }
+    }
+}
+
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewRowSwitch() {
@@ -884,8 +1006,7 @@ fun PreviewRowSwitch() {
             modifier = Modifier
                 .padding(10.sdp())
                 .height(40.sdp())
-                .fillMaxWidth()
-            ,
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -893,8 +1014,7 @@ fun PreviewRowSwitch() {
                 contentDescription = null,
                 modifier = Modifier
                     .size(16.sdp(), 16.sdp())
-                    .aspectRatio(1f)
-                ,
+                    .aspectRatio(1f),
                 tint = Color.Unspecified
             )
             Spacer(Modifier.width(9.sdp()))

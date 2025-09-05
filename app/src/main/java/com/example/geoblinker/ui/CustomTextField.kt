@@ -35,6 +35,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -49,6 +51,11 @@ import com.example.geoblinker.ui.theme.sdp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.rejowan.ccpc.CCPUtils
+import com.rejowan.ccpc.Country
+import com.rejowan.ccpc.CountryCodePickerTextField
+import com.rejowan.ccpc.PickerCustomization
+import com.rejowan.ccpc.ViewCustomization
 
 @Composable
 fun CodeTextField(
@@ -123,6 +130,7 @@ fun formatPhoneNumber(phoneNumber: String): String {
     return formatted.toString()
 }
 
+
 @Composable
 fun PhoneNumberTextField(
     initial: String,
@@ -193,6 +201,104 @@ fun PhoneNumberTextField(
         )
     }
 }
+
+
+@Composable
+fun PhoneNumberTextFieldPicker(
+    initial: String,
+    onValueChange: (String) -> Unit,
+    onDone: () -> Unit,
+    isError: Boolean = false,
+    placeholder: String = "  ${stringResource(R.string.enter_the_number)}",
+    radius: Int = 24,
+    height: Int = 81
+) {
+    var number by remember {
+        mutableStateOf(initial)
+    }
+    var textFieldValueState by remember { mutableStateOf(TextFieldValue(text = formatPhoneNumber(initial))) }
+    var isFocused by remember { mutableStateOf(false) }
+    val country by remember {
+        mutableStateOf(Country.RussianFederation)
+    }
+
+    Surface(
+        shape = RoundedCornerShape(radius.hdp()),
+        border = BorderStroke(1.hdp(), if (isError) ColorError else Color(0xFFBEBEBE))
+    ) {
+
+        CountryCodePickerTextField(
+            number = number,
+            selectedCountry = country,
+            //value = textFieldValueState,
+            onValueChange = { countryCode: String, value: String, isValid: Boolean ->
+                val filterColorError = value.filter { it.isDigit() }.take(10)
+                val format = formatPhoneNumber(filterColorError)
+                onValueChange(filterColorError)
+                number = value
+
+            },
+            viewCustomization = ViewCustomization(showFlag = false),
+            pickerCustomization = PickerCustomization().also {
+                it.searchHint = "Поиск страны"
+                it.headerTitle = "Выберите страну"
+            },
+            modifier = Modifier
+                .height(height.hdp())
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    isFocused = focusState.isFocused
+                },
+            textStyle = MaterialTheme.typography.headlineMedium.copy(
+                color = if (isError) ColorError else Color(0xFF222221)
+            ),
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent, // Убираем линию в фокусе
+                unfocusedIndicatorColor = Color.Transparent // Убираем линию без фокуса
+            ) ,
+            placeholder = {
+                if (!isFocused)
+                    Text(
+                        text = placeholder,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+            },
+            /*
+            prefix = {
+                if (isFocused || textFieldValueState.text.isNotEmpty())
+                    Text(
+                        text = "  + 7 ",
+                        color = if (isError) ColorError else Color.Unspecified,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+            },
+
+             */
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Phone,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone =  { onDone() }
+            ),
+            //singleLine = true,
+            shape = MaterialTheme.shapes.large,
+            /*
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color.White,
+                focusedContainerColor = Color.White,
+                focusedIndicatorColor = Color.Transparent, // Убираем линию в фокусе
+                unfocusedIndicatorColor = Color.Transparent // Убираем линию без фокуса
+            )
+
+             */
+        )
+    }
+}
+
+
 
 @Composable
 fun NameTextField(
@@ -446,7 +552,9 @@ fun ImeiTextField(
 
         if (isFocused) {
             Box(
-                Modifier.fillMaxWidth().padding(5.sdp()),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(5.sdp()),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Button(
@@ -522,7 +630,9 @@ fun SearchDevice(
 
         if (key.isEmpty()) {
             Box(
-                Modifier.fillMaxWidth().padding(8.sdp()),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(8.sdp()),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Icon(

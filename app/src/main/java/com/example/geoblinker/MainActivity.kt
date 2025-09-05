@@ -96,8 +96,7 @@ class MainActivity : ComponentActivity() {
                             // СНАЧАЛА создаем подписку в базе данных
                             lifecycleScope.launch {
                                 try {
-                                    val repository = com.example.geoblinker.network.SubscriptionRepository(application)
-                                    val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
+                                       val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
                                     
                                     Log.d("MainActivity", "🏗️ Creating subscription with tariff ID: $selectedTariffId")
                                     val subscriptionResult = repository.createSubscription(selectedTariffId.toString())
@@ -117,7 +116,7 @@ class MainActivity : ComponentActivity() {
                                         val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
                                         
                                         Log.d("MainActivity", "🔍 BEFORE CALCULATION: selectedTariffId = $selectedTariffId")
-                                        
+                                        // todo - тут захардкожены тарифы, их надо брать с сервера и там брать период
                                         // Tarif ID ga qarab davomni belgilaymiz (ANIQ VAQTLAR)
                                         val durationInSeconds = when (selectedTariffId) {
                                             1 -> {
@@ -218,7 +217,19 @@ class MainActivity : ComponentActivity() {
                     if (subscription.subsStatus == "1" && subscription.paid == true) {
                         val tariff = tariffs[subscription.tariff]
                         if (tariff != null) {
-                            val durationInSeconds = tariff["period"].toString().toInt()  * 30 * 24 * 60 * 60L
+
+                            val durationClass = tariff["duration_class"].toString()
+
+                            val durationInSeconds = when (durationClass) {
+                                "1"-> 30L * 24 * 3600    // 30 дней
+                                "2"-> 1L * 24 * 3600     // 1 день
+                                "3"-> 3600L     // 1 час
+                                "4"-> 90L * 24 * 3600    // 90 дней
+                                "5"-> 180L * 24 * 3600   // 180 дней
+                                "6"-> 365L* 24 * 3600   // 365 дней
+                                else -> 0
+                            }
+                            //val durationInSeconds = tariff["period"].toString().toInt()  * 30 * 24 * 60 * 60L
                             val endDate = subscription.startDate + durationInSeconds
                             
                             if (endDate > maxEndDate) {

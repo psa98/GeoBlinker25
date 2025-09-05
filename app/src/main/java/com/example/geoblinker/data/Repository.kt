@@ -35,7 +35,7 @@ class Repository(
     fun getAllDevices(): Flow<List<Device>> = deviceDao.getAll()
 
     private suspend fun insertAllTypeSignal(device: Device) {
-        //todo - переделать на список из 7 или 9 элементов в зависимости от типа
+
         val listTypeSignal = if (device.deviceType=="tracker_model4") listOf(
             TypeSignal(deviceId = device.id, type = SignalType.ShakeAlarm),
             TypeSignal(deviceId = device.id, type = SignalType.InFence),

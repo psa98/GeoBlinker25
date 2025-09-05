@@ -60,8 +60,16 @@ interface ApiService {
     ): Token
 
     @FormUrlEncoded
+    @POST("user/{c_id}")
+    suspend fun editUserData(
+        @Path("c_id") userName: String,
+        @FieldMap request: Map<String, String>
+    ): Code
+
+
+    @FormUrlEncoded
     @POST("user")
-    suspend fun edit(
+    suspend fun editUser(
         @FieldMap request: Map<String, String>
     ): Code
 
@@ -83,6 +91,8 @@ interface ApiService {
         @Path("c_id") cId: String,
         @FieldMap request: Map<String, String>
     ): Code
+
+
 
     @FormUrlEncoded
     @POST("mail/1/send/")

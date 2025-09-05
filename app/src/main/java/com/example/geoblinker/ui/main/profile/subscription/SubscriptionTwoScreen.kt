@@ -38,8 +38,11 @@ import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.TypeColor
+import com.example.geoblinker.ui.main.GeoBlinker.Companion.gson
 import com.example.geoblinker.ui.main.viewmodel.SubscriptionViewModel
 import com.example.geoblinker.ui.theme.sdp
+import com.google.gson.reflect.TypeToken
+import java.lang.reflect.Type
 
 @Composable
 fun SubscriptionTwoScreen(
@@ -91,20 +94,24 @@ fun SubscriptionTwoScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             // Tanlangan tarifga qarab to'g'ri matnni ko'rsatamiz
-            val context = LocalContext.current
-            val prefs = context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
             val selectedTariffId = prefs.getInt("selected_tariff_id", 1)
-            
-            val subscriptionText = when (selectedTariffId) {
-                1 -> "Вы приобрели подписку: Год на месяц (30 дней)"
-                2 -> "Вы приобрели подписку: Год на день (1 день)"  
-                3 -> "Вы приобрели подписку: Год на час (1 час)"
-                4 -> "Вы приобрели подписку: Сильвер на месяц (30 дней)"
-                5 -> "Вы приобрели подписку: Сильвер на день (1 день)"
-                6 -> "Вы приобрели подписку: Сильвер на час (1 час)"
-                else -> "Вы приобрели подписку: ${pickSubscription.labelPeriod}"
-            }
-            
+            /*
+             todo:
+               1. Проверить что в selected_tariff_id сохраняется выбранная подписка
+               (и желательно именно в момент подтверждения покупки)
+               2. При авторизации мы получаем карту с текущими тарифами - надо там же
+               создать карту код тарифа -> название тарифа, и выгрузить ее в префы
+               тогда ниже можно будет нормально указать ее имя
+             */
+
+
+            val tariffMapGson = prefs.getString("tariff_names_map","[]")!!
+            val mapType: Type = object : TypeToken<HashMap<String, String>>() {}.type
+            val tariffNames:HashMap<String, String> =  gson.fromJson(tariffMapGson,mapType)
+
+
+            val subscriptionText = tariffNames[selectedTariffId.toString()]?:""
+
             Text(
                 subscriptionText,
                 style = MaterialTheme.typography.bodyMedium,

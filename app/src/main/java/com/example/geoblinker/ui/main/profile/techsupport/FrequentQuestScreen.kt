@@ -48,7 +48,7 @@ fun FrequentQuestScreen(
             )
             Spacer(Modifier.height(25.sdp()))
             Text(
-                stringResource(frequentQuestions.description),
+                FrequentQuestions.getScreenName(frequentQuestions),
                 style = MaterialTheme.typography.labelMedium
             )
         }

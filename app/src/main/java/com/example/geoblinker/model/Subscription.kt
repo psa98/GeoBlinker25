@@ -71,7 +71,7 @@ data class SubscriptionListResponse(
 
 data class SubscriptionListData(
     @SerializedName("subscription")
-    val subscription: List<SubscriptionInfo>
+    val subscription: List<SubscriptionInfo>?
 )
 
 // Payment API Models
@@ -164,6 +164,15 @@ data class TariffResponseMap(
     @SerializedName("data")
     val data: TariffDataMap
 )
+
+data class TariffIndividualData(
+    val number:Int,
+    val name :String,
+    val period:Int
+){
+    fun getLenInSeconds() = 0
+
+}
 
 data class DataLangResponse(
     @SerializedName("code")

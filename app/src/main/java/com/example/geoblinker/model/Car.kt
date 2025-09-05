@@ -37,7 +37,10 @@ data class Details(
     val isConnected: Boolean = true,
 
     @SerializedName("binding_time")
-    val bindingTime: Long
+    val bindingTime: Long,
+
+    @SerializedName("type_name")
+    val typeName: String?,
 )
 
 data class ResponseCreateCar(

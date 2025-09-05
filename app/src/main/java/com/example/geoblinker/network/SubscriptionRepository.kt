@@ -12,7 +12,11 @@ import java.util.Objects
 
 class SubscriptionRepository(private val context: Context) {
     private val prefs: SharedPreferences = 
-        context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
+        context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE).also {
+            it.registerOnSharedPreferenceChangeListener { sharedPreferences, key ->
+                Log.e("Shared pref", " key $key changed")
+            }
+        }
     private val gson = Gson()
 
     suspend fun createSubscription(tariffId: String): Result<String> = withContext(Dispatchers.IO) {
@@ -130,12 +134,14 @@ class SubscriptionRepository(private val context: Context) {
             )
 
             val response = Api.retrofitService.getSubscription(request)
-            
+
+
             if (response.code == "200") {
-                Result.success(response.data.subscription)
+                Result.success(response.data.subscription!!)
             } else {
                 Result.failure(Exception("Failed to get subscriptions: ${response.code}"))
             }
+
         } catch (e: Exception) {
             Log.e("SubscriptionRepo", "Error getting subscriptions", e)
             Result.failure(e)

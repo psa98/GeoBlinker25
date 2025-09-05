@@ -8,6 +8,7 @@ import com.example.geoblinker.data.AppDatabase
 import com.example.geoblinker.network.ConstantsRepository
 import com.example.geoblinker.worker.NotificationRepository
 import com.example.geoblinker.worker.NotificationWorkerFactory
+import com.google.gson.Gson
 
 class GeoBlinker : Application(), Configuration.Provider {
 
@@ -17,14 +18,14 @@ class GeoBlinker : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         ProcessLifecycleOwner.get().lifecycle.addObserver(AppLifecycleObserver)
-
         val db = AppDatabase.getInstance(this)
         val prefs = getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-
         repository = NotificationRepository(db.deviceDao(), db.typeSignalDao(), db.signalDao())
         workerFactory = NotificationWorkerFactory(repository, prefs)
         constants = ConstantsRepository(this)
         constants.initConstants()
+        context =this
+
 
     }
 
@@ -35,6 +36,8 @@ class GeoBlinker : Application(), Configuration.Provider {
 
 companion object{
     lateinit var constants: ConstantsRepository
+    lateinit var context: Application
+    val gson = Gson()
 
 }
 }

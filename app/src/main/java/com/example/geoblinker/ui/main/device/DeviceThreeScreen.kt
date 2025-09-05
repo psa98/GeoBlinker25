@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.core.content.ContextCompat
 import com.example.geoblinker.R
+import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomLinkEmailPopup
@@ -86,7 +87,7 @@ fun DeviceThreeScreen(
         }
         Spacer(Modifier.height(10.sdp()))
         Text(
-            typeSignal.type.description,
+            SignalType.getScreenName(typeSignal.type),
             color = Color(0xFF737373),
             style = MaterialTheme.typography.bodyLarge
         )

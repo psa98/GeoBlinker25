@@ -7,5 +7,7 @@ data class Code(
     val code: String,
 
     @SerializedName("message")
-    val message: String? = null
+    val message: String? = null,
+    @SerializedName("data")
+    val data: Any? = null
 )

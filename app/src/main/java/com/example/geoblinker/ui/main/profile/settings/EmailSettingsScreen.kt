@@ -64,12 +64,14 @@ fun EmailSettingsScreen(
     val emailFirst by remember { mutableStateOf(email) }
     var value by remember { mutableStateOf("") }
 
+
+    var checkTimer by remember { mutableStateOf(false) }
     /**
      * TODO:
      * Пока что это таймер-заглушка, так как нет бека для отправки ссылки с подтверждением почты.
-     */
+
     var remainingTime by remember { mutableIntStateOf(15) }
-    var checkTimer by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(checkTimer) {
         if (checkTimer) {
@@ -81,6 +83,7 @@ fun EmailSettingsScreen(
             navController.navigate(Email.Ready.name)
         }
     }
+     */
 
     NavHost(
         navController,
@@ -91,7 +94,8 @@ fun EmailSettingsScreen(
                 isShow,
                 onDone = {
                     value = it
-                    navController.navigate(Email.IsCheck.name)
+                    viewModel.updateEmail(value)
+                    navController.navigate(Email.Ready.name)
                 }
             )
         }
@@ -103,6 +107,7 @@ fun EmailSettingsScreen(
             )
         }
         composable(route = Email.Ready.name) {
+
             Ready(
                 email
             )
@@ -112,7 +117,9 @@ fun EmailSettingsScreen(
                 email,
                 onDone = {
                     value = it
-                    navController.navigate(Email.IsCheck.name)
+                    viewModel.updateEmail(value)
+                    navController.navigate(Email.Ready.name)
+                    //navController.navigate(Email.IsCheck.name)
                 }
             )
         }

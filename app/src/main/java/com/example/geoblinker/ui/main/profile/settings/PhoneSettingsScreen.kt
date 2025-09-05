@@ -38,6 +38,7 @@ import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CodeTextField
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.PhoneNumberTextField
+import com.example.geoblinker.ui.PhoneNumberTextFieldPicker
 import com.example.geoblinker.ui.TypeColor
 import com.example.geoblinker.ui.formatPhoneNumber
 import com.example.geoblinker.ui.main.viewmodel.ProfileViewModel
@@ -123,7 +124,7 @@ private fun PhoneScreen(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-        PhoneNumberTextField(
+        PhoneNumberTextFieldPicker(
             initial = value,
             placeholder = ' ' + stringResource(R.string.link_new_phone),
             onValueChange = {

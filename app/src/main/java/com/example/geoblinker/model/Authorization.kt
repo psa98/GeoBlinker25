@@ -24,6 +24,7 @@ data class User(
     val photo: String
 )
 
+
 data class Token(
     @SerializedName("data")
     val data: DataToken

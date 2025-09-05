@@ -9,15 +9,27 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,6 +39,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -77,9 +90,9 @@ fun BindingOneScreen(
         Image(
             painter = painterResource(R.drawable.new_device_image),
             contentDescription = null,
-            modifier = Modifier.size(310.sdp(), 222.sdp())
+            modifier = Modifier.size(270.sdp(), 200.sdp())
         )
-        HSpacer(50)
+        HSpacer(30)
         ImeiTextField(
             imei,
             {
@@ -92,6 +105,8 @@ fun BindingOneScreen(
             },
             isError = uiState is DefaultStates.Error
         )
+        HSpacer(15)
+        SelectType(viewModel,Modifier.size(200.dp,60.dp))
         HSpacer(15)
         CustomButton(
             text = stringResource(R.string.link),
@@ -118,6 +133,64 @@ fun BindingOneScreen(
     if (isShow) {
         BarcodeScannerScreen {
             imei = it
+            isShow=false
+        }
+    }
+}
+
+@Composable
+fun SelectType(viewModel: DeviceViewModel,
+               modifier: Modifier) {
+
+    val list = listOf("Тип 2", "Тип 4")
+    var selected by remember { mutableStateOf(list[0]) }
+    var expanded by remember { mutableStateOf(false) } // initial value
+
+    OutlinedCard(
+        modifier = modifier.clickable {
+            expanded = !expanded
+        }
+    ) {
+
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+
+            Text(
+                text = selected,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            Icon(Icons.Outlined.ArrowDropDown, null, modifier = Modifier.padding(8.dp))
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()   // delete this modifier and use .wrapContentWidth() if you would like to wrap the dropdown menu around the content
+            ) {
+                list.forEach { listEntry ->
+
+                    DropdownMenuItem(
+                        onClick = {
+                            selected = listEntry
+                            expanded = false
+                            viewModel.setType(selected)
+                        },
+                        text = {
+                            Text(
+                                text = listEntry,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.Start)
+                            )
+                        },
+                    )
+                }
+            }
+
         }
     }
 }
@@ -150,7 +223,9 @@ fun BarcodeScannerScreen(onScanResult: (String) -> Unit) {
                     .also {
                         it.setAnalyzer(cameraExecutor) { imageProxy ->
                             processImage(imageProxy, barcodeScanner) { result ->
+
                                 onScanResult(result)
+
                             }
                         }
                     }
@@ -166,20 +241,21 @@ fun BarcodeScannerScreen(onScanResult: (String) -> Unit) {
             }, cameraExecutor)
             previewView
         },
-        modifier = Modifier.layout { measurable, _ ->
-            // Игнорируем родительские ограничения
-            val placeable = measurable.measure(
-                Constraints(
-                    minWidth = 0,
-                    maxWidth = Constraints.Infinity,
-                    minHeight = 0,
-                    maxHeight = Constraints.Infinity
+        modifier = Modifier
+            .layout { measurable, _ ->
+                // Игнорируем родительские ограничения
+                val placeable = measurable.measure(
+                    Constraints(
+                        minWidth = 0,
+                        maxWidth = Constraints.Infinity,
+                        minHeight = 0,
+                        maxHeight = Constraints.Infinity
+                    )
                 )
-            )
-            layout(placeable.width, placeable.height) {
-                placeable.place(0, 0)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(0, 0)
+                }
             }
-        }
             .size(screenWidth, screenHeight) // Явно задаем размер экрана
     )
 }
