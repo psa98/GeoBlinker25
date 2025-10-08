@@ -18,7 +18,9 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.example.geoblinker.R
+import com.example.geoblinker.network.LangRepository
 import com.example.geoblinker.ui.BackButton
+import com.example.geoblinker.ui.main.GeoBlinker
 import com.example.geoblinker.ui.theme.sdp
 
 @Composable
@@ -50,7 +52,7 @@ fun AboutAppScreen(
         )
         Spacer(Modifier.height(79.sdp()))
         Text(
-            "Разработано командой Х",
+            GeoBlinker.langData.aboutText,
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge
         )

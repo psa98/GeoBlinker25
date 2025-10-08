@@ -43,8 +43,7 @@ fun AboutCompanyScreen(
             )
         }
         items(AboutCompany.entries) { quest ->
-            Text(
-                stringResource(quest.title),
+            Text(quest.getText(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { toDescriptionScreen(quest) }

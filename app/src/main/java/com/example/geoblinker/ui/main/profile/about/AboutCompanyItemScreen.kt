@@ -48,7 +48,7 @@ fun AboutCompanyItemScreen(
             )
             Spacer(Modifier.height(25.sdp()))
             Text(
-                stringResource(aboutCompany.description),
+                aboutCompany.getText(),
                 style = MaterialTheme.typography.labelMedium
             )
         }

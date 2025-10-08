@@ -10,25 +10,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.reflect.Type
 
-class ConstantsRepository(context: Context) {
-    val langId = 1 //Русский
+class LangRepository(context: Context) {
+    private val langId = 1 //Русский
+    var offerTitle = ""
+    var policyTitle = ""
+    var offerText = ""
+    var policyText = ""
+    var aboutTitle = ""
+    var aboutText = ""
     private val prefs: SharedPreferences =
         context.getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
-            .also { Log.e("", "!!: =") }
     private val gson = Gson().also { Log.e("", "!!: =") }
     private val mapType: Type = object : TypeToken<HashMap<String, String>?>() {}.type
     private val eventNameMap: HashMap<String, String> = gson.fromJson(
         prefs.getString("trackerNamesMap", "[]"), mapType
     )
-    var tracker2EventList: List<String> =
+    private var tracker2EventList: List<String> =
         prefs.getStringSet("tracker2EventList", emptySet<String>())!!.toList()
-    var tracker4EventList: List<String> =
+    private var tracker4EventList: List<String> =
         prefs.getStringSet("tracker4EventList", emptySet<String>())!!.toList()
-    var tracker2EventNames: List<String> = mutableListOf<String>().apply {
+    private var tracker2EventNames: List<String> = mutableListOf<String>().apply {
         tracker2EventList.forEach { this.add(getNameForEvent(it)) }}
-    var tracker4EventNames: List<String> = mutableListOf<String>().apply {
+    private var tracker4EventNames: List<String> = mutableListOf<String>().apply {
         tracker4EventList.forEach { this.add(getNameForEvent(it)) }}
-    val faqNamesTagList: List<String> = listOf(
+    private val faqNamesTagList: List<String> = listOf(
         "e_faq_1",
         "e_faq_2",
         "e_faq_3",
@@ -66,6 +71,25 @@ class ConstantsRepository(context: Context) {
                     faqNamesTagList.forEach { tag ->
                         val translation = langValues[tag]?.get(langId)
                         translation?.let { faqTextMap[tag] = translation  }}
+                    val offerJson = langValues["e_about_1_oferta"]?.get(langId)?:"[]"
+                    // todo - вероятно при неудаче загрузок надо " писать не удалось загрузить с сервера"
+                    //и блокировать дальнейшую работу.
+                    // todo - добавить сохранение последней оферты и политики в префы
+                    val policyJson = langValues["e_about_2_pkd"]?.get(langId)?:"[]"
+                    val aboutJson = langValues["e_about_app"]?.get(langId)?:"[]"
+                    offerTitle = (gson.fromJson(offerJson,mapType) as Map<String,String>)["title"]
+                        ?:""
+                    offerText = (gson.fromJson(offerJson,mapType) as Map<String,String>)["body"]
+                        ?:""
+                    policyTitle = (gson.fromJson(policyJson,mapType) as Map<String,String>)["title"]
+                        ?:""
+                    policyText = (gson.fromJson(policyJson,mapType) as Map<String,String>)["body"]
+                        ?:""
+
+                    aboutTitle = (gson.fromJson(aboutJson,mapType) as Map<String,String>)["title"]
+                        ?:""
+                    aboutText = (gson.fromJson(aboutJson,mapType) as Map<String,String>)["body"]
+                        ?:""
                 }
             }
 

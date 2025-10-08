@@ -5,7 +5,7 @@ import android.content.Context
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
 import com.example.geoblinker.data.AppDatabase
-import com.example.geoblinker.network.ConstantsRepository
+import com.example.geoblinker.network.LangRepository
 import com.example.geoblinker.worker.NotificationRepository
 import com.example.geoblinker.worker.NotificationWorkerFactory
 import com.google.gson.Gson
@@ -22,8 +22,8 @@ class GeoBlinker : Application(), Configuration.Provider {
         val prefs = getSharedPreferences("profile_prefs", Context.MODE_PRIVATE)
         repository = NotificationRepository(db.deviceDao(), db.typeSignalDao(), db.signalDao())
         workerFactory = NotificationWorkerFactory(repository, prefs)
-        constants = ConstantsRepository(this)
-        constants.initConstants()
+        langData = LangRepository(this)
+        langData.initConstants()
         context =this
 
 
@@ -35,7 +35,7 @@ class GeoBlinker : Application(), Configuration.Provider {
             .build()
 
 companion object{
-    lateinit var constants: ConstantsRepository
+    lateinit var langData: LangRepository
     lateinit var context: Application
     val gson = Gson()
 

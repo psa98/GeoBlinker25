@@ -2,7 +2,6 @@ package com.example.geoblinker.ui.main.profile.techsupport
 
 import androidx.annotation.StringRes
 import com.example.geoblinker.R
-import com.example.geoblinker.data.SignalType
 import com.example.geoblinker.ui.main.GeoBlinker
 
 enum class FrequentQuestions(
@@ -17,7 +16,7 @@ enum class FrequentQuestions(
     CantChangePhone(R.string.cant_change_phone,"e_faq_4"),
     CantLinkEmail(R.string.cant_link_email,"e_faq_5");
     companion object{
-        fun getScreenName (type: FrequentQuestions):String =  GeoBlinker.constants.getNameForFaq(type.langKey)
+        fun getScreenName (type: FrequentQuestions):String =  GeoBlinker.langData.getNameForFaq(type.langKey)
     }
 
 

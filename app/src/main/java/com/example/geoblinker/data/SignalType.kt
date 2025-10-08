@@ -46,7 +46,7 @@ enum class SignalType(
     companion object {
         fun fromRaw(raw: String): SignalType? =
             entries.firstOrNull { raw in it.rawNames }
-        fun getScreenName (type:SignalType):String =  GeoBlinker.constants.getNameForEvent(type.rawNames.first())
+        fun getScreenName (type:SignalType):String =  GeoBlinker.langData.getNameForEvent(type.rawNames.first())
 
     }
 
