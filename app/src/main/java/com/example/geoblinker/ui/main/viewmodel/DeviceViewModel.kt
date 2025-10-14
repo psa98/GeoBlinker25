@@ -122,7 +122,8 @@ class DeviceViewModel(
                         isConnected = device.details.isConnected,
                         bindingTime = device.details.bindingTime,
                         registrationPlate = device.registrationPlate,
-                        deviceType = device.details.typeName?:"tracker_model2"
+                        deviceType = device.details.typeName?:"tracker_model2",
+                        markerId = device.details.markerId
                     )
                     newDevices.add(newDevice)
                     Log.d("devices", "name: ${newDevice.name}, id: ${newDevice.id}, IMEI: ${newDevice.imei}, registrationPlate: ${newDevice.registrationPlate}")
@@ -249,6 +250,25 @@ class DeviceViewModel(
     fun setSelectedMarker(device: Device? = null) {
         viewModelScope.launch {
             selectedMarker.value = device
+            //todo - сохранить настройку мaркера
+        }
+    }
+
+    fun changeSelectedMarker(device: Device,marker:Int  ) {
+        viewModelScope.launch {
+            _device.value = device.copy(markerId = marker)
+            updateDevice(_device.value)
+
+
+            val newList = _devices.value.map { itemInList ->
+                val newSimei = _device.value.simei
+                if (newSimei != device.simei) {
+                    Log.i("getDeviceListImei", "name: ${device.name}, simei: $newSimei")
+                    itemInList
+                } else
+                device.copy(markerId = marker)
+            }
+            _devices.value=newList
         }
     }
 
@@ -516,7 +536,8 @@ class DeviceViewModel(
                                     name = device.name,
                                     isConnected = device.isConnected,
                                     bindingTime = device.bindingTime,
-                                    typeName = device.deviceType
+                                    typeName = device.deviceType,
+                                    markerId = device.markerId
                                 )
                             )
                         )

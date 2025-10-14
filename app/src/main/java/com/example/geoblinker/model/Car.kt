@@ -41,6 +41,8 @@ data class Details(
 
     @SerializedName("type_name")
     val typeName: String?,
+    @SerializedName("marker_Id")
+    val markerId: Int=0,
 )
 
 data class ResponseCreateCar(

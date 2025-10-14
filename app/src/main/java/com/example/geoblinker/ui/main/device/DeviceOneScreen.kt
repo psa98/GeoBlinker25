@@ -74,7 +74,9 @@ fun DeviceOneScreen(
     toMap: () -> Unit,
     toTrajectory: () -> Unit,
     toDetach: () -> Unit,
-    toBack: () -> Unit
+    toBack: () -> Unit,
+    toIcons: () -> Unit
+
 ) {
     val device by viewModel.device.collectAsState()
     val unitsDistance by viewModel.unitsDistance
@@ -366,6 +368,14 @@ fun DeviceOneScreen(
                     typeColor = TypeColor.Black,
                     rightIcon = ImageVector.vectorResource(R.drawable.rectangle_list),
                     iconSize = 18,
+                    height = 55,
+                    radius = 10
+                )
+                HSpacer(15)
+                CustomButton(
+                    text = stringResource(R.string.choose_icon),
+                    onClick = toIcons,
+                    typeColor = TypeColor.Black,
                     height = 55,
                     radius = 10
                 )

@@ -21,7 +21,8 @@ data class Device(
     val typeStatus: TypeStatus = TypeStatus.Available,
     val deviceType:String = "",
     val breakdownForecast: String? = null,
-    val maintenanceRecommendations: String? = null
+    val maintenanceRecommendations: String? = null,
+    val markerId:Int = 0
 ) {
     enum class TypeStatus {
         Available,

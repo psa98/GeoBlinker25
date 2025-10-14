@@ -32,7 +32,10 @@ class Repository(
         deviceDao.deleteAll()
     }
 
-    fun getAllDevices(): Flow<List<Device>> = deviceDao.getAll()
+    fun getAllDevices(): Flow<List<Device>> {
+        val flow = deviceDao.getAll()
+        return flow
+    }
 
     private suspend fun insertAllTypeSignal(device: Device) {
 

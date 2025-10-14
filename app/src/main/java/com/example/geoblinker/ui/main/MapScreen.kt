@@ -58,6 +58,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import com.example.geoblinker.R
 import com.example.geoblinker.data.Device
+import com.example.geoblinker.data.MarkersRepository
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
 import com.example.geoblinker.ui.CustomCommentsPopup
@@ -116,6 +117,24 @@ fun MapScreen(
         if (!viewModel.checkDevices()) {
             isShowPopup = true
         }
+        val hasPermission = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        if (hasPermission){
+            LocationHelper(context) { location ->
+                currentLocation = location
+                currentLocation?.let {
+                    webView.evaluateJavascript(
+                        "addSvgMarker('myLocation', ${it.latitude}, ${it.longitude}, 'my_marker.svg', ${26 * scaleIcons}, ${26 * scaleIcons})",
+                        null
+                    )
+                    webView.evaluateJavascript("setCenter(${it.latitude}, ${it.longitude})",
+                        null)
+                }
+            }.getLastLocation()
+
+        }
     }
 
     MapFromAssets(webView, viewModel, toDeviceScreen)
@@ -123,31 +142,20 @@ fun MapScreen(
     LaunchedEffect(Unit) {
         while (true) {
             devices.forEach { item ->
-                if (item.isConnected && item.lat != -999999999.9 && item.lng != -999999999.9)
+                if (item.isConnected && item.lat != -999999999.9 && item.lng != -999999999.9) {
+                    val filename = MarkersRepository.getFilename(item.markerId)
                     webView.evaluateJavascript(
-                        "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, 'marker.svg', ${26 * scaleIcons}, ${26 * scaleIcons})",
+                        "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, '$filename', ${32 * scaleIcons}, ${32 * scaleIcons})",
+
                         null
                     )
-                else
+                } else
                     webView.evaluateJavascript(
                         "removeMarker('${item.imei}')",
                         null
                     )
             }
-            val hasPermission = ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-            if (hasPermission)
-                LocationHelper(context) { location ->
-                    currentLocation = location
-                }.getLastLocation()
-            currentLocation?.let {
-                webView.evaluateJavascript(
-                    "addSvgMarker('myLocation', ${it.latitude}, ${it.longitude}, 'my_marker.svg', ${26 * scaleIcons}, ${26 * scaleIcons})",
-                    null
-                )
-            }
+
             delay(5000)
         }
     }

@@ -12,7 +12,7 @@ interface DeviceDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(vararg device: Device)
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun update(device: Device)
 
     @Update

@@ -19,7 +19,9 @@ private const val BASE_URL = "https://www.gps666.net/"
 
 val interceptor = HttpLoggingInterceptor().apply { level =HttpLoggingInterceptor.Level.BODY }
 
-val client = OkHttpClient.Builder().addInterceptor(interceptor).build()
+private val client = OkHttpClient.Builder()
+    //.addInterceptor(interceptor)
+    .build()
 
 private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL)

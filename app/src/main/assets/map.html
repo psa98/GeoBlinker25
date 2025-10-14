@@ -22,7 +22,7 @@
             color: #666 !important;
         }
     </style>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="file:///android_asset/map.css"/>
 </head>
 <body>
 <div id="map"></div>
@@ -60,7 +60,7 @@
             minZoom: 3,
             maxZoom: 18,
             layers: [layers.light]
-        }).setView([51.505, -0.09], 10);
+        }).setView([55.752, 37.623], 10);
 
         currentLayer = layers.light;
 
@@ -101,11 +101,18 @@
                     { color: markerColor[imei], weight: 5, opacity: 1 }
                 ).addTo(map);
                 trackLines.push(line);
-            }
-            return;
+            };
+            //return;
         }
 
         markerColor[imei] = randomColor();
+
+        var currentIcon = L.icon({
+                iconUrl: 'file:///android_asset/' + svgFileName,
+                iconSize: [width, height],
+                iconAnchor: [width/2, height/2],
+                popupAnchor: [0, 0]
+            });
 
         if (!customIcons[svgFileName]) {
             customIcons[svgFileName] = L.icon({
@@ -115,15 +122,21 @@
                 popupAnchor: [0, 0]
             });
         }
-
-        markers[imei] = L.marker([lat, lng], {icon: customIcons[svgFileName]})
+        if (markers[imei]){
+            markers[imei].removeFrom(map)
+            };
+        markers[imei] = L.marker([lat, lng], {icon: currentIcon})
             .on('click', function(e) {
                 AndroidInterface.onMarkerClicked(imei);
-            })
-            .addTo(map);
+            });
 
+        markers[imei].addTo(map)
         markerPrevPos[imei] = [lat, lng];
     }
+
+
+
+
 
     function addTrackLine(color, lat1, lng1, lat2, lng2) {
         var line = L.polyline(

@@ -69,6 +69,7 @@ import com.example.geoblinker.ui.main.device.DeviceOneScreen
 import com.example.geoblinker.ui.main.device.DeviceThreeScreen
 import com.example.geoblinker.ui.main.device.DeviceTrajectory
 import com.example.geoblinker.ui.main.device.DeviceTwoScreen
+import com.example.geoblinker.ui.main.device.IconChooserScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachOneScreen
 import com.example.geoblinker.ui.main.device.detach.DeviceDetachTwoScreen
 import com.example.geoblinker.ui.main.profile.JournalSignalsScreen
@@ -124,6 +125,7 @@ enum class MainScreen {
     DeviceDetach,
     DeviceDetachOne,
     DeviceDetachTwo,
+    IconChooser,
     Notifications,
     Profile,
     ProfileOne,
@@ -431,6 +433,12 @@ fun MainScreen(
             )
         }
 
+        composable(route = MainScreen.IconChooser.name) {
+            currentRoute = MainScreen.IconChooser.name
+            IconChooserScreen(viewModel
+            ) { navController.navigateUp() }
+        }
+
         navigation(
             route = "${MainScreen.Binding.name}/{previousScreen}",
             startDestination = MainScreen.BindingOne.name
@@ -486,7 +494,8 @@ fun MainScreen(
                     },
                     { navController.navigate(MainScreen.DeviceTrajectory.name) },
                     { navController.navigate(MainScreen.DeviceDetachOne.name) },
-                    { navController.navigate(previousScreen) }
+                    { navController.navigate(previousScreen) },
+                    { navController.navigate(MainScreen.IconChooser.name) }
                 )
             }
             composable(route = MainScreen.DeviceTwo.name) {
@@ -792,6 +801,7 @@ fun MainScreen(
                 )
             }
         }
+
 
         composable(route = MainScreen.Notifications.name) {
             currentRoute = MainScreen.Notifications.name
