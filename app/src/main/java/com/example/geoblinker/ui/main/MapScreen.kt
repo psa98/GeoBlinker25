@@ -146,7 +146,6 @@ fun MapScreen(
                     val filename = MarkersRepository.getFilename(item.markerId)
                     webView.evaluateJavascript(
                         "addSvgMarker('${item.imei}', ${item.lat}, ${item.lng}, '$filename', ${32 * scaleIcons}, ${32 * scaleIcons})",
-
                         null
                     )
                 } else
@@ -395,7 +394,7 @@ fun MapFromAssets(
 ) {
     val addWidth = 30.sdp()
     val addHeight = 45.sdp()
-    val scaleIcons = sc()
+
 
     val devices by viewModel.devices.collectAsState()
     var selectedMarker by remember { mutableStateOf<Device?>(null) }

@@ -100,10 +100,10 @@ class DeviceViewModel(
             while (!next && isActive) {
                 try {
 
-                    val params = HashMap<String,String>()
+                    val params = HashMap<String, String>()
                     params["token"] = _token
                     params["u_hash"] = _hash
-                    res = Api.retrofitService.getAllCar( params)
+                    res = Api.retrofitService.getAllCar(params)
 
 
                     if (res.code != "200")
@@ -122,11 +122,14 @@ class DeviceViewModel(
                         isConnected = device.details.isConnected,
                         bindingTime = device.details.bindingTime,
                         registrationPlate = device.registrationPlate,
-                        deviceType = device.details.typeName?:"tracker_model2",
+                        deviceType = device.details.typeName ?: "tracker_model2",
                         markerId = device.details.markerId
                     )
                     newDevices.add(newDevice)
-                    Log.d("devices", "name: ${newDevice.name}, id: ${newDevice.id}, IMEI: ${newDevice.imei}, registrationPlate: ${newDevice.registrationPlate}")
+                    Log.d(
+                        "devices",
+                        "name: ${newDevice.name}, id: ${newDevice.id}, IMEI: ${newDevice.imei}, registrationPlate: ${newDevice.registrationPlate}"
+                    )
                 }
                 repository.insertAllDevices(newDevices)
                 next = true
@@ -148,7 +151,8 @@ class DeviceViewModel(
                 }
                 _sid = resImei.sid
                 _sidFamily = resImei.family[0]["sid"] as String
-                _profilePrefs.edit().putString("sid", _sid).putString("sidFamily", _sidFamily).apply()
+                _profilePrefs.edit().putString("sid", _sid).putString("sidFamily", _sidFamily)
+                    .apply()
                 Log.d("LoginImei", "sid: $_sid, sidFamily: $_sidFamily")
                 next = true
             }
@@ -172,7 +176,8 @@ class DeviceViewModel(
                 }
                 _sgid = resDeviceListImei.items[0].sgid
                 // собираем Map<imei, simei>
-                val imeiToSimei = resDeviceListImei.items.associateBy({ it.imei.toString() }, { it.simei })
+                val imeiToSimei =
+                    resDeviceListImei.items.associateBy({ it.imei.toString() }, { it.simei })
 
                 // делаем копию списка с проставленным simei
                 val newList = _devices.value.map { device ->
@@ -250,25 +255,22 @@ class DeviceViewModel(
     fun setSelectedMarker(device: Device? = null) {
         viewModelScope.launch {
             selectedMarker.value = device
-            //todo - сохранить настройку мaркера
         }
     }
 
-    fun changeSelectedMarker(device: Device,marker:Int  ) {
+    fun changeSelectedMarker(device: Device, marker: Int) {
         viewModelScope.launch {
             _device.value = device.copy(markerId = marker)
             updateDevice(_device.value)
-
-
             val newList = _devices.value.map { itemInList ->
                 val newSimei = _device.value.simei
                 if (newSimei != device.simei) {
                     Log.i("getDeviceListImei", "name: ${device.name}, simei: $newSimei")
                     itemInList
                 } else
-                device.copy(markerId = marker)
+                    device.copy(markerId = marker)
             }
-            _devices.value=newList
+            _devices.value = newList
         }
     }
 
@@ -352,11 +354,19 @@ class DeviceViewModel(
                 )
                 if (res.items.isEmpty())
                     throw Exception("Failed attempt to add a device to the server")
-                _device.value = Device(imei, "", "", bindingTime = 0, simei = res.items[0].simei, registrationPlate = "", deviceType = selectedType)
+                _device.value = Device(
+                    imei,
+                    "",
+                    "",
+                    bindingTime = 0,
+                    simei = res.items[0].simei,
+                    registrationPlate = "",
+                    deviceType = selectedType
+                )
 
             } catch (e: Exception) {
                 Log.e("addImei", e.toString())
-                uiState.value= DefaultStates.Error(R.string.imei_not_found)
+                uiState.value = DefaultStates.Error(R.string.imei_not_found)
                 return@launch
             }
             try {
@@ -378,7 +388,7 @@ class DeviceViewModel(
                 uiState.value = DefaultStates.Error(R.string.imei_not_found)
                 return@launch
             }
-            uiState.value= DefaultStates.Success
+            uiState.value = DefaultStates.Success
         }
     }
 
@@ -394,14 +404,17 @@ class DeviceViewModel(
             crashlytics.log("Попытка привязки IMEI: ${_device.value.imei}. token: $_token. u_hash: $_hash")
             val nowTime = Instant.now().toEpochMilli()
             val id: String
-            val foundDevice = _devices.value.find { it.imei == _device.value.imei && !it.isConnected }
+            val foundDevice =
+                _devices.value.find { it.imei == _device.value.imei && !it.isConnected }
             if (foundDevice != null) {
-                updateDevice(foundDevice.copy(
-                    name = name,
-                    bindingTime = nowTime,
-                    isConnected = true,
-                    deviceType = device.value.deviceType
-                ))
+                updateDevice(
+                    foundDevice.copy(
+                        name = name,
+                        bindingTime = nowTime,
+                        isConnected = true,
+                        deviceType = device.value.deviceType
+                    )
+                )
                 if (uiState.value is DefaultStates.Error)
                     return@launch
                 _device.value = foundDevice.copy(
@@ -410,8 +423,7 @@ class DeviceViewModel(
                     isConnected = true,
                     deviceType = device.value.deviceType
                 )
-            }
-            else {
+            } else {
                 val registrationPlate = _device.value.imei + randomHash()
                 try {
                     val res = Api.retrofitService.addCar(
@@ -430,7 +442,7 @@ class DeviceViewModel(
                                     )
                                 )
                             )
-                       )
+                        )
                     )
                     if (res.code != "200")
                         throw Exception("Code: ${res.code}, message: ${res.message}")
@@ -439,7 +451,7 @@ class DeviceViewModel(
                     crashlytics.log("Не удалось привязать IMEI: ${_device.value.imei}. registrationPlate: $registrationPlate. token: $_token. u_hash: $_hash Ошибка: $e")
                     crashlytics.recordException(e)
                     Log.e("addCar", e.toString())
-                    uiState.value= DefaultStates.Error(R.string.server_error)
+                    uiState.value = DefaultStates.Error(R.string.server_error)
                     return@launch
                 }
                 val device = Device(
@@ -470,7 +482,7 @@ class DeviceViewModel(
                         _signalsDevice.value = it
                     }
             }
-            uiState.value= DefaultStates.Success
+            uiState.value = DefaultStates.Success
         }
     }
 
@@ -547,10 +559,10 @@ class DeviceViewModel(
                     throw Exception("Code: ${res.code}, message: ${res.message}")
             } catch (e: Exception) {
                 Log.e("updateCar", e.toString())
-                uiState.value= DefaultStates.Error(R.string.server_error)
+                uiState.value = DefaultStates.Error(R.string.server_error)
                 return@launch
             }
-            uiState.value= DefaultStates.Success
+            uiState.value = DefaultStates.Success
         }
         _device.value = device
     }
@@ -616,7 +628,7 @@ class DeviceViewModel(
 
     }
 
-    private fun getType (selected:String) = when(selected){
+    private fun getType(selected: String) = when (selected) {
         "Тип 2" -> "tracker_model2"
         "Тип 4" -> "tracker_model4"
 
