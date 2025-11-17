@@ -3,7 +3,6 @@ package com.example.geoblinker.ui.main.profile.techsupport
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -20,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.core.net.toUri
 import com.example.geoblinker.R
 import com.example.geoblinker.ui.BackButton
 import com.example.geoblinker.ui.CustomButton
@@ -72,7 +72,7 @@ fun TechSupport(
         CustomButton(
             text = stringResource(R.string.chat_with_tech_support),
             onClick = {
-                openTelegramBot(context, "PumpDump_ScreenerBot")
+                openTelegramBot(context, "GeoblinkerSupport_Bot")
             },
             typeColor = TypeColor.Black,
             rightIcon = ImageVector.vectorResource(R.drawable.chat),
@@ -88,7 +88,7 @@ fun TechSupport(
 
 fun openTelegramBot(context: Context, botUsername: String) {
     val intent = Intent(Intent.ACTION_VIEW).apply {
-        data = Uri.parse("https://t.me/$botUsername")
+        data = "https://t.me/$botUsername".toUri()
         setPackage("org.telegram.messenger") // Пытаемся открыть в приложении
     }
 
@@ -97,7 +97,7 @@ fun openTelegramBot(context: Context, botUsername: String) {
     } catch (e: ActivityNotFoundException) {
         // Если приложение Telegram не установлено, открываем в браузере
         context.startActivity(
-            Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/$botUsername"))
+            Intent(Intent.ACTION_VIEW, "https://t.me/$botUsername".toUri())
         )
     }
 }
